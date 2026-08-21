@@ -155,6 +155,9 @@ table.cat .plo input{min-width:210px;font-weight:500}
 .prep-table td{padding:4px 7px;border:1px solid #eee}
 .prep-table td:last-child,.prep-table th:last-child{text-align:right;width:60px}
 .prep-note{font-size:10px;color:#333;margin-top:16px;padding:8px 10px;background:#f7f8fa;border-left:2px solid #001489}
+.prep-chart{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;display:block;margin:4px 0 8px}
+.prep-scope{font-size:11px;color:#333;margin-bottom:10px;padding:6px 8px;background:#f0f2f6;border-radius:3px}
+.prep-table thead{display:table-header-group}
 .prep-signoff{margin-top:22px}
 .prep-signrow{display:flex;align-items:center;gap:8px;font-size:11px;margin-bottom:16px}
 .prep-signrow>span:first-child{flex:none;width:78px;color:#555}
@@ -196,6 +199,7 @@ table.cat .plo input{min-width:210px;font-weight:500}
     <div class="stats" id="stats"></div>
   </div>
   <div class="filters">
+    <div class="field"><label>Year</label><select id="fYear"></select></div>
     <div class="field"><label>Term</label><select id="fTerm"></select></div>
     <div class="field"><label>Sub-directorate</label><select id="fSub"></select></div>
     <div class="field"><label>Unit</label><select id="fUnit"></select></div>
@@ -205,6 +209,11 @@ table.cat .plo input{min-width:210px;font-weight:500}
     <div class="field"><label>Sort</label><select id="fSort">
       <option value="rating">Lowest rated first</option><option value="ratingdesc">Highest rated first</option>
       <option value="responses">Most responses</option><option value="date">Soonest date</option></select></div>
+  </div>
+  <div class="filters" style="margin-top:-8px">
+    <button class="btn" id="printSummaryBtn">📄 Summary report (PDF) for filtered sessions</button>
+    <button class="btn" id="exportSummaryBtn">⬇ Summary report (Excel) for filtered sessions</button>
+    <span id="summaryScope" style="font-size:11.5px;color:var(--ink-soft);align-self:center"></span>
   </div>
   <div class="explorer"><div class="cards" id="cards"></div>
     <aside class="detail empty" id="detail"><div>Select a session to see its rubric breakdown and each facilitator's delivery.</div></aside>
@@ -314,7 +323,7 @@ let CMAP={},FMAP={};
 let RESPONSES=[]; let RAW_RESPONSES=[]; let LIVE=false;
 let AGG={}; // sessionKey -> {n, items{}, facItems:{fid:{code:{sum,n}}}, facN:{fid}}
 let sel={session:null,course:null,fac:null,catSub:'sessions'};
-const state={view:'sessions',term:'',sub:'',unit:'',mode:'',fac:'',q:'',sort:'rating'};
+const state={view:'sessions',year:'',term:'',sub:'',unit:'',mode:'',fac:'',q:'',sort:'rating'};
 
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDate(iso){if(!iso)return '-';const d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.getDate()+' '+MONTHS[d.getMonth()];}
@@ -364,6 +373,7 @@ function courseAgg(cid){const ss=SESSIONS.filter(s=>s.cid===cid);let sum=0,n=0,r
 /* filters */
 function filteredSessions(){
   let list=SESSIONS.filter(s=>{const c=CMAP[s.cid]||{};
+    if(state.year&&(s.date||'').slice(0,4)!==state.year)return false;
     if(state.term&&c.term!==state.term)return false;
     if(state.sub&&c.sub!==state.sub)return false;
     if(state.unit&&c.unit!==state.unit)return false;
@@ -403,6 +413,7 @@ function renderHero(){
 /* SESSION CARDS + DETAIL */
 function renderSessionCards(){
   const list=filteredSessions();const el=document.getElementById('cards');
+  updateSummaryScope(list);
   if(!list.length){el.innerHTML=`<div class="scard" style="grid-template-columns:1fr;cursor:default"><h3>No sessions match</h3></div>`;return;}
   el.innerHTML=list.map(s=>{const c=CMAP[s.cid]||{};const o=sessionOverall(s.sid);const a=AGG[s.sid];
     const fnames=s.facs.map(facName).join(', ');
@@ -447,6 +458,31 @@ function renderSessionDetail(){
 
 /* Session report: shared data shape used by both the print view and the Excel export,
    so the two stay in sync automatically rather than duplicating the score-gathering logic. */
+/* Small inline SVG bar chart shared by the session and summary reports. Vector, so it
+   stays crisp in a printed PDF; print-color-adjust (see .prep-chart CSS) keeps the fill
+   colours intact when the browser prints, which backgrounds don't get by default. */
+function sectionChartSvg(items,scaleMax){
+  if(!items.length)return'';
+  const rowH=14,gap=3,labelW=145,barW=210,valW=26;
+  const width=labelW+barW+valW+8,height=items.length*(rowH+gap);
+  const rows=items.map((it,i)=>{
+    const y=i*(rowH+gap);const w=Math.max(2,(it.score/scaleMax)*barW);const col=scoreColor(it.score);
+    const lbl=it.label.length>24?it.label.slice(0,23)+'…':it.label;
+    return `<text x="0" y="${y+rowH-3}" font-size="8.5" font-family="Inter,sans-serif" fill="#444">${esc(lbl)}</text>
+      <rect x="${labelW}" y="${y+1}" width="${barW}" height="${rowH-2}" fill="#e8e8ec"/>
+      <rect x="${labelW}" y="${y+1}" width="${w}" height="${rowH-2}" fill="${col}"/>
+      <text x="${labelW+barW+6}" y="${y+rowH-3}" font-size="8.5" font-family="'IBM Plex Mono',monospace" fill="#333">${it.score.toFixed(1)}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" class="prep-chart" preserveAspectRatio="xMinYMin meet">${rows}</svg>`;
+}
+// Excel has no reliable free-tier native chart support in the loaded library, so a compact
+// in-cell block bar stands in as the "visual" column, works in any spreadsheet app, no
+// extra dependency, and degrades gracefully to plain characters if a font lacks the glyph.
+function asciiBar(score,scaleMax,width){
+  width=width||10;const filled=Math.max(0,Math.min(width,Math.round((score/scaleMax)*width)));
+  return '█'.repeat(filled)+'░'.repeat(width-filled);
+}
+
 function buildSessionReportData(sk){
   const s=SESSIONS.find(x=>x.sid===sk);if(!s)return null;
   const c=CMAP[s.cid]||{};const a=AGG[sk];const o=sessionOverall(sk);
@@ -478,11 +514,12 @@ function printSessionReport(sk){
   const facHtml=d.facilitators.map(f=>`
     <div class="prep-block">
       <div class="prep-blockhead"><b>${esc(f.name)}</b> <span class="prep-mono">${f.fid}</span><span class="prep-score">${f.score!=null?f.score.toFixed(2):'-'} / ${SCALE_MAX}</span></div>
-      ${f.items.length?`<table class="prep-table"><thead><tr><th>Code</th><th>Item</th><th>Score</th></tr></thead><tbody>${f.items.map(it=>`<tr><td class="prep-mono">${it.code}</td><td>${esc(it.label)}</td><td>${it.score.toFixed(1)}</td></tr>`).join('')}</tbody></table>`:'<p class="prep-muted">No facilitation responses recorded for this session at the time of reporting.</p>'}
+      ${f.items.length?sectionChartSvg(f.items,SCALE_MAX)+`<table class="prep-table"><thead><tr><th>Code</th><th>Item</th><th>Score</th></tr></thead><tbody>${f.items.map(it=>`<tr><td class="prep-mono">${it.code}</td><td>${esc(it.label)}</td><td>${it.score.toFixed(1)}</td></tr>`).join('')}</tbody></table>`:'<p class="prep-muted">No facilitation responses recorded for this session at the time of reporting.</p>'}
     </div>`).join('');
   const secHtml=d.sections.map(sec=>`
     <div class="prep-block">
       <div class="prep-blockhead"><b>${esc(sec.name)}</b><span class="prep-score">${sec.avg!=null?sec.avg.toFixed(2):'-'} / ${SCALE_MAX}</span></div>
+      ${sectionChartSvg(sec.items,SCALE_MAX)}
       <table class="prep-table"><thead><tr><th>Code</th><th>Item</th><th>Score</th></tr></thead><tbody>${sec.items.map(it=>`<tr><td class="prep-mono">${it.code}</td><td>${esc(it.label)}</td><td>${it.score.toFixed(1)}</td></tr>`).join('')}</tbody></table>
     </div>`).join('');
   document.getElementById('printArea').innerHTML=`
@@ -548,7 +585,7 @@ function exportSessionExcel(sk){
   d.facilitators.forEach(f=>{
     rows.push([]);
     rows.push([`${f.name} (${f.fid})`,f.score!=null?`${f.score.toFixed(2)} / ${SCALE_MAX}`:'-']);
-    if(f.items.length){rows.push(['Code','Item','Score']);f.items.forEach(it=>rows.push([it.code,it.label,it.score.toFixed(1)]));}
+    if(f.items.length){rows.push(['Code','Item','Score','Visual']);f.items.forEach(it=>rows.push([it.code,it.label,it.score.toFixed(1),asciiBar(it.score,SCALE_MAX)]));}
     else rows.push(['No facilitation responses recorded for this session at the time of reporting.']);
   });
   rows.push([]);
@@ -557,8 +594,8 @@ function exportSessionExcel(sk){
   d.sections.forEach(sec=>{
     rows.push([]);
     rows.push([sec.name,sec.avg!=null?`${sec.avg.toFixed(2)} / ${SCALE_MAX}`:'-']);
-    rows.push(['Code','Item','Score']);
-    sec.items.forEach(it=>rows.push([it.code,it.label,it.score.toFixed(1)]));
+    rows.push(['Code','Item','Score','Visual']);
+    sec.items.forEach(it=>rows.push([it.code,it.label,it.score.toFixed(1),asciiBar(it.score,SCALE_MAX)]));
   });
   rows.push([]);
   rows.push(['Methodology: scores are the mean of all respondent submissions received for each item, on a scale of 1 (lowest) to '+SCALE_MAX+' (highest). "Not applicable" and unanswered items are excluded rather than counted as zero. Facilitation scores are attributed to the facilitator(s) recorded against the session in the CTLI Course & Session Register at the time of reporting.']);
@@ -568,6 +605,132 @@ function exportSessionExcel(sk){
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Session Report');
   XLSX.writeFile(wb,`CTLI-Session-${d.sid}-Report.xlsx`);
+}
+
+/* Summary report: rolls up whatever the Sessions tab's filters currently match (Year,
+   Term, Sub-directorate, Unit, Mode, Facilitator, Search), so it reuses the existing
+   filter UI rather than duplicating a second set of controls. */
+function summaryScopeParts(){
+  const parts=[];
+  if(state.year)parts.push(`Year ${state.year}`);
+  if(state.term)parts.push(`Term ${state.term}`);
+  if(state.sub)parts.push(`Sub-directorate ${state.sub}`);
+  if(state.unit)parts.push(`Unit ${state.unit}`);
+  if(state.mode)parts.push(`Mode ${state.mode}`);
+  if(state.fac)parts.push(`Facilitator ${facName(state.fac)}`);
+  if(state.q)parts.push(`Search "${state.q}"`);
+  return parts;
+}
+function updateSummaryScope(list){
+  const el=document.getElementById('summaryScope');if(!el)return;
+  const n=list?list.length:filteredSessions().length;
+  const scope=summaryScopeParts();
+  el.textContent=`${n} session${n!==1?'s':''} in scope${scope.length?' · '+scope.join(', '):' · all sessions'}`;
+}
+function buildSummaryReportData(){
+  const list=filteredSessions();
+  const sessionRows=list.map(s=>{const c=CMAP[s.cid]||{};const a=AGG[s.sid];
+    return{sid:s.sid,course:c.plo||s.cid,cid:s.cid,date:fmtDate(s.date),term:c.term||'-',unit:c.unit||'-',mode:c.mode||'-',overall:sessionOverall(s.sid),resp:a?a.resp:0};});
+  const secSum={},secN={};let sum=0,n=0,totalResp=0;
+  for(const s of list){const a=AGG[s.sid];if(!a)continue;totalResp+=a.resp;
+    for(const sec of RUBRIC){const v=sessionSectionAvg(s.sid,sec);if(v!=null){secSum[sec.code]=(secSum[sec.code]||0)+v*a.resp;secN[sec.code]=(secN[sec.code]||0)+a.resp;}}
+    const o=sessionOverall(s.sid);if(o!=null){sum+=o*a.resp;n+=a.resp;}}
+  const sections=RUBRIC.map(sec=>({name:sec.name,code:sec.code,avg:secN[sec.code]?secSum[sec.code]/secN[sec.code]:null})).filter(s=>s.avg!=null);
+  const overall=n?sum/n:null;
+  const facMap={};
+  for(const s of list){for(const fid of s.facs){const fs=facInSession(s.sid,fid);if(fs==null)continue;
+    if(!facMap[fid])facMap[fid]={fid,name:facName(fid),scores:[],sessions:0};
+    facMap[fid].scores.push(fs);facMap[fid].sessions++;}}
+  const facilitators=Object.values(facMap).map(f=>({fid:f.fid,name:f.name,sessions:f.sessions,avg:f.scores.reduce((a,b)=>a+b,0)/f.scores.length})).sort((a,b)=>a.avg-b.avg);
+  return{sessionRows,sections,overall,totalResp,facilitators,scopeParts:summaryScopeParts(),sessionCount:list.length};
+}
+function printSummaryReport(){
+  const d=buildSummaryReportData();
+  if(!d.sessionCount){alert('No sessions match the current filters. Adjust the filters above and try again.');return;}
+  const now=new Date();
+  const generated=now.toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'})+' at '+now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+  const ref=reportReference('SUMMARY',now);
+  const scopeLine=d.scopeParts.length?d.scopeParts.join(' · '):'All sessions on record';
+  const sectionsChart=sectionChartSvg(d.sections.map(s=>({code:s.code,label:s.name,score:s.avg})),SCALE_MAX);
+  const sectionsRows=d.sections.map(s=>`<tr><td class="prep-mono">${s.code}</td><td>${esc(s.name)}</td><td>${s.avg.toFixed(2)}</td></tr>`).join('');
+  const facRows=d.facilitators.map(f=>`<tr><td>${esc(f.name)}</td><td class="prep-mono">${f.fid}</td><td>${f.sessions}</td><td>${f.avg.toFixed(2)}</td></tr>`).join('');
+  const sessRows=d.sessionRows.map(r=>`<tr><td class="prep-mono">${r.sid}</td><td>${esc(r.course)}</td><td>${esc(r.date)}</td><td>${esc(r.term)}</td><td>${esc(r.unit)}</td><td>${esc(r.mode)}</td><td>${r.resp}</td><td>${r.overall!=null?r.overall.toFixed(2):'-'}</td></tr>`).join('');
+  document.getElementById('printArea').innerHTML=`
+    <div class="prep-page">
+      <div class="prep-letterhead">
+        <img src="${WCED_LOGO_B64}" alt="Western Cape Government: Education" class="prep-logo">
+        <div class="prep-org">
+          <div class="prep-org-l1">WESTERN CAPE GOVERNMENT: EDUCATION</div>
+          <div class="prep-org-l2">Cape Teaching and Leadership Institute (CTLI)</div>
+          <div class="prep-org-l3">${esc(state.unit?('Hosting Unit: '+state.unit):'All hosting units')}</div>
+        </div>
+      </div>
+      <div class="prep-rule"></div>
+      <div class="prep-title">Professional Learning Programme Summary Report</div>
+      <div class="prep-scope"><b>Report scope:</b> ${esc(scopeLine)}</div>
+      <table class="prep-refs">
+        <tr><td>Report reference</td><td class="prep-mono">${ref}</td><td>Report generated</td><td>${generated}</td></tr>
+        <tr><td>Sessions in scope</td><td>${d.sessionCount}</td><td>Responses received</td><td>${d.totalResp}</td></tr>
+        <tr><td>Overall satisfaction</td><td colspan="3"><b>${d.overall!=null?d.overall.toFixed(2):'-'} / ${SCALE_MAX}</b></td></tr>
+      </table>
+      <h3 class="prep-h3">Average score by section</h3>
+      ${sectionsChart}
+      <table class="prep-table"><thead><tr><th>Code</th><th>Section</th><th>Average score</th></tr></thead><tbody>${sectionsRows}</tbody></table>
+      <h3 class="prep-h3">Facilitator summary</h3>
+      ${facRows?`<table class="prep-table"><thead><tr><th>Facilitator</th><th>ID</th><th>Sessions</th><th>Avg. facilitation score</th></tr></thead><tbody>${facRows}</tbody></table>`:'<p class="prep-muted">No facilitation data recorded for the sessions in scope.</p>'}
+      <h3 class="prep-h3">Sessions included (${d.sessionCount})</h3>
+      <table class="prep-table"><thead><tr><th>Key</th><th>Course</th><th>Date</th><th>Term</th><th>Unit</th><th>Mode</th><th>Resp.</th><th>Score</th></tr></thead><tbody>${sessRows}</tbody></table>
+      <div class="prep-note"><b>Methodology.</b> Section averages are the mean of all respondent submissions received across every session in scope, weighted by response count, on a scale of 1 (lowest) to ${SCALE_MAX} (highest). "Not applicable" and unanswered items are excluded rather than counted as zero. Facilitator averages reflect only the sessions in scope, not that facilitator's full record. Facilitation is attributed using the CTLI Course &amp; Session Register at the time of reporting.</div>
+      <div class="prep-signoff">
+        <div class="prep-signrow"><span>Compiled by:</span><span class="prep-line"></span><span>Date:</span><span class="prep-line short"></span></div>
+        <div class="prep-signrow"><span>Verified by:</span><span class="prep-line"></span><span>Date:</span><span class="prep-line short"></span></div>
+      </div>
+      <div class="prep-footer">This report was generated automatically by the CTLI Quality Management Framework Dashboard from response data submitted via the CTLI Professional Learning Feedback and CTLI Session Facilitation Feedback forms. Report reference ${ref}. For internal Western Cape Government: Education use.</div>
+    </div>`;
+  document.body.classList.add('printing');
+  window.print();
+  window.addEventListener('afterprint',()=>document.body.classList.remove('printing'),{once:true});
+}
+function exportSummaryExcel(){
+  const d=buildSummaryReportData();
+  if(!d.sessionCount){alert('No sessions match the current filters. Adjust the filters above and try again.');return;}
+  if(typeof XLSX==='undefined'){alert('Spreadsheet writer is still loading, please try again in a moment.');return;}
+  const now=new Date();
+  const generated=now.toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'})+' at '+now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+  const ref=reportReference('SUMMARY',now);
+  const scopeLine=d.scopeParts.length?d.scopeParts.join(' · '):'All sessions on record';
+  const rows=[];
+  rows.push(['WESTERN CAPE GOVERNMENT: EDUCATION']);
+  rows.push(['Cape Teaching and Leadership Institute (CTLI)']);
+  rows.push([]);
+  rows.push(['PROFESSIONAL LEARNING PROGRAMME SUMMARY REPORT']);
+  rows.push(['Report scope',scopeLine]);
+  rows.push([]);
+  rows.push(['Report reference',ref,'Report generated',generated]);
+  rows.push(['Sessions in scope',d.sessionCount,'Responses received',d.totalResp]);
+  rows.push(['Overall satisfaction',d.overall!=null?`${d.overall.toFixed(2)} / ${SCALE_MAX}`:'-']);
+  rows.push([]);
+  rows.push(['AVERAGE SCORE BY SECTION']);
+  rows.push(['Code','Section','Average score','Visual']);
+  d.sections.forEach(s=>rows.push([s.code,s.name,s.avg.toFixed(2),asciiBar(s.avg,SCALE_MAX)]));
+  rows.push([]);
+  rows.push(['FACILITATOR SUMMARY']);
+  if(!d.facilitators.length)rows.push(['No facilitation data recorded for the sessions in scope.']);
+  else{rows.push(['Facilitator','ID','Sessions','Avg. facilitation score','Visual']);
+    d.facilitators.forEach(f=>rows.push([f.name,f.fid,f.sessions,f.avg.toFixed(2),asciiBar(f.avg,SCALE_MAX)]));}
+  rows.push([]);
+  rows.push([`SESSIONS INCLUDED (${d.sessionCount})`]);
+  rows.push(['Key','Course','Date','Term','Unit','Mode','Responses','Score']);
+  d.sessionRows.forEach(r=>rows.push([r.sid,r.course,r.date,r.term,r.unit,r.mode,r.resp,r.overall!=null?r.overall.toFixed(2):'-']));
+  rows.push([]);
+  rows.push(['Methodology: section averages are the mean of all respondent submissions received across every session in scope, weighted by response count, on a scale of 1 (lowest) to '+SCALE_MAX+' (highest). "Not applicable" and unanswered items are excluded rather than counted as zero. Facilitator averages reflect only the sessions in scope. Facilitation is attributed using the CTLI Course & Session Register at the time of reporting.']);
+  rows.push([`Generated automatically by the CTLI Quality Management Framework Dashboard. Report reference ${ref}. For internal Western Cape Government: Education use.`]);
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:26},{wch:44},{wch:16},{wch:18},{wch:14},{wch:12},{wch:12},{wch:10}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Summary Report');
+  const pp=nn=>String(nn).padStart(2,'0');
+  XLSX.writeFile(wb,`CTLI-Summary-${now.getFullYear()}${pp(now.getMonth()+1)}${pp(now.getDate())}-Report.xlsx`);
 }
 
 /* COURSES */
@@ -827,6 +990,7 @@ function copyAllOptions(){const lines=[];for(const s of SESSIONS)for(const fid o
 
 /* filters UI */
 function refreshFilters(){
+  fillSel('fYear','All years',[...new Set(SESSIONS.map(s=>(s.date||'').slice(0,4)).filter(Boolean))].sort().reverse(),state.year);
   fillSel('fTerm','All terms',[...new Set(COURSES.map(c=>c.term).filter(Boolean))].sort(),state.term);
   fillSel('fSub','All sub-directorates',[...new Set(COURSES.map(c=>c.sub).filter(Boolean))].sort(),state.sub);
   fillSel('fUnit','All units',[...new Set(COURSES.map(c=>c.unit).filter(Boolean))].sort(),state.unit);
@@ -851,8 +1015,10 @@ function setView(v){
 /* wire */
 document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>setView(t.dataset.view));
 document.querySelectorAll('#catSub .subtab').forEach(t=>t.onclick=()=>{sel.catSub=t.dataset.sub;renderCat();});
-[['fTerm','term'],['fSub','sub'],['fUnit','unit'],['fMode','mode'],['fFac','fac'],['fSort','sort']].forEach(([id,k])=>document.getElementById(id).addEventListener('change',e=>{state[k]=e.target.value;renderSessionCards();}));
+[['fYear','year'],['fTerm','term'],['fSub','sub'],['fUnit','unit'],['fMode','mode'],['fFac','fac'],['fSort','sort']].forEach(([id,k])=>document.getElementById(id).addEventListener('change',e=>{state[k]=e.target.value;renderSessionCards();}));
 document.getElementById('fSearch').addEventListener('input',e=>{state.q=e.target.value;renderSessionCards();});
+document.getElementById('printSummaryBtn').onclick=printSummaryReport;
+document.getElementById('exportSummaryBtn').onclick=exportSummaryExcel;
 document.getElementById('addRow').onclick=()=>{
   if(sel.catSub==='courses'){const n=COURSES.length+1;COURSES.push({cid:'C'+String(n).padStart(3,'0'),plo:'New course',sub:'TPI',unit:'',days:'',hours:'',term:'1',mode:'Face-to-Face',seed:null});}
   else if(sel.catSub==='facs'){const n=FACS.length+1;FACS.push({fid:'F'+String(n).padStart(2,'0'),name:'New facilitator'});}
