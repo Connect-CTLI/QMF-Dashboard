@@ -26,6 +26,11 @@ button{font-family:inherit;cursor:pointer}a{color:var(--brand);text-decoration:n
 .tabs{display:flex;gap:2px;background:rgba(255,255,255,.08);padding:3px;border-radius:10px;flex-wrap:wrap}
 .tab{border:0;background:transparent;color:rgba(255,255,255,.7);padding:7px 12px;border-radius:7px;font-size:13px;font-weight:500}
 .tab[aria-selected=true]{background:#fff;color:var(--brand-ink)}
+.admin-tab{display:none}
+body.admin-unlocked .admin-tab{display:inline-flex}
+#adminLock{background:transparent;border:0;color:rgba(255,255,255,.35);font-size:14px;padding:6px 4px;line-height:1;flex:none}
+#adminLock:hover{color:rgba(255,255,255,.8)}
+body.admin-unlocked #adminLock{color:#f5c608}
 .tab:hover:not([aria-selected=true]){color:#fff}
 .wrap{max-width:1320px;margin:0 auto;padding:22px}
 .badge-live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:rgba(91,127,149,.10);color:var(--ink-soft);border:1px solid rgba(91,127,149,.28)}
@@ -136,9 +141,10 @@ table.cat .plo input{min-width:210px;font-weight:500}
     <button class="tab" role="tab" data-view="courses" aria-selected="false">Courses</button>
     <button class="tab" role="tab" data-view="facilitators" aria-selected="false">Facilitators</button>
     <button class="tab" role="tab" data-view="rubric" aria-selected="false">Rubric</button>
-    <button class="tab" role="tab" data-view="catalogue" aria-selected="false">Catalogue</button>
-    <button class="tab" role="tab" data-view="setup" aria-selected="false">Setup</button>
+    <button class="tab admin-tab" role="tab" data-view="catalogue" aria-selected="false">Catalogue</button>
+    <button class="tab admin-tab" role="tab" data-view="setup" aria-selected="false">Setup</button>
   </nav>
+  <button id="adminLock" title="Admin access" aria-label="Admin access">🔒</button>
 </div></header>
 <main class="wrap">
 
@@ -221,13 +227,14 @@ table.cat .plo input{min-width:210px;font-weight:500}
       <div class="urlrow"><input type="url" id="csvUrl" placeholder="Course & session feedback CSV link"><button class="btn primary" id="loadCsv">Load</button></div>
       <div class="urlrow"><input type="url" id="csvUrlFac" placeholder="Facilitator feedback CSV link (optional, if split into its own form)"></div>
       <div id="csvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
+      <div style="margin-top:6px"><span style="font-size:11px;color:var(--ink-soft)">Links are remembered on this device and reloaded automatically next time.</span> <button class="btn" id="clearFeedbackLinks" style="font-size:11px;padding:3px 9px;margin-left:6px">Forget saved links</button></div>
     </div>
     <div class="panel">
       <h2>How the form maps</h2>
       <div class="psub">Two things let the dashboard read each response, in either form:</div>
-      <div class="step"><div class="no">A</div><div class="st"><h4>Session × facilitator key</h4><p>Q1 = <i>"Which session are you evaluating?"</i> Each option ends in a compound key:<br><code>20 Feb · SACE Ethics Seminar · N. Adams [2701-F03]</code><br>The dashboard reads <code>2701</code> for the session and <code>F03</code> for the facilitator. Co-facilitated sessions appear once per facilitator. Copy the whole list from the Catalogue tab, and use the same key list in both forms if you split them.</p></div></div>
-      <div class="step"><div class="no">B</div><div class="st"><h4>Rubric codes</h4><p>Each Likert question starts with its code, for example <code>C1</code>, <code>D1.2</code> or <code>S3.4</code>. The <code>D1</code> block is facilitation and is attributed to the facilitator in the key.</p></div></div>
-      <div class="note"><b>One form or two?</b> Either works. Keep everything in one form and paste one link above, or split facilitation into its own form and paste both links. The dashboard matches rows from both sheets by their <code>[2701-F03]</code> key and reads whichever rubric codes are present in each, so a course-feedback row and a facilitation row for the same session simply combine into one picture rather than needing to line up as a single submission.</div>
+      <div class="step"><div class="no">A</div><div class="st"><h4>Session key</h4><p>Q1 = <i>"Select the session you attended"</i> (or the equivalent PLO question). Each option ends in the session ID in brackets:<br><code>20 Feb 2026 · Leadership Conference [2701]</code><br>The dashboard reads <code>2701</code> from that key. No facilitator ID needs to be embedded, the register (Courses/Sessions/Facilitators, loaded further down this page) tells the dashboard who ran that session. A co-facilitated session with no explicit facilitator selector credits every assigned facilitator equally. Copy the whole session list from the Catalogue tab when building the form's dropdown.</p></div></div>
+      <div class="step"><div class="no">B</div><div class="st"><h4>Question wording, not codes</h4><p>Questions don't need a rubric code prefix. The dashboard matches each question by its wording, for example a question containing <i>"Ease of platform use"</i> maps automatically to the Digital & Online section. Answers can be numbered (<code>3 - Good</code>) or plain text (<code>Strongly agree</code>); both convert to a 1–4 score. "Not Applicable" and blank answers are excluded rather than counted as zero.</p></div></div>
+      <div class="note"><b>One form or two?</b> Either works. Keep everything in one form and paste one link above, or split facilitation into its own form and paste both links. The dashboard pools rows from both sheets by session, so a course-feedback row and a facilitation row for the same session simply combine into one picture rather than needing to line up as a single submission. If you change a question's wording, keep it close to what's on file, since the matcher looks for the same key phrases each time.</div>
     </div>
     <div class="panel" style="grid-column:1/-1">
       <h2>Connect the course & session register</h2>
@@ -236,6 +243,7 @@ table.cat .plo input{min-width:210px;font-weight:500}
       <div class="urlrow"><input type="url" id="csvUrlSessions" placeholder="Sessions tab CSV link"></div>
       <div class="urlrow"><input type="url" id="csvUrlFacs" placeholder="Facilitators tab CSV link"><button class="btn primary" id="loadRegister">Load register</button></div>
       <div id="regStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
+      <div style="margin-top:6px"><span style="font-size:11px;color:var(--ink-soft)">Links are remembered on this device and reloaded automatically next time.</span> <button class="btn" id="clearRegisterLinks" style="font-size:11px;padding:3px 9px;margin-left:6px">Forget saved links</button></div>
       <div class="note">Column headers just need to contain the right words, matching the same layout as the CTLI Course & Session Register spreadsheet, for example <code>Course ID</code>, <code>Professional Learning Opportunity</code>, <code>Session ID</code>, <code>Facilitator ID</code>. Dates can be entered as <code>YYYY-MM-DD</code>, <code>DD/MM/YYYY</code> or Google Sheets' own date format; the dashboard converts them automatically.</div>
     </div>
   </div>
@@ -663,7 +671,9 @@ function renderActive(){
   else if(state.view==='facilitators'){renderFacCards();renderFacDetail();}
   else if(state.view==='rubric'){renderHeat();}
   else if(state.view==='catalogue'){renderCat();}}
-function setView(v){state.view=v;document.querySelectorAll('#tabs .tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===v));
+function setView(v){
+  if((v==='setup'||v==='catalogue')&&!document.body.classList.contains('admin-unlocked'))v='sessions';
+  state.view=v;document.querySelectorAll('#tabs .tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===v));
   document.querySelectorAll('.view').forEach(s=>s.classList.add('hidden'));document.getElementById('v-'+v).classList.remove('hidden');renderActive();}
 
 /* wire */
@@ -732,33 +742,94 @@ function ingestRegisterCSV(parts){
   rebuild();refreshFilters();renderCat();renderActive();
   return loaded;
 }
-document.getElementById('loadRegister').onclick=()=>{
-  const fields=[{id:'csvUrlCourses',kind:'courses'},{id:'csvUrlSessions',kind:'sessions'},{id:'csvUrlFacs',kind:'facilitators'}];
+/* Persisted setup links: remembered per-browser via localStorage so a page reload
+   doesn't require re-pasting every CSV link. Falls back silently if storage is
+   unavailable (private browsing, restricted contexts, etc.) */
+const LS_KEYS={courses:'ctli_url_courses',sessions:'ctli_url_sessions',facs:'ctli_url_facs',feedback:'ctli_url_feedback',feedbackFac:'ctli_url_feedback_fac'};
+function lsGet(k){try{return localStorage.getItem(k)||'';}catch(e){return'';}}
+function lsSet(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k);}catch(e){}}
+function lsClear(keys){keys.forEach(k=>lsSet(k,''));}
+
+function runRegisterLoad(){
+  const fields=[{id:'csvUrlCourses',kind:'courses',lsKey:LS_KEYS.courses},{id:'csvUrlSessions',kind:'sessions',lsKey:LS_KEYS.sessions},{id:'csvUrlFacs',kind:'facilitators',lsKey:LS_KEYS.facs}];
   const st=document.getElementById('regStatus');
   const wanted=fields.map(f=>({...f,url:document.getElementById(f.id).value.trim()})).filter(f=>f.url);
   if(!wanted.length){st.textContent='Paste at least one tab link.';return;}
   st.textContent='Loading…';
   Promise.all(wanted.map(f=>fetch(f.url).then(r=>r.text()).then(text=>({...f,text}))))
     .then(parts=>{const loaded=ingestRegisterCSV(parts);
-      st.textContent=loaded.length?`Loaded ${loaded.join(', ')}.`:'No matching rows found. Check the tab links and column headers.';})
+      st.textContent=loaded.length?`Loaded ${loaded.join(', ')}.`:'No matching rows found. Check the tab links and column headers.';
+      if(loaded.length)wanted.forEach(f=>lsSet(f.lsKey,f.url));})
     .catch(e=>{st.textContent='Could not load: '+e.message;});
-};
-document.getElementById('loadCsv').onclick=()=>{
+}
+function runFeedbackLoad(){
   const url1=document.getElementById('csvUrl').value.trim();
   const url2=document.getElementById('csvUrlFac').value.trim();
   const st=document.getElementById('csvStatus');
-  const sources=[];if(url1)sources.push({url:url1,label:'Course feedback'});if(url2)sources.push({url:url2,label:'Facilitator feedback'});
+  const sources=[];if(url1)sources.push({url:url1,label:'Course feedback',lsKey:LS_KEYS.feedback});if(url2)sources.push({url:url2,label:'Facilitator feedback',lsKey:LS_KEYS.feedbackFac});
   if(!sources.length){st.textContent='Paste at least one published CSV link.';return;}
   st.textContent='Loading…';
   Promise.all(sources.map(s=>fetch(s.url).then(r=>r.text()).then(text=>({...s,text}))))
     .then(parts=>{const{merged,counts}=ingestSources(parts);
       const breakdown=counts.length>1?` (${counts.map(c=>`${c.label}: ${c.n}`).join(', ')})`:'';
-      st.textContent=`Loaded ${merged.length} live responses`+breakdown+'.';})
-    .catch(e=>{st.textContent='Could not load: '+e.message;});};
+      st.textContent=`Loaded ${merged.length} live responses`+breakdown+'.';
+      sources.forEach(s=>lsSet(s.lsKey,s.url));})
+    .catch(e=>{st.textContent='Could not load: '+e.message;});
+}
+document.getElementById('loadRegister').onclick=runRegisterLoad;
+document.getElementById('loadCsv').onclick=runFeedbackLoad;
+document.getElementById('clearRegisterLinks').onclick=()=>{
+  lsClear([LS_KEYS.courses,LS_KEYS.sessions,LS_KEYS.facs]);
+  ['csvUrlCourses','csvUrlSessions','csvUrlFacs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('regStatus').textContent='Saved register links forgotten.';
+};
+document.getElementById('clearFeedbackLinks').onclick=()=>{
+  lsClear([LS_KEYS.feedback,LS_KEYS.feedbackFac]);
+  ['csvUrl','csvUrlFac'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('csvStatus').textContent='Saved feedback links forgotten.';
+};
+
+/* Admin gate: not real security (this is a static file, anyone can view its source),
+   just a deterrent that keeps Setup and Catalogue out of casual view. Change ADMIN_PIN
+   to something private before sharing this file, and don't reuse a real password. */
+const ADMIN_PIN='2027';
+const LS_ADMIN='ctli_admin_unlocked';
+function setAdminUnlocked(on){
+  document.body.classList.toggle('admin-unlocked',on);
+  lsSet(LS_ADMIN,on?'1':'');
+}
+document.getElementById('adminLock').onclick=()=>{
+  if(document.body.classList.contains('admin-unlocked')){
+    if(confirm('Lock admin tools (Setup and Catalogue) again on this device?')){
+      setAdminUnlocked(false);
+      if(state.view==='setup'||state.view==='catalogue')setView('sessions');
+    }
+    return;
+  }
+  const entered=prompt('Enter admin PIN to unlock Setup and Catalogue:');
+  if(entered===null)return;
+  if(entered.trim()===ADMIN_PIN){setAdminUnlocked(true);}
+  else alert('Incorrect PIN.');
+};
 
 /* boot */
-rebuild();refreshFilters();setView('sessions');
+rebuild();refreshFilters();
+if(lsGet(LS_ADMIN)==='1')setAdminUnlocked(true);
+setView('sessions');
 if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessionCards();renderSessionDetail();}
+
+// Restore any saved links and auto-load them, so a page refresh doesn't require re-pasting.
+(function autoLoadSaved(){
+  const cU=lsGet(LS_KEYS.courses),sU=lsGet(LS_KEYS.sessions),fU=lsGet(LS_KEYS.facs);
+  const fbU=lsGet(LS_KEYS.feedback),fbfU=lsGet(LS_KEYS.feedbackFac);
+  if(cU)document.getElementById('csvUrlCourses').value=cU;
+  if(sU)document.getElementById('csvUrlSessions').value=sU;
+  if(fU)document.getElementById('csvUrlFacs').value=fU;
+  if(fbU)document.getElementById('csvUrl').value=fbU;
+  if(fbfU)document.getElementById('csvUrlFac').value=fbfU;
+  if(cU||sU||fU)runRegisterLoad();
+  if(fbU||fbfU)runFeedbackLoad();
+})();
 </script>
 </body>
 </html>
