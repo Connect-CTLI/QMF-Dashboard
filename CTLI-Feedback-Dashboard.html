@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CTLI Feedback 2027 · Course · Session · Facilitator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#001489;--ink-soft:#5B7F95;--paper:#EEF2F6;--card:#FFF;--line:rgba(0,20,137,.16);--line-soft:rgba(0,20,137,.07);
+--brand:#001489;--brand-ink:#000c5e;--teal:#00A1A3;--purple:#8D6E97;--gold:#f5c608;--good:#92ad12;--mid:#f5c608;--poor:#d73828;
+--shadow:0 1px 2px rgba(12,30,62,.06),0 8px 24px rgba(12,30,62,.06);--r:14px}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45;font-size:15px}
+.mono{font-family:'IBM Plex Mono',monospace}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-.01em;margin:0}
+button{font-family:inherit;cursor:pointer}a{color:var(--brand);text-decoration:none}
+.topbar{position:sticky;top:0;z-index:50;background:var(--brand-ink);color:#fff;border-bottom:3px solid var(--gold)}
+.topbar-in{max-width:1320px;margin:0 auto;padding:11px 22px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand .glyph{width:34px;height:34px;border-radius:8px;background:linear-gradient(150deg,var(--teal),var(--brand));display:grid;place-items:center;font-family:'Space Grotesk';font-weight:700;font-size:16px;color:#fff}
+.brand .wm{font-family:'Space Grotesk';font-weight:600;font-size:15px;line-height:1.1}
+.brand .wm small{display:block;font-family:'Inter';font-weight:450;font-size:11px;color:rgba(255,255,255,.65)}
+.spring{flex:1}
+.tabs{display:flex;gap:2px;background:rgba(255,255,255,.08);padding:3px;border-radius:10px;flex-wrap:wrap}
+.tab{border:0;background:transparent;color:rgba(255,255,255,.7);padding:7px 12px;border-radius:7px;font-size:13px;font-weight:500}
+.tab[aria-selected=true]{background:#fff;color:var(--brand-ink)}
+.tab:hover:not([aria-selected=true]){color:#fff}
+.wrap{max-width:1320px;margin:0 auto;padding:22px}
+.badge-live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:rgba(91,127,149,.10);color:var(--ink-soft);border:1px solid rgba(91,127,149,.28)}
+.badge-live.on{background:rgba(146,173,18,.14);color:#5c6f0c;border-color:rgba(146,173,18,.4)}
+.badge-live .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px 22px;margin-bottom:18px}
+.hero-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.hero-head .eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--teal)}
+.hero-head h1{font-size:23px;margin-top:3px}
+.hero-head p{margin:4px 0 0;color:var(--ink-soft);font-size:13.5px;max-width:56ch}
+.pulse{display:grid;grid-template-columns:220px 1fr;gap:22px;align-items:center}
+.gauge{text-align:center}.gauge .lab{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.sectbars{display:flex;flex-direction:column;gap:8px}
+.sbar{display:grid;grid-template-columns:150px 1fr 46px;align-items:center;gap:12px}
+.sbar .nm{font-size:12.5px;font-weight:500}.sbar .track{height:9px;border-radius:6px;background:var(--line-soft);overflow:hidden}
+.sbar .fill{height:100%;border-radius:6px}.sbar .sc{font-family:'IBM Plex Mono';font-size:12.5px;font-weight:600;text-align:right}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:15px;border-top:1px solid var(--line-soft)}
+.stat{flex:1;min-width:110px}.stat .n{font-family:'Space Grotesk';font-weight:700;font-size:22px}.stat .l{font-size:11.5px;color:var(--ink-soft)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label{font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+select,input[type=text],input[type=url]{font-family:inherit;font-size:13.5px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);min-width:140px}
+select:focus,input:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+.searchwrap{flex:1;min-width:200px}.searchwrap input{width:100%}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 13px;border-radius:9px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{border-color:var(--brand);color:var(--brand)}.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn.primary:hover{background:var(--brand-ink)}
+.explorer{display:grid;grid-template-columns:1fr 410px;gap:18px;align-items:start}
+.cards{display:flex;flex-direction:column;gap:10px}
+.scard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);cursor:pointer;transition:border-color .12s,transform .12s;display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:center}
+.scard:hover{border-color:var(--brand);transform:translateY(-1px)}
+.scard[aria-selected=true]{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand),var(--shadow)}
+.scard .key{font-family:'IBM Plex Mono';font-weight:600;font-size:12px;color:#8a6a00;background:rgba(245,198,8,.18);border:1px solid rgba(245,198,8,.5);border-radius:6px;padding:1px 7px}
+.scard h3{font-size:15px;line-height:1.25;grid-column:1;font-weight:600}
+.scard .meta{grid-column:1;display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft);align-items:center}
+.pill{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(0,20,137,.07);color:var(--brand)}
+.pill.mode{background:rgba(0,161,163,.13);color:#00787a}.pill.fac{background:rgba(141,110,151,.15);color:var(--purple)}
+.scard .rate{grid-row:1/3;grid-column:2;text-align:right}
+.scard .rate .num{font-family:'Space Grotesk';font-weight:700;font-size:20px;line-height:1}
+.scard .rate .n2{font-size:10.5px;color:var(--ink-soft)}
+.detail{position:sticky;top:78px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;max-height:calc(100vh - 100px);display:flex;flex-direction:column}
+.detail.empty{align-items:center;justify-content:center;text-align:center;padding:44px 26px;color:var(--ink-soft)}
+.detail-head{padding:16px 18px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,rgba(0,20,137,.03),#fff)}
+.detail-head .key{font-family:'IBM Plex Mono';font-weight:600;font-size:12.5px;color:#8a6a00}
+.detail-head h2{font-size:17px;margin-top:5px;line-height:1.2}
+.detail-head .sub{font-size:12px;color:var(--ink-soft);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.detail-body{padding:14px 18px;overflow-y:auto}
+.rgroup{margin-bottom:15px}
+.rgroup h4{font-family:'Space Grotesk';font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);margin-bottom:8px;display:flex;justify-content:space-between}
+.rgroup h4 span{color:var(--ink-soft);font-weight:500}
+.rgroup.fac h4{color:var(--purple)}
+.facblock{border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:rgba(141,110,151,.04)}
+.facblock .fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.facblock .fh b{font-family:'Space Grotesk';font-size:13px}
+.facblock .fh .fs{font-family:'IBM Plex Mono';font-weight:600;font-size:13px}
+.ritem{display:grid;grid-template-columns:1fr 80px 30px;gap:9px;align-items:center;margin-bottom:5px;font-size:12px}
+.ritem .rn{color:var(--ink-soft)}.ritem .rt{height:6px;border-radius:4px;background:var(--line-soft);overflow:hidden}
+.ritem .rf{height:100%}.ritem .rv{font-family:'IBM Plex Mono';font-size:11.5px;font-weight:600;text-align:right}
+.spark{display:flex;align-items:flex-end;gap:3px;height:34px}
+.spark i{flex:1;border-radius:2px 2px 0 0;min-width:4px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px 20px}
+.panel h2{font-size:17px;margin-bottom:3px}.panel .psub{color:var(--ink-soft);font-size:13px;margin-bottom:16px}
+.heat-scroll{overflow-x:auto}
+table.heat{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+table.heat th,table.heat td{padding:7px 9px;text-align:center;white-space:nowrap}
+table.heat thead th{position:sticky;top:0;background:#fff;font-weight:600;color:var(--ink-soft);font-size:11px;border-bottom:1px solid var(--line)}
+table.heat th.row{position:sticky;left:0;background:#fff;text-align:left;font-weight:500;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+table.heat td.cell{font-family:'IBM Plex Mono';font-weight:600;color:#fff;border-radius:5px;min-width:42px}
+.legend{display:flex;gap:14px;align-items:center;margin-top:14px;font-size:12px;color:var(--ink-soft);flex-wrap:wrap}
+.legend .sw{display:inline-flex;align-items:center;gap:6px}.legend .sw i{width:14px;height:14px;border-radius:4px}
+.cat-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.cat-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;max-height:60vh}
+table.cat{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff}
+table.cat th{background:rgba(0,20,137,.04);text-align:left;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);padding:9px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;font-weight:600}
+table.cat td{padding:4px 6px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+table.cat tr:hover td{background:rgba(0,20,137,.02)}
+table.cat .keycell{font-family:'IBM Plex Mono';font-weight:600;color:#8a6a00;background:rgba(245,198,8,.18);text-align:center;border-radius:5px;white-space:nowrap;padding:4px 8px}
+table.cat .cidcell{font-family:'IBM Plex Mono';font-weight:600;color:var(--purple);background:rgba(141,110,151,.15);text-align:center;border-radius:5px}
+table.cat input,table.cat select{width:100%;min-width:60px;border:1px solid transparent;background:transparent;padding:6px 7px;border-radius:6px;font-size:12.5px}
+table.cat input:hover,table.cat select:hover{border-color:var(--line)}
+table.cat input:focus,table.cat select:focus{background:#fff;border-color:var(--brand);outline:none}
+table.cat .plo input{min-width:210px;font-weight:500}
+.rowdel{border:0;background:transparent;color:rgba(91,127,149,.55);font-size:16px;padding:4px 8px;border-radius:6px}
+.rowdel:hover{background:rgba(215,56,40,.10);color:var(--poor)}
+.subtabs{display:inline-flex;gap:3px;background:rgba(0,20,137,.05);padding:3px;border-radius:9px;margin-bottom:14px}
+.subtab{border:0;background:transparent;padding:6px 13px;border-radius:6px;font-size:13px;font-weight:500;color:var(--ink-soft)}
+.subtab[aria-selected=true]{background:#fff;color:var(--brand);box-shadow:var(--shadow)}
+.step{display:flex;gap:13px;margin-bottom:15px}
+.step .no{flex:none;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;font-family:'Space Grotesk';font-weight:600;font-size:13px;display:grid;place-items:center}
+.step .st h4{font-size:14px;margin-bottom:2px}.step .st p{margin:0;font-size:13px;color:var(--ink-soft)}
+.step .st code{font-family:'IBM Plex Mono';font-size:12px;background:rgba(0,20,137,.05);padding:1px 5px;border-radius:4px}
+.note{background:rgba(0,161,163,.05);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--ink-soft);margin-top:12px}
+.note b{color:var(--ink)}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.urlrow{display:flex;gap:9px;margin:10px 0}.urlrow input{flex:1}
+.hidden{display:none!important}
+.foot{max-width:1320px;margin:8px auto 30px;padding:0 22px;font-size:11.5px;color:var(--ink-soft)}
+@media(max-width:1000px){.explorer{grid-template-columns:1fr}.detail{position:static;max-height:none}.pulse{grid-template-columns:1fr}.setup-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-in">
+  <div class="brand"><div class="glyph">Ct</div><div class="wm">CTLI Feedback<small>Course · Session · Facilitator · 2027</small></div></div>
+  <div class="spring"></div>
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-view="sessions" aria-selected="true">Sessions</button>
+    <button class="tab" role="tab" data-view="courses" aria-selected="false">Courses</button>
+    <button class="tab" role="tab" data-view="facilitators" aria-selected="false">Facilitators</button>
+    <button class="tab" role="tab" data-view="rubric" aria-selected="false">Rubric</button>
+    <button class="tab" role="tab" data-view="catalogue" aria-selected="false">Catalogue</button>
+    <button class="tab" role="tab" data-view="setup" aria-selected="false">Setup</button>
+  </nav>
+</div></header>
+<main class="wrap">
+
+<section id="v-sessions" class="view">
+  <div class="hero">
+    <div class="hero-head">
+      <div><div class="eyebrow">Programme pulse</div><h1>How the 2027 programme is landing</h1>
+      <p>Feedback across every session, scored on the CTLI rubric. Facilitation is reported per facilitator, so select a session to see each person's delivery.</p></div>
+      <span class="badge-live" id="dataBadge"><span class="dot"></span><span id="dataBadgeTxt">No data loaded yet</span></span>
+    </div>
+    <div class="pulse"><div class="gauge" id="gauge"></div><div class="sectbars" id="sectbars"></div></div>
+    <div class="stats" id="stats"></div>
+  </div>
+  <div class="filters">
+    <div class="field"><label>Term</label><select id="fTerm"></select></div>
+    <div class="field"><label>Sub-directorate</label><select id="fSub"></select></div>
+    <div class="field"><label>Unit</label><select id="fUnit"></select></div>
+    <div class="field"><label>Mode</label><select id="fMode"></select></div>
+    <div class="field"><label>Facilitator</label><select id="fFac"></select></div>
+    <div class="field searchwrap"><label>Search</label><input type="text" id="fSearch" placeholder="Course name or session key…"></div>
+    <div class="field"><label>Sort</label><select id="fSort">
+      <option value="rating">Lowest rated first</option><option value="ratingdesc">Highest rated first</option>
+      <option value="responses">Most responses</option><option value="date">Soonest date</option></select></div>
+  </div>
+  <div class="explorer"><div class="cards" id="cards"></div>
+    <aside class="detail empty" id="detail"><div>Select a session to see its rubric breakdown and each facilitator's delivery.</div></aside>
+  </div>
+</section>
+
+<section id="v-courses" class="view hidden">
+  <div class="explorer"><div class="cards" id="courseCards"></div>
+    <aside class="detail empty" id="courseDetail"><div>Select a course to see its sessions rolled up, with a trend across deliveries.</div></aside>
+  </div>
+</section>
+
+<section id="v-facilitators" class="view hidden">
+  <div class="explorer"><div class="cards" id="facCards"></div>
+    <aside class="detail empty" id="facDetail"><div>Select a facilitator to see their facilitation scores across every session they ran.</div></aside>
+  </div>
+</section>
+
+<section id="v-rubric" class="view hidden">
+  <div class="panel"><h2>Rubric heatmap</h2>
+    <div class="psub">Average score per rubric section across hosting units. Deeper red is weaker, deeper green stronger.</div>
+    <div class="heat-scroll"><table class="heat" id="heat"></table></div>
+    <div class="legend"><span class="sw"><i style="background:var(--poor)"></i>1.0–2.4</span>
+      <span class="sw"><i style="background:var(--mid)"></i>2.5–3.4</span>
+      <span class="sw"><i style="background:var(--good)"></i>3.5–4.0</span>
+      <span style="margin-left:auto" class="mono" id="heatMeta"></span></div>
+  </div>
+</section>
+
+<section id="v-catalogue" class="view hidden">
+  <div class="panel">
+    <div class="subtabs" id="catSub">
+      <button class="subtab" data-sub="sessions" aria-selected="true">Sessions</button>
+      <button class="subtab" data-sub="courses" aria-selected="false">Courses</button>
+      <button class="subtab" data-sub="facs" aria-selected="false">Facilitators</button>
+    </div>
+    <div class="cat-tools">
+      <button class="btn primary" id="addRow">+ Add row</button>
+      <button class="btn" id="expJson">Export JSON</button>
+      <label class="btn" style="cursor:pointer">Import JSON<input type="file" id="impFile" accept=".json" class="hidden"></label>
+      <label class="btn primary" style="cursor:pointer">Import register (.xlsx)<input type="file" id="impXlsx" accept=".xlsx" class="hidden"></label>
+      <button class="btn" id="copyAll" style="margin-left:auto">Copy form options (session × facilitator)</button>
+    </div>
+    <div id="catBody"></div>
+    <div class="note" id="catNote"></div>
+  </div>
+</section>
+
+<section id="v-setup" class="view hidden">
+  <div class="setup-grid">
+    <div class="panel">
+      <h2>Connect live responses</h2>
+      <div class="psub">The dashboard reads feedback from your form's response sheet, or from two, if facilitation feedback sits in its own form. One-time setup:</div>
+      <div class="step"><div class="no">1</div><div class="st"><h4>Link each form to a Sheet</h4><p>CTLI Professional Learning Feedback → Responses → link to Sheets. If facilitation has its own form, link that one too, either to its own sheet or as a second tab in the same one.</p></div></div>
+      <div class="step"><div class="no">2</div><div class="st"><h4>Publish each as CSV</h4><p>File → Share → Publish to web → responses tab → CSV → Publish. Do this once per form.</p></div></div>
+      <div class="step"><div class="no">3</div><div class="st"><h4>Paste the link(s)</h4><p>One form only? Fill in the first field and leave the second blank. Two forms? Paste both. The dashboard fetches and merges them on load.</p></div></div>
+      <div class="urlrow"><input type="url" id="csvUrl" placeholder="Course & session feedback CSV link"><button class="btn primary" id="loadCsv">Load</button></div>
+      <div class="urlrow"><input type="url" id="csvUrlFac" placeholder="Facilitator feedback CSV link (optional, if split into its own form)"></div>
+      <div id="csvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
+    </div>
+    <div class="panel">
+      <h2>How the form maps</h2>
+      <div class="psub">Two things let the dashboard read each response, in either form:</div>
+      <div class="step"><div class="no">A</div><div class="st"><h4>Session × facilitator key</h4><p>Q1 = <i>"Which session are you evaluating?"</i> Each option ends in a compound key:<br><code>20 Feb · SACE Ethics Seminar · N. Adams [2701-F03]</code><br>The dashboard reads <code>2701</code> for the session and <code>F03</code> for the facilitator. Co-facilitated sessions appear once per facilitator. Copy the whole list from the Catalogue tab, and use the same key list in both forms if you split them.</p></div></div>
+      <div class="step"><div class="no">B</div><div class="st"><h4>Rubric codes</h4><p>Each Likert question starts with its code, for example <code>C1</code>, <code>D1.2</code> or <code>S3.4</code>. The <code>D1</code> block is facilitation and is attributed to the facilitator in the key.</p></div></div>
+      <div class="note"><b>One form or two?</b> Either works. Keep everything in one form and paste one link above, or split facilitation into its own form and paste both links. The dashboard matches rows from both sheets by their <code>[2701-F03]</code> key and reads whichever rubric codes are present in each, so a course-feedback row and a facilitation row for the same session simply combine into one picture rather than needing to line up as a single submission.</div>
+    </div>
+    <div class="panel" style="grid-column:1/-1">
+      <h2>Connect the course & session register</h2>
+      <div class="psub">This is the Courses, Sessions and Facilitators data itself, not feedback responses. It can be linked the same way, so the Catalogue tab stays current without a manual re-upload every time. Google's Publish to web only exports one tab per link, so publish each tab separately and paste the three links below. Leave any blank; only the tabs you link get refreshed.</div>
+      <div class="urlrow"><input type="url" id="csvUrlCourses" placeholder="Courses tab CSV link"></div>
+      <div class="urlrow"><input type="url" id="csvUrlSessions" placeholder="Sessions tab CSV link"></div>
+      <div class="urlrow"><input type="url" id="csvUrlFacs" placeholder="Facilitators tab CSV link"><button class="btn primary" id="loadRegister">Load register</button></div>
+      <div id="regStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
+      <div class="note">Column headers just need to contain the right words, matching the same layout as the CTLI Course & Session Register spreadsheet, for example <code>Course ID</code>, <code>Professional Learning Opportunity</code>, <code>Session ID</code>, <code>Facilitator ID</code>. Dates can be entered as <code>YYYY-MM-DD</code>, <code>DD/MM/YYYY</code> or Google Sheets' own date format; the dashboard converts them automatically.</div>
+    </div>
+  </div>
+</section>
+</main>
+<div class="foot">CTLI Feedback 2027 · course → session → facilitator model · connect your register and feedback responses on the Setup tab</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>window.__MODEL__ = {"courses":[],"sessions":[],"facilitators":[]};</script>
+<script>
+const SCALE_MAX=4;
+const RUBRIC=[
+ {code:'C',name:'Content Design',kind:'session',items:[['C1','Structure and flow'],['C2','Content depth'],['C3','Variety of learning experiences'],['C4','Improved knowledge & skills for workplace'],['C5','Topics supported objectives'],['C6','Professionally designed'],['C7','Collaboration opportunities']]},
+ {code:'D1',name:'Facilitation',kind:'facilitator',items:[['D1.1','Knowledge of the subject'],['D1.2','Explained content clearly'],['D1.3','Encouraged participation'],['D1.4','Responded to questions'],['D1.5','Overall facilitation satisfaction']]},
+ {code:'D2',name:'Logistics & Delivery',kind:'session',items:[['D2.1','Communication before start'],['D2.2','Logistical arrangements'],['D2.3','Support communication channels']]},
+ {code:'D3',name:'Digital & Online',kind:'session',items:[['D3.1','CTLI online registration'],['D3.2','Platform login & access'],['D3.3','Access to digital material'],['D3.4','Ease of platform use'],['D3.5','Technical support']]},
+ {code:'S3',name:'Venue & Facilities',kind:'session',items:[['S3.1','Cleanliness of training room'],['S3.2','Disability friendly'],['S3.3','Safety and security'],['S3.4','Access control'],['S3.5','Restrooms'],['S3.6','General maintenance']]},
+ {code:'S4',name:'Catering',kind:'session',items:[['S4.1','Food quality'],['S4.2','Food presentation'],['S4.3','On-time catering'],['S4.4','Hygiene'],['S4.5','Friendly & professional staff']]},
+ {code:'S5',name:'Accommodation',kind:'session',items:[['S5.1','Easy check-in'],['S5.2','Cleanliness'],['S5.3','Bedding and linen'],['S5.4','Catering'],['S5.5','General maintenance']]},
+ {code:'E',name:'EDULIS Library',kind:'session',items:[['E1','Physical resources accessible'],['E2','E-resources accessible'],['E3','Resources relevant & up to date'],['E4','Staff knowledgeable & courteous'],['E5','Intend to use in future']]}
+];
+const D1=RUBRIC.find(s=>s.code==='D1');
+const SESSION_SECS=RUBRIC.filter(s=>s.kind==='session');
+
+let COURSES=window.__MODEL__.courses.map(c=>({...c}));
+let SESSIONS=window.__MODEL__.sessions.map(s=>({...s,facs:[...s.facs]}));
+let FACS=window.__MODEL__.facilitators.map(f=>({...f}));
+let CMAP={},FMAP={};
+let RESPONSES=[]; let LIVE=false;
+let AGG={}; // sessionKey -> {n, items{}, facItems:{fid:{code:{sum,n}}}, facN:{fid}}
+let sel={session:null,course:null,fac:null,catSub:'sessions'};
+const state={view:'sessions',term:'',sub:'',unit:'',mode:'',fac:'',q:'',sort:'rating'};
+
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDate(iso){if(!iso)return '-';const d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.getDate()+' '+MONTHS[d.getMonth()];}
+function weekday(iso){if(!iso)return '';const d=new Date(iso+'T00:00:00');return isNaN(d)?'':['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function mix(a,b,t){return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(',')})`;}
+function scoreColor(v){if(v==null||isNaN(v))return '#aabbc8';const mid=(1+SCALE_MAX)/2;if(v<mid){return mix([215,56,40],[245,198,8],(v-1)/(mid-1));}return mix([245,198,8],[146,173,18],Math.max(0,Math.min(1,(v-mid)/(SCALE_MAX-mid))));}
+
+function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);}
+function facName(fid){return (FMAP[fid]&&FMAP[fid].name)||fid;}
+function courseOf(sk){const s=SESSIONS.find(x=>x.sid===sk);return s?CMAP[s.cid]:null;}
+function sessionLabel(s,fid){const c=CMAP[s.cid]||{};const wd=weekday(s.date);const dt=fmtDate(s.date);
+  return `${wd?wd+', ':''}${dt} · ${c.plo||s.cid} · ${facName(fid)} [${s.sid}-${fid}]`;}
+
+function rebuild(){reindex();aggregate();}
+
+function aggregate(){
+  AGG={};
+  for(const s of SESSIONS)AGG[s.sid]={n:0,resp:0,items:{},facItems:{},facN:{}};
+  for(const r of RESPONSES){const a=AGG[r.sk];if(!a)continue;a.resp++;
+    const facCodes=Object.keys(r.scores).filter(c=>/^D1/.test(c)&&r.scores[c]!=null&&!isNaN(r.scores[c]));
+    if(r.fid&&facCodes.length){if(!a.facItems[r.fid]){a.facItems[r.fid]={};a.facN[r.fid]=0;}a.facN[r.fid]++;}
+    for(const[code,val]of Object.entries(r.scores)){if(val==null||isNaN(val))continue;
+      if(/^D1/.test(code)){if(!r.fid)continue;const fi=a.facItems[r.fid]=a.facItems[r.fid]||{};(fi[code]=fi[code]||{sum:0,n:0});fi[code].sum+=+val;fi[code].n++;}
+      else{(a.items[code]=a.items[code]||{sum:0,n:0});a.items[code].sum+=+val;a.items[code].n++;}
+    }}
+}
+function sessionSectionAvg(sk,sec){const a=AGG[sk];let sum=0,n=0;
+  if(sec.code==='D1'){for(const fid of Object.keys(a.facItems))for(const[code]of sec.items){const it=a.facItems[fid][code];if(it){sum+=it.sum;n+=it.n;}}}
+  else{for(const[code]of sec.items){const it=a.items[code];if(it){sum+=it.sum;n+=it.n;}}}
+  return n?sum/n:null;}
+function sessionOverall(sk){let sum=0,n=0;for(const sec of RUBRIC){const v=sessionSectionAvg(sk,sec);if(v!=null){const w=1;sum+=v;n+=1;}}return n?sum/n:null;}
+function facInSession(sk,fid){const fi=AGG[sk].facItems[fid];if(!fi)return null;let sum=0,n=0;for(const[code]of D1.items){const it=fi[code];if(it){sum+=it.sum;n+=it.n;}}return n?sum/n:null;}
+function facItemAvg(sk,fid,code){const it=AGG[sk].facItems[fid]&&AGG[sk].facItems[fid][code];return it&&it.n?it.sum/it.n:null;}
+function sessItemAvg(sk,code){const it=AGG[sk].items[code];return it&&it.n?it.sum/it.n:null;}
+
+// facilitator-wide
+function facAgg(fid){let items={},resp=0,sessions=new Set();
+  for(const r of RESPONSES){if(r.fid!==fid)continue;resp++;sessions.add(r.sk);
+    for(const[code,val]of Object.entries(r.scores)){if(/^D1/.test(code)&&val!=null){(items[code]=items[code]||{sum:0,n:0});items[code].sum+=+val;items[code].n++;}}}
+  let sum=0,n=0;for(const c in items){sum+=items[c].sum;n+=items[c].n;}
+  return {overall:n?sum/n:null,items,resp,sessions:[...sessions]};}
+function courseAgg(cid){const ss=SESSIONS.filter(s=>s.cid===cid);let sum=0,n=0,resp=0;
+  for(const s of ss){const o=sessionOverall(s.sid);const rn=AGG[s.sid].resp;if(o!=null){sum+=o*rn;n+=rn;}resp+=rn;}
+  return {overall:n?sum/n:null,sessions:ss,resp};}
+
+/* filters */
+function filteredSessions(){
+  let list=SESSIONS.filter(s=>{const c=CMAP[s.cid]||{};
+    if(state.term&&c.term!==state.term)return false;
+    if(state.sub&&c.sub!==state.sub)return false;
+    if(state.unit&&c.unit!==state.unit)return false;
+    if(state.mode&&(c.mode||'').toLowerCase()!==state.mode.toLowerCase())return false;
+    if(state.fac&&!s.facs.includes(state.fac))return false;
+    if(state.q){const q=state.q.toLowerCase();if(!((c.plo||'').toLowerCase().includes(q)||s.sid.includes(q)))return false;}
+    return true;});
+  const ov=s=>{const o=sessionOverall(s.sid);return o==null?99:o;};
+  const S={rating:(a,b)=>ov(a)-ov(b),ratingdesc:(a,b)=>ov(b)-ov(a),responses:(a,b)=>AGG[b.sid].resp-AGG[a.sid].resp,date:(a,b)=>(a.date||'9999').localeCompare(b.date||'9999')};
+  return list.sort(S[state.sort]||S.rating);}
+
+/* HERO */
+function renderHero(){
+  let sum=0,n=0,resp=0;const secSum={},secN={};
+  for(const s of SESSIONS){const a=AGG[s.sid];resp+=a.resp;
+    for(const sec of RUBRIC){const v=sessionSectionAvg(s.sid,sec);if(v!=null){secSum[sec.code]=(secSum[sec.code]||0)+v*a.resp;secN[sec.code]=(secN[sec.code]||0)+a.resp;}}
+    const o=sessionOverall(s.sid);if(o!=null){sum+=o*a.resp;n+=a.resp;}}
+  const hasData=n>0;const overall=hasData?sum/n:0,pct=hasData?overall/5:0,R=64,C=2*Math.PI*R,off=C*(1-pct*0.75),col=hasData?scoreColor(overall):'#aabbc8';
+  document.getElementById('gauge').innerHTML=`<svg width="180" height="140" viewBox="0 0 180 140">
+    <circle cx="90" cy="90" r="${R}" fill="none" stroke="rgba(0,20,137,.08)" stroke-width="15" stroke-dasharray="${C*0.75} ${C}" transform="rotate(135 90 90)" stroke-linecap="round"/>
+    <circle cx="90" cy="90" r="${R}" fill="none" stroke="${col}" stroke-width="15" stroke-dasharray="${C*0.75} ${C}" stroke-dashoffset="${off}" transform="rotate(135 90 90)" stroke-linecap="round"/>
+    <text x="90" y="86" text-anchor="middle" style="font-family:Space Grotesk;font-weight:700;font-size:34px;fill:var(--ink)">${hasData?overall.toFixed(2):'-'}</text>
+    <text x="90" y="106" text-anchor="middle" style="font-family:Inter;font-size:12px;fill:#5B7F95">out of ${SCALE_MAX}.0</text></svg><div class="lab">Overall satisfaction</div>`;
+  document.getElementById('sectbars').innerHTML=RUBRIC.map(sec=>{const v=secN[sec.code]?secSum[sec.code]/secN[sec.code]:null;
+    return `<div class="sbar"><div class="nm">${sec.name}</div><div class="track"><div class="fill" style="width:${v?v/SCALE_MAX*100:0}%;background:${scoreColor(v)}"></div></div><div class="sc" style="color:${v?scoreColor(v):'#aabbc8'}">${v?v.toFixed(2):'-'}</div></div>`;}).join('');
+  const low=SESSIONS.filter(s=>{const o=sessionOverall(s.sid);return o!=null&&o<3.5;}).length;
+  document.getElementById('stats').innerHTML=`
+   <div class="stat"><div class="n">${COURSES.length}</div><div class="l">Courses</div></div>
+   <div class="stat"><div class="n">${SESSIONS.length}</div><div class="l">Sessions</div></div>
+   <div class="stat"><div class="n">${FACS.length}</div><div class="l">Facilitators</div></div>
+   <div class="stat"><div class="n">${resp.toLocaleString()}</div><div class="l">Responses</div></div>
+   <div class="stat"><div class="n" style="color:${hasData?scoreColor(overall):'#aabbc8'}">${hasData?overall.toFixed(2):'-'}</div><div class="l">Mean score</div></div>
+   <div class="stat"><div class="n" style="color:${low?'var(--poor)':'var(--good)'}">${low}</div><div class="l">Sessions below 3.5</div></div>`;
+}
+
+
+/* SESSION CARDS + DETAIL */
+function renderSessionCards(){
+  const list=filteredSessions();const el=document.getElementById('cards');
+  if(!list.length){el.innerHTML=`<div class="scard" style="grid-template-columns:1fr;cursor:default"><h3>No sessions match</h3></div>`;return;}
+  el.innerHTML=list.map(s=>{const c=CMAP[s.cid]||{};const o=sessionOverall(s.sid);const a=AGG[s.sid];
+    const fnames=s.facs.map(facName).join(', ');
+    return `<div class="scard" data-sk="${s.sid}" aria-selected="${s.sid===sel.session}" tabindex="0" role="button">
+      <div class="meta"><span class="key">[${s.sid}]</span><span class="pill">${c.cid}</span><span class="pill mode">${c.mode||'-'}</span><span>${fmtDate(s.date)} · Term ${c.term||'-'}</span></div>
+      <h3>${esc(c.plo||s.cid)}</h3>
+      <div class="meta"><span class="pill fac">${s.facs.length>1?s.facs.length+' facilitators':'1 facilitator'}</span><span>${esc(fnames)}</span></div>
+      <div class="rate"><div class="num" style="color:${o?scoreColor(o):'#aabbc8'}">${o?o.toFixed(2):'-'}</div><div class="n2">${a.resp} responses</div></div>
+    </div>`;}).join('');
+  el.querySelectorAll('.scard[data-sk]').forEach(c=>{const k=c.getAttribute('data-sk');
+    c.onclick=()=>{sel.session=k;renderSessionCards();renderSessionDetail();};
+    c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();c.onclick();}};});
+}
+function renderSessionDetail(){
+  const el=document.getElementById('detail');const s=SESSIONS.find(x=>x.sid===sel.session);
+  if(!s){el.className='detail empty';el.innerHTML='<div>Select a session.</div>';return;}
+  const c=CMAP[s.cid]||{};const a=AGG[s.sid];el.className='detail';
+  // session-level sections
+  const sessGroups=SESSION_SECS.map(sec=>{
+    const rows=sec.items.map(([code,label])=>{const v=sessItemAvg(s.sid,code);if(v==null)return '';
+      return `<div class="ritem"><div class="rn"><span class="mono" style="color:#5B7F95">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/SCALE_MAX*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+    if(!rows.trim())return '';const sv=sessionSectionAvg(s.sid,sec);
+    return `<div class="rgroup"><h4>${sec.name}<span>${sv?sv.toFixed(2):'-'}</span></h4>${rows}</div>`;}).join('');
+  // facilitation per facilitator
+  const facBlocks=s.facs.map(fid=>{
+    const fs=facInSession(s.sid,fid);
+    const rows=D1.items.map(([code,label])=>{const v=facItemAvg(s.sid,fid,code);if(v==null)return '';
+      return `<div class="ritem"><div class="rn"><span class="mono" style="color:#5B7F95">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/SCALE_MAX*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+    return `<div class="facblock"><div class="fh"><b>${esc(facName(fid))} <span class="mono" style="color:#5B7F95;font-weight:500">${fid}</span></b><span class="fs" style="color:${fs?scoreColor(fs):'#aabbc8'}">${fs?fs.toFixed(2):'-'}</span></div>${rows||'<span style="font-size:12px;color:#5B7F95">No facilitation responses yet.</span>'}</div>`;}).join('');
+  const o=sessionOverall(s.sid);
+  el.innerHTML=`<div class="detail-head"><div class="key">[${s.sid}] · session key · course ${c.cid}</div>
+    <h2>${esc(c.plo||s.cid)}</h2>
+    <div class="sub"><span class="pill">${c.sub||'-'}</span><span class="pill">${c.unit||'-'}</span><span class="pill mode">${c.mode||'-'}</span><span>Term ${c.term||'-'}</span><span>${weekday(s.date)?weekday(s.date)+', ':''}${fmtDate(s.date)}</span></div>
+    <div class="sub"><b style="color:${o?scoreColor(o):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${o?o.toFixed(2):'-'}/${SCALE_MAX}</b><span>${a.resp} responses</span></div></div>
+    <div class="detail-body">
+      <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${s.facs.length} rated separately</span></h4>${facBlocks}</div>
+      ${sessGroups}</div>`;
+}
+
+/* COURSES */
+function renderCourseCards(){
+  const el=document.getElementById('courseCards');
+  const list=COURSES.map(c=>({c,ag:courseAgg(c.cid)})).sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
+  el.innerHTML=list.map(({c,ag})=>`<div class="scard" data-cid="${c.cid}" aria-selected="${c.cid===sel.course}" tabindex="0" role="button">
+    <div class="meta"><span class="cidcell mono" style="padding:1px 7px">${c.cid}</span><span class="pill">${c.sub||'-'}·${c.unit||'-'}</span><span class="pill mode">${c.mode||'-'}</span><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''} · Term ${c.term||'-'}</span></div>
+    <h3>${esc(c.plo)}</h3>
+    <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aabbc8'}">${ag.overall?ag.overall.toFixed(2):'-'}</div><div class="n2">${ag.resp} responses</div></div>
+   </div>`).join('');
+  el.querySelectorAll('.scard[data-cid]').forEach(c=>{const k=c.getAttribute('data-cid');
+    c.onclick=()=>{sel.course=k;renderCourseCards();renderCourseDetail();};c.onkeydown=e=>{if(e.key==='Enter'){c.onclick();}};});
+}
+function renderCourseDetail(){
+  const el=document.getElementById('courseDetail');const c=CMAP[sel.course];
+  if(!c){el.className='detail empty';el.innerHTML='<div>Select a course.</div>';return;}
+  el.className='detail';const ag=courseAgg(c.cid);
+  const ss=ag.sessions.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const spark=ss.map(s=>{const o=sessionOverall(s.sid);return `<i style="height:${o?o/SCALE_MAX*100:4}%;background:${scoreColor(o)}" title="${fmtDate(s.date)}: ${o?o.toFixed(2):'-'}"></i>`;}).join('');
+  const rows=ss.map(s=>{const o=sessionOverall(s.sid);return `<div class="ritem" style="grid-template-columns:1fr 80px 34px"><div class="rn"><span class="key mono">[${s.sid}]</span> ${fmtDate(s.date)} · ${s.facs.map(facName).join(', ')}</div><div class="rt"><div class="rf" style="width:${o?o/SCALE_MAX*100:0}%;background:${scoreColor(o)}"></div></div><div class="rv" style="color:${o?scoreColor(o):'#aabbc8'}">${o?o.toFixed(1):'-'}</div></div>`;}).join('');
+  el.innerHTML=`<div class="detail-head"><div class="key">${c.cid} · course</div><h2>${esc(c.plo)}</h2>
+    <div class="sub"><span class="pill">${c.sub||'-'}</span><span class="pill">${c.unit||'-'}</span><span class="pill mode">${c.mode||'-'}</span><span>Term ${c.term||'-'}</span></div>
+    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'-'}/${SCALE_MAX}</b><span>${ss.length} sessions · ${ag.resp} responses</span></div></div>
+    <div class="detail-body"><div class="rgroup"><h4>Score across deliveries<span>oldest → newest</span></h4><div class="spark">${spark}</div></div>
+    <div class="rgroup"><h4>Sessions</h4>${rows}</div></div>`;
+}
+
+/* FACILITATORS */
+function renderFacCards(){
+  const el=document.getElementById('facCards');
+  const list=FACS.map(f=>({f,ag:facAgg(f.fid)})).sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
+  el.innerHTML=list.map(({f,ag})=>`<div class="scard" data-fid="${f.fid}" aria-selected="${f.fid===sel.fac}" tabindex="0" role="button">
+    <div class="meta"><span class="pill fac mono">${f.fid}</span><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''} · ${ag.resp} responses</span></div>
+    <h3>${esc(f.name)}</h3><div class="meta"><span>Facilitation score</span></div>
+    <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aabbc8'}">${ag.overall?ag.overall.toFixed(2):'-'}</div><div class="n2">D1 mean</div></div>
+   </div>`).join('');
+  el.querySelectorAll('.scard[data-fid]').forEach(c=>{const k=c.getAttribute('data-fid');
+    c.onclick=()=>{sel.fac=k;renderFacCards();renderFacDetail();};c.onkeydown=e=>{if(e.key==='Enter'){c.onclick();}};});
+}
+function renderFacDetail(){
+  const el=document.getElementById('facDetail');const f=FMAP[sel.fac];
+  if(!f){el.className='detail empty';el.innerHTML='<div>Select a facilitator.</div>';return;}
+  el.className='detail';const ag=facAgg(f.fid);
+  const itemRows=D1.items.map(([code,label])=>{const it=ag.items[code];const v=it&&it.n?it.sum/it.n:null;if(v==null)return '';
+    return `<div class="ritem"><div class="rn"><span class="mono" style="color:#5B7F95">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/SCALE_MAX*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+  const norm=ag.overall;
+  const sessRows=ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);const c=CMAP[s.cid]||{};const fs=facInSession(sk,f.fid);
+    const flag=(fs!=null&&norm!=null&&fs<norm-0.4)?` <span class="pill" style="background:rgba(215,56,40,.10);color:#d73828">below norm</span>`:'';
+    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sk}]</span> ${esc(c.plo||'')} · ${fmtDate(s.date)}${flag}</div><div class="rt"><div class="rf" style="width:${fs?fs/SCALE_MAX*100:0}%;background:${scoreColor(fs)}"></div></div><div class="rv" style="color:${fs?scoreColor(fs):'#aabbc8'}">${fs?fs.toFixed(1):'-'}</div></div>`;}).join('');
+  el.innerHTML=`<div class="detail-head"><div class="key">${f.fid} · facilitator</div><h2>${esc(f.name)}</h2>
+    <div class="sub"><b style="color:${norm?scoreColor(norm):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${norm?norm.toFixed(2):'-'}/${SCALE_MAX}</b><span>facilitation · ${ag.sessions.length} sessions · ${ag.resp} responses</span></div></div>
+    <div class="detail-body"><div class="rgroup fac"><h4>Facilitation items (all sessions)</h4>${itemRows}</div>
+    <div class="rgroup"><h4>Per session<span>flagged if &gt;0.4 below their norm</span></h4>${sessRows}</div></div>`;
+}
+
+/* RUBRIC HEATMAP */
+function renderHeat(){
+  const units=[...new Set(COURSES.map(c=>c.unit).filter(Boolean))].sort();
+  let head=`<thead><tr><th class="row">Section ↓ / Unit →</th>${units.map(u=>`<th>${u}</th>`).join('')}<th>All</th></tr></thead>`;
+  let body='<tbody>';
+  for(const sec of RUBRIC){body+=`<tr><th class="row" title="${sec.name}">${sec.name}</th>`;let gs=0,gn=0;
+    for(const u of units){let sum=0,n=0;
+      for(const s of SESSIONS.filter(x=>(CMAP[x.cid]||{}).unit===u)){const v=sessionSectionAvg(s.sid,sec);const rn=AGG[s.sid].resp;if(v!=null){sum+=v*rn;n+=rn;}}
+      const v=n?sum/n:null;gs+=sum;gn+=n;
+      body+=v!=null?`<td class="cell" style="background:${scoreColor(v)}">${v.toFixed(1)}</td>`:'<td style="color:#aabbc8">-</td>';}
+    const gv=gn?gs/gn:null;body+=gv!=null?`<td class="cell" style="background:${scoreColor(gv)}">${gv.toFixed(1)}</td>`:'<td>-</td>';body+='</tr>';}
+  document.getElementById('heat').innerHTML=head+body+'</tbody>';
+  document.getElementById('heatMeta').textContent=`${units.length} units × ${RUBRIC.length} sections`;
+}
+
+/* CATALOGUE */
+const MODES=['Face-to-Face','Online','Blended'],SUBS=['LA','PD','TPI'];
+function opts(arr,s){return arr.map(o=>`<option${o===s?' selected':''}>${o}</option>`).join('');}
+function renderCat(){
+  document.querySelectorAll('#catSub .subtab').forEach(t=>t.setAttribute('aria-selected',t.dataset.sub===sel.catSub));
+  const body=document.getElementById('catBody');const note=document.getElementById('catNote');
+  if(sel.catSub==='courses'){
+    body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>ID</th><th>Course (PLO)</th><th>Sub</th><th>Unit</th><th>Days</th><th>Hours</th><th>Term</th><th>Mode</th><th></th></tr></thead><tbody>${COURSES.map((c,i)=>`<tr data-i="${i}">
+      <td class="cidcell">${c.cid}</td><td class="plo"><input value="${esc(c.plo||'')}" data-f="plo"></td>
+      <td><select data-f="sub">${opts(SUBS,c.sub)}</select></td><td><input value="${esc(c.unit||'')}" data-f="unit" style="min-width:60px"></td>
+      <td><input value="${esc(c.days||'')}" data-f="days" style="min-width:56px"></td><td><input value="${esc(c.hours||'')}" data-f="hours" style="min-width:56px"></td>
+      <td><select data-f="term"><option value=""></option>${opts(['1','2','3'],c.term)}</select></td><td><select data-f="mode">${opts(MODES,c.mode)}</select></td>
+      <td><button class="rowdel" data-del="${i}">×</button></td></tr>`).join('')}</tbody></table></div>`;
+    note.innerHTML='<b>Courses</b> are the stable layer: one row per PLO, with IDs frozen. Each course fans out into sessions on the Sessions tab.';
+    bindCat('courses');
+  } else if(sel.catSub==='facs'){
+    body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>ID</th><th>Facilitator name</th><th>Sessions</th><th></th></tr></thead><tbody>${FACS.map((f,i)=>{const nsess=SESSIONS.filter(s=>s.facs.includes(f.fid)).length;
+      return `<tr data-i="${i}"><td class="cidcell" style="color:#8D6E97;background:rgba(141,110,151,.15)">${f.fid}</td><td class="plo"><input value="${esc(f.name||'')}" data-f="name"></td><td class="mono" style="color:#5B7F95">${nsess}</td><td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
+    note.innerHTML='<b>Facilitators</b> are the roster. Assign them to sessions on the Sessions tab (comma-separated IDs). Facilitation feedback rolls up per person from here.';
+    bindCat('facs');
+  } else {
+    body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>Key</th><th>Course</th><th>Date</th><th>Facilitator IDs</th><th>Mode</th><th>Form options</th><th></th></tr></thead><tbody>${SESSIONS.map((s,i)=>{const c=CMAP[s.cid]||{};
+      return `<tr data-i="${i}"><td class="keycell">${s.sid}</td>
+      <td><select data-f="cid">${COURSES.map(cc=>`<option value="${cc.cid}"${cc.cid===s.cid?' selected':''}>${cc.cid} · ${esc((cc.plo||'').slice(0,32))}</option>`).join('')}</select></td>
+      <td><input value="${esc(s.date||'')}" data-f="date" placeholder="YYYY-MM-DD" style="min-width:110px"></td>
+      <td><input value="${esc(s.facs.join(', '))}" data-f="facs" style="min-width:110px" title="e.g. F01, F07"></td>
+      <td class="mono" style="font-size:11px;color:#5B7F95">${c.mode||'-'}</td>
+      <td class="mono" style="font-size:10.5px;color:#5B7F95">${s.facs.length} option${s.facs.length!==1?'s':''}</td>
+      <td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
+    note.innerHTML='<b>Sessions</b> are individual deliveries. Each generates one form option <i>per facilitator</i>, so a co-facilitated session yields two options with keys like <span class="mono">[2701-F03]</span> and <span class="mono">[2701-F07]</span>. Use <b>Copy form options</b> for the full paste-ready list.';
+    bindCat('sessions');
+  }
+}
+function bindCat(kind){
+  const arr=kind==='courses'?COURSES:kind==='facs'?FACS:SESSIONS;
+  document.querySelectorAll('#catBody input[data-f],#catBody select[data-f]').forEach(inp=>inp.addEventListener('change',e=>{
+    const i=+e.target.closest('tr').getAttribute('data-i');const f=e.target.getAttribute('data-f');let v=e.target.value.trim();
+    if(f==='facs'){arr[i].facs=v.split(',').map(x=>x.trim().toUpperCase()).filter(Boolean);}
+    else arr[i][f]=v||null;
+    rebuild();refreshFilters();renderCat();renderActive();}));
+  document.querySelectorAll('#catBody [data-del]').forEach(b=>b.onclick=()=>{arr.splice(+b.getAttribute('data-del'),1);rebuild();refreshFilters();renderCat();renderActive();});
+}
+
+/* CSV ingest - real-form aware: keyword question matching, text Likert conversion, session to facilitator lookup */
+function parseCSV(text){const rows=[];let row=[],cur='',q=false;for(let i=0;i<text.length;i++){const ch=text[i];
+  if(q){if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+  else{if(ch==='"')q=true;else if(ch===','){row.push(cur);cur='';}else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur='';}else if(ch==='\r'){}else cur+=ch;}}
+  if(cur.length||row.length){row.push(cur);rows.push(row);}return rows.filter(r=>r.some(c=>c!==''));}
+
+// Fragment extraction: prefer the bracketed sub-item label at the end of a grid-question header,
+// fall back to the full header text for standalone (non-grid) questions.
+function extractFragment(header){
+  const clean=String(header||'').replace(/\s+/g,' ').trim();
+  const m=clean.match(/\[([^\]]+)\]\s*$/);
+  let frag=(m?m[1]:clean).toLowerCase().trim();
+  frag=frag.replace(/\.$/,'');
+  return frag;
+}
+
+// Keyword -> rubric code. Substring match against the extracted fragment (see extractFragment).
+// Two pairs ("general maintenance" and "catering") are ambiguous between Venue/Accommodation
+// sections, so those are resolved separately before this table is consulted.
+const QUESTION_MATCHERS=[
+  ['C1',['structure and flow']],
+  ['C2',['content depth']],
+  ['C3',['variety of learning experiences']],
+  ['C4',['improved my knowledge and skills']],
+  ['C5',['supported the objectives']],
+  ['C6',['looked professionally designed']],
+  ['C7',['sufficient opportunity to share']],
+  ['D1.1',['demonstrated good knowledge of the subject']],
+  ['D1.2',['explained the content clearly']],
+  ['D1.3',['encouraged participation and interaction']],
+  ['D1.4',['responded effectively to questions']],
+  ['D1.5',['overall, i was satisfied with the facilitation','overall satisfied with the facilitation']],
+  ['D2.1',['communication about the learning opportunity']],
+  ['D2.2',['logistical arrangements']],
+  ['D2.3',['sufficient forms of communication']],
+  ['D3.1',['ctli online registration experience']],
+  ['D3.2',['online learning platform login']],
+  ['D3.3',['access to the digital learning materials']],
+  ['D3.4',['ease of platform use']],
+  ['D3.5',['technical support']],
+  ['S3.1',['cleanliness of training room']],
+  ['S3.2',['accessibility and accommodations on premises']],
+  ['S3.3',['safety and security on premises']],
+  ['S3.4',['access control']],
+  ['S3.5',['restrooms']],
+  ['S4.1',['quality of food']],
+  ['S4.2',['food presentation']],
+  ['S4.3',['timeliness']],
+  ['S4.4',['catering areas and supplies']],
+  ['S4.5',['catering staff were friendly']],
+  ['S5.1',['easy check-in']],
+  ['S5.2',['cleanliness (ablution']],
+  ['S5.3',['clean bedding and linen']],
+  ['E1',['physical resources are easily accessible']],
+  ['E2',['e-resources are easily accessible']],
+  ['E3',['edulis library resources are relevant']],
+  ['E4',['edulis library staff are knowledgeable']],
+  ['E5',['intend to use edulis library']]
+];
+function matchQuestionCode(fragment){
+  if(fragment.startsWith('general maintenance (building'))return'S3.6';
+  if(fragment==='general maintenance')return'S5.5';
+  if(fragment==='catering')return'S5.4';
+  for(const[code,subs]of QUESTION_MATCHERS){if(subs.some(s=>fragment.includes(s)))return code;}
+  return null;
+}
+
+// Converts a raw cell like "3 - Good", "Strongly agree", or "2 – Fair" into a 1–4 numeric score.
+// Handles both quality wording (Excellent/Good/Fair/Poor/Unsatisfactory) and agreement wording
+// (Strongly agree/Agree/Disagree/Strongly disagree), since the real forms mix both, sometimes
+// with a leading digit and sometimes without. "Not applicable" and blanks return null (excluded).
+function textToScore(raw){
+  if(raw==null)return null;const s=String(raw).trim();if(!s)return null;
+  const low=s.toLowerCase();
+  if(low.includes('not applicable')||low==='n/a')return null;
+  const m=s.match(/^([1-4])\s*[-–—]/);if(m)return+m[1];
+  if(low.includes('strongly agree'))return 4;
+  if(low.includes('strongly disagree'))return 1;
+  if(low.includes('excellent'))return 4;
+  if(low.includes('unsatisfactory'))return 1;
+  if(low.includes('good'))return 3;
+  if(low.includes('fair')||low.includes('poor'))return 2;
+  if(low.includes('agree'))return 3;
+  if(low.includes('disagree'))return 2;
+  const f=parseFloat(s);return isNaN(f)?null:f;
+}
+
+// Parses one CSV source into raw {sk, facCodes, sessCodes} rows before facilitator attribution,
+// which needs the SESSIONS register and happens in ingestSources/ingestCSV once all sources are read.
+function parseResponseRows(text,label){const rows=parseCSV(text);if(rows.length<2)throw new Error((label?label+': ':'')+'sheet looks empty');const head=rows[0];
+  let keyCol=-1;const codeCols={};
+  head.forEach((h,idx)=>{const H=h.trim();if(keyCol<0&&/session/i.test(H))keyCol=idx;
+    const code=matchQuestionCode(extractFragment(h));if(code)codeCols[idx]=code;});
+  if(keyCol<0)for(let c=0;c<head.length;c++){if(rows.slice(1).some(r=>/\[\d{3,4}(-F\d+)?\]/i.test(r[c]||''))){keyCol=c;break;}}
+  const out=[];for(const r of rows.slice(1)){
+    const raw=r[keyCol]||'';
+    const mFac=raw.match(/\[(\d{3,4})-(F\d+)\]/i);
+    const mSess=raw.match(/\[(\d{3,4})\]/i);
+    if(!mFac&&!mSess)continue;
+    const sk=(mFac||mSess)[1];const explicitFid=mFac?mFac[2].toUpperCase():null;
+    const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=textToScore(r[idx]);if(v!=null)scores[code]=v;}
+    if(Object.keys(scores).length)out.push({sk,explicitFid,scores});}
+  if(!out.length)throw new Error((label?label+': ':'')+'no rows matched, please check the session key column and question wording');
+  return out;}
+
+// Splits each raw row's scores into facilitation (D1.x) vs everything else, and attributes the
+// facilitation portion to the right facilitator(s): the explicit ID if the form embeds one,
+// otherwise looked up from the session's register entry. A co-facilitated session with no
+// explicit ID duplicates the facilitation score across each assigned facilitator.
+function attributeRows(rawRows){
+  const out=[];
+  for(const r of rawRows){
+    const facScores={},sessScores={};
+    for(const[code,val]of Object.entries(r.scores)){(/^D1/.test(code)?facScores:sessScores)[code]=val;}
+    if(Object.keys(sessScores).length)out.push({sk:r.sk,fid:null,scores:sessScores});
+    if(Object.keys(facScores).length){
+      if(r.explicitFid){out.push({sk:r.sk,fid:r.explicitFid,scores:facScores});}
+      else{const s=SESSIONS.find(x=>x.sid===r.sk);const facs=s?s.facs:[];
+        if(!facs.length){/* session has no facilitator on record yet, can't attribute, skip */}
+        else for(const fid of facs)out.push({sk:r.sk,fid,scores:facScores});}
+    }
+  }
+  return out;
+}
+function ingestCSV(text){const raw=parseResponseRows(text);const out=attributeRows(raw);RESPONSES=out;LIVE=true;aggregate();setBadge(true,out.length);renderActive();return out.length;}
+function ingestSources(parts){let rawMerged=[];const counts=[];for(const p of parts){const rows=parseResponseRows(p.text,p.label);counts.push({label:p.label,n:rows.length});rawMerged=rawMerged.concat(rows);}
+  const merged=attributeRows(rawMerged);RESPONSES=merged;LIVE=true;aggregate();setBadge(true,merged.length);renderActive();return {merged,counts};}
+function setBadge(on,n){const b=document.getElementById('dataBadge'),t=document.getElementById('dataBadgeTxt');b.classList.toggle('on',on);t.textContent=on?`Live · ${n} responses`:'No data loaded yet';}
+
+/* export/import */
+function download(name,text,type){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+function exportJSON(){download('ctli-model.json',JSON.stringify({courses:COURSES,sessions:SESSIONS,facilitators:FACS},null,2),'application/json');}
+function importFile(file){const fr=new FileReader();fr.onload=()=>{try{const m=JSON.parse(fr.result);
+  COURSES=(m.courses||[]).map(c=>({...c}));SESSIONS=(m.sessions||[]).map(s=>({...s,facs:[...(s.facs||[])]}));FACS=(m.facilitators||[]).map(f=>({...f}));
+  rebuild();refreshFilters();renderCat();renderActive();}catch(e){alert('Could not read file: '+e.message);}};fr.readAsText(file);}
+function copyAllOptions(){const lines=[];for(const s of SESSIONS)for(const fid of s.facs)lines.push(sessionLabel(s,fid));
+  navigator.clipboard.writeText(lines.join('\n'));const b=document.getElementById('copyAll');b.textContent=`✓ Copied ${lines.length} options`;setTimeout(()=>b.textContent='Copy form options (session × facilitator)',1500);}
+
+/* filters UI */
+function refreshFilters(){
+  fillSel('fTerm','All terms',[...new Set(COURSES.map(c=>c.term).filter(Boolean))].sort(),state.term);
+  fillSel('fSub','All sub-directorates',[...new Set(COURSES.map(c=>c.sub).filter(Boolean))].sort(),state.sub);
+  fillSel('fUnit','All units',[...new Set(COURSES.map(c=>c.unit).filter(Boolean))].sort(),state.unit);
+  fillSel('fMode','All modes',[...new Set(COURSES.map(c=>c.mode).filter(Boolean))].sort(),state.mode);
+  fillSel('fFac','All facilitators',FACS.map(f=>f.fid),state.fac,fid=>facName(fid));
+}
+function fillSel(id,allLabel,arr,selv,label){const el=document.getElementById(id);
+  el.innerHTML=`<option value="">${allLabel}</option>`+arr.map(v=>`<option value="${v}"${v===selv?' selected':''}>${label?esc(label(v)):v}</option>`).join('');}
+
+/* views */
+function renderActive(){
+  if(state.view==='sessions'){renderHero();renderSessionCards();renderSessionDetail();}
+  else if(state.view==='courses'){renderCourseCards();renderCourseDetail();}
+  else if(state.view==='facilitators'){renderFacCards();renderFacDetail();}
+  else if(state.view==='rubric'){renderHeat();}
+  else if(state.view==='catalogue'){renderCat();}}
+function setView(v){state.view=v;document.querySelectorAll('#tabs .tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===v));
+  document.querySelectorAll('.view').forEach(s=>s.classList.add('hidden'));document.getElementById('v-'+v).classList.remove('hidden');renderActive();}
+
+/* wire */
+document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>setView(t.dataset.view));
+document.querySelectorAll('#catSub .subtab').forEach(t=>t.onclick=()=>{sel.catSub=t.dataset.sub;renderCat();});
+[['fTerm','term'],['fSub','sub'],['fUnit','unit'],['fMode','mode'],['fFac','fac'],['fSort','sort']].forEach(([id,k])=>document.getElementById(id).addEventListener('change',e=>{state[k]=e.target.value;renderSessionCards();}));
+document.getElementById('fSearch').addEventListener('input',e=>{state.q=e.target.value;renderSessionCards();});
+document.getElementById('addRow').onclick=()=>{
+  if(sel.catSub==='courses'){const n=COURSES.length+1;COURSES.push({cid:'C'+String(n).padStart(3,'0'),plo:'New course',sub:'TPI',unit:'',days:'',hours:'',term:'1',mode:'Face-to-Face',seed:null});}
+  else if(sel.catSub==='facs'){const n=FACS.length+1;FACS.push({fid:'F'+String(n).padStart(2,'0'),name:'New facilitator'});}
+  else{const maxk=Math.max(2700,...SESSIONS.map(s=>+s.sid||0))+1;SESSIONS.push({sid:String(maxk),cid:COURSES[0]?.cid||'C001',date:null,facs:[],online:false});}
+  rebuild();refreshFilters();renderCat();renderActive();};
+document.getElementById('expJson').onclick=exportJSON;
+document.getElementById('impFile').addEventListener('change',e=>{if(e.target.files[0])importFile(e.target.files[0]);});
+document.getElementById('impXlsx').addEventListener('change',e=>{if(e.target.files[0])importWorkbook(e.target.files[0]);});
+function importWorkbook(file){
+  if(typeof XLSX==='undefined'){alert('Spreadsheet reader is still loading, please try again in a moment.');return;}
+  const fr=new FileReader();
+  fr.onload=()=>{try{
+    const wb=XLSX.read(new Uint8Array(fr.result),{type:'array',cellDates:true});
+    const grab=names=>{for(const n of wb.SheetNames){if(names.some(x=>n.toLowerCase().includes(x)))return XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:null});}return null;};
+    const pick=(row,keys)=>{for(const k of Object.keys(row)){const kl=k.toLowerCase().trim();if(keys.some(x=>kl.includes(x)))return row[k];}return null;};
+    const fmtD=v=>{if(v==null||v==='')return null;if(v instanceof Date){const p=n=>String(n).padStart(2,'0');return v.getFullYear()+'-'+p(v.getMonth()+1)+'-'+p(v.getDate());}const s=String(v).trim();return s||null;};
+    const cRows=grab(['course']),sRows=grab(['session']),fRows=grab(['facilit']);
+    if(cRows&&cRows.length)COURSES=cRows.filter(r=>pick(r,['course id'])).map(r=>({cid:String(pick(r,['course id'])).trim(),plo:pick(r,['professional learning','plo'])||'',sub:pick(r,['sub'])||null,unit:pick(r,['hosting'])||null,days:pick(r,['day'])!=null?String(pick(r,['day'])):null,hours:pick(r,['hour'])!=null?String(pick(r,['hour'])):null,term:pick(r,['term'])!=null?String(pick(r,['term'])).replace(/\.0$/,''):null,mode:pick(r,['mode'])||null}));
+    if(sRows&&sRows.length)SESSIONS=sRows.filter(r=>pick(r,['session id'])).map(r=>{const f=pick(r,['facilitator id','facilitator'])||'';return {sid:String(pick(r,['session id'])).replace(/\.0$/,'').trim(),cid:String(pick(r,['course id'])||'').trim(),date:fmtD(pick(r,['date'])),facs:String(f).split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),online:false};});
+    if(fRows&&fRows.length)FACS=fRows.filter(r=>pick(r,['facilitator id'])).map(r=>({fid:String(pick(r,['facilitator id'])).trim(),name:pick(r,['name'])||''}));
+    const cm={};COURSES.forEach(c=>cm[c.cid]=(c.mode||'').toLowerCase());SESSIONS.forEach(s=>{s.online=/online|blended/.test(cm[s.cid]||'');});
+    rebuild();refreshFilters();renderCat();renderActive();
+    const assigned=SESSIONS.filter(s=>s.facs.length).length;
+    alert(`Loaded from register: ${COURSES.length} courses, ${SESSIONS.length} sessions, ${FACS.length} facilitators.`+(assigned<SESSIONS.length?`\n${SESSIONS.length-assigned} sessions have no facilitator assigned yet. Add them on the Sessions tab to populate facilitation reporting.`:''));
+  }catch(err){alert('Could not read workbook: '+err.message);}};
+  fr.readAsArrayBuffer(file);
+}
+document.getElementById('copyAll').onclick=copyAllOptions;
+
+/* Register via published CSV (Courses / Sessions / Facilitators tabs) */
+function normalizeDateStr(v){
+  if(v==null)return null;const s=String(v).trim();if(!s)return null;
+  const pad=n=>String(n).padStart(2,'0');
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m)return `${m[1]}-${pad(m[2])}-${pad(m[3])}`;
+  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m){let a=+m[1],b=+m[2],y=m[3],day,month;
+    if(a>12){day=a;month=b;}else if(b>12){day=b;month=a;}else{day=a;month=b;} // ambiguous DD/MM vs MM/DD: default to DD/MM
+    return `${y}-${pad(month)}-${pad(day)}`;}
+  const d=new Date(s);if(!isNaN(d))return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  return s;
+}
+function csvRowsToObjects(text){const rows=parseCSV(text);if(rows.length<2)return[];const head=rows[0];
+  return rows.slice(1).map(r=>{const o={};head.forEach((h,i)=>o[h]=(r[i]!==undefined&&r[i]!=='')?r[i]:null);return o;});}
+function regPick(row,keys){for(const k of Object.keys(row)){const kl=k.toLowerCase().trim();if(keys.some(x=>kl.includes(x)))return row[k];}return null;}
+function ingestRegisterCSV(parts){
+  const loaded=[];
+  for(const p of parts){
+    const objs=csvRowsToObjects(p.text);
+    if(!objs.length)continue;
+    if(p.kind==='courses'){const rows=objs.filter(r=>regPick(r,['course id']));
+      if(rows.length){COURSES=rows.map(r=>({cid:String(regPick(r,['course id'])).trim(),plo:regPick(r,['professional learning','plo'])||'',sub:regPick(r,['sub'])||null,unit:regPick(r,['hosting'])||null,days:regPick(r,['day'])!=null?String(regPick(r,['day'])):null,hours:regPick(r,['hour'])!=null?String(regPick(r,['hour'])):null,term:regPick(r,['term'])!=null?String(regPick(r,['term'])).replace(/\.0$/,''):null,mode:regPick(r,['mode'])||null}));loaded.push(`${COURSES.length} courses`);}}
+    else if(p.kind==='sessions'){const rows=objs.filter(r=>regPick(r,['session id']));
+      if(rows.length){SESSIONS=rows.map(r=>{const f=regPick(r,['facilitator id','facilitator'])||'';return{sid:String(regPick(r,['session id'])).replace(/\.0$/,'').trim(),cid:String(regPick(r,['course id'])||'').trim(),date:normalizeDateStr(regPick(r,['date'])),facs:String(f).split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),online:false};});loaded.push(`${SESSIONS.length} sessions`);}}
+    else if(p.kind==='facilitators'){const rows=objs.filter(r=>regPick(r,['facilitator id']));
+      if(rows.length){FACS=rows.map(r=>({fid:String(regPick(r,['facilitator id'])).trim(),name:regPick(r,['name'])||''}));loaded.push(`${FACS.length} facilitators`);}}
+  }
+  const cm={};COURSES.forEach(c=>cm[c.cid]=(c.mode||'').toLowerCase());SESSIONS.forEach(s=>{s.online=/online|blended/.test(cm[s.cid]||'');});
+  rebuild();refreshFilters();renderCat();renderActive();
+  return loaded;
+}
+document.getElementById('loadRegister').onclick=()=>{
+  const fields=[{id:'csvUrlCourses',kind:'courses'},{id:'csvUrlSessions',kind:'sessions'},{id:'csvUrlFacs',kind:'facilitators'}];
+  const st=document.getElementById('regStatus');
+  const wanted=fields.map(f=>({...f,url:document.getElementById(f.id).value.trim()})).filter(f=>f.url);
+  if(!wanted.length){st.textContent='Paste at least one tab link.';return;}
+  st.textContent='Loading…';
+  Promise.all(wanted.map(f=>fetch(f.url).then(r=>r.text()).then(text=>({...f,text}))))
+    .then(parts=>{const loaded=ingestRegisterCSV(parts);
+      st.textContent=loaded.length?`Loaded ${loaded.join(', ')}.`:'No matching rows found. Check the tab links and column headers.';})
+    .catch(e=>{st.textContent='Could not load: '+e.message;});
+};
+document.getElementById('loadCsv').onclick=()=>{
+  const url1=document.getElementById('csvUrl').value.trim();
+  const url2=document.getElementById('csvUrlFac').value.trim();
+  const st=document.getElementById('csvStatus');
+  const sources=[];if(url1)sources.push({url:url1,label:'Course feedback'});if(url2)sources.push({url:url2,label:'Facilitator feedback'});
+  if(!sources.length){st.textContent='Paste at least one published CSV link.';return;}
+  st.textContent='Loading…';
+  Promise.all(sources.map(s=>fetch(s.url).then(r=>r.text()).then(text=>({...s,text}))))
+    .then(parts=>{const{merged,counts}=ingestSources(parts);
+      const breakdown=counts.length>1?` (${counts.map(c=>`${c.label}: ${c.n}`).join(', ')})`:'';
+      st.textContent=`Loaded ${merged.length} live responses`+breakdown+'.';})
+    .catch(e=>{st.textContent='Could not load: '+e.message;});};
+
+/* boot */
+rebuild();refreshFilters();setView('sessions');
+if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessionCards();renderSessionDetail();}
+</script>
+</body>
+</html>
