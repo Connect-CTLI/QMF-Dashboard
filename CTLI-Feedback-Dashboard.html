@@ -272,7 +272,7 @@ let COURSES=window.__MODEL__.courses.map(c=>({...c}));
 let SESSIONS=window.__MODEL__.sessions.map(s=>({...s,facs:[...s.facs]}));
 let FACS=window.__MODEL__.facilitators.map(f=>({...f}));
 let CMAP={},FMAP={};
-let RESPONSES=[]; let LIVE=false;
+let RESPONSES=[]; let RAW_RESPONSES=[]; let LIVE=false;
 let AGG={}; // sessionKey -> {n, items{}, facItems:{fid:{code:{sum,n}}}, facN:{fid}}
 let sel={session:null,course:null,fac:null,catSub:'sessions'};
 const state={view:'sessions',term:'',sub:'',unit:'',mode:'',fac:'',q:'',sort:'rating'};
@@ -639,9 +639,14 @@ function attributeRows(rawRows){
   }
   return out;
 }
-function ingestCSV(text){const raw=parseResponseRows(text);const out=attributeRows(raw);RESPONSES=out;LIVE=true;aggregate();setBadge(true,out.length);renderActive();return out.length;}
+// RAW_RESPONSES is kept around (pre-attribution) so that a later register load can
+// re-run attribution against it. This matters because a facilitation score is only
+// correctly credited once the register knows who's assigned to that session, and the
+// register and the response CSVs load independently, so whichever happens to arrive
+// first shouldn't determine whether attribution silently fails.
+function ingestCSV(text){const raw=parseResponseRows(text);RAW_RESPONSES=raw;const out=attributeRows(RAW_RESPONSES);RESPONSES=out;LIVE=true;aggregate();setBadge(true,out.length);renderActive();return out.length;}
 function ingestSources(parts){let rawMerged=[];const counts=[];for(const p of parts){const rows=parseResponseRows(p.text,p.label);counts.push({label:p.label,n:rows.length});rawMerged=rawMerged.concat(rows);}
-  const merged=attributeRows(rawMerged);RESPONSES=merged;LIVE=true;aggregate();setBadge(true,merged.length);renderActive();return {merged,counts};}
+  RAW_RESPONSES=rawMerged;const merged=attributeRows(RAW_RESPONSES);RESPONSES=merged;LIVE=true;aggregate();setBadge(true,merged.length);renderActive();return {merged,counts};}
 function setBadge(on,n){const b=document.getElementById('dataBadge'),t=document.getElementById('dataBadgeTxt');b.classList.toggle('on',on);t.textContent=on?`Live · ${n} responses`:'No data loaded yet';}
 
 /* export/import */
@@ -739,6 +744,13 @@ function ingestRegisterCSV(parts){
       if(rows.length){FACS=rows.map(r=>({fid:String(regPick(r,['facilitator id'])).trim(),name:regPick(r,['name'])||''}));loaded.push(`${FACS.length} facilitators`);}}
   }
   const cm={};COURSES.forEach(c=>cm[c.cid]=(c.mode||'').toLowerCase());SESSIONS.forEach(s=>{s.online=/online|blended/.test(cm[s.cid]||'');});
+  // Re-attribute any already-loaded responses now that the register (and therefore
+  // session→facilitator lookups) may have changed, regardless of which loaded first.
+  if(RAW_RESPONSES.length){
+    RESPONSES=attributeRows(RAW_RESPONSES);
+    const fbSt=document.getElementById('csvStatus');
+    if(fbSt&&fbSt.textContent)fbSt.textContent=`Loaded ${RESPONSES.length} live responses.`;
+  }
   rebuild();refreshFilters();renderCat();renderActive();
   return loaded;
 }
@@ -754,9 +766,9 @@ function runRegisterLoad(){
   const fields=[{id:'csvUrlCourses',kind:'courses',lsKey:LS_KEYS.courses},{id:'csvUrlSessions',kind:'sessions',lsKey:LS_KEYS.sessions},{id:'csvUrlFacs',kind:'facilitators',lsKey:LS_KEYS.facs}];
   const st=document.getElementById('regStatus');
   const wanted=fields.map(f=>({...f,url:document.getElementById(f.id).value.trim()})).filter(f=>f.url);
-  if(!wanted.length){st.textContent='Paste at least one tab link.';return;}
+  if(!wanted.length){st.textContent='Paste at least one tab link.';return Promise.resolve();}
   st.textContent='Loading…';
-  Promise.all(wanted.map(f=>fetch(f.url).then(r=>r.text()).then(text=>({...f,text}))))
+  return Promise.all(wanted.map(f=>fetch(f.url).then(r=>r.text()).then(text=>({...f,text}))))
     .then(parts=>{const loaded=ingestRegisterCSV(parts);
       st.textContent=loaded.length?`Loaded ${loaded.join(', ')}.`:'No matching rows found. Check the tab links and column headers.';
       if(loaded.length)wanted.forEach(f=>lsSet(f.lsKey,f.url));})
@@ -767,9 +779,9 @@ function runFeedbackLoad(){
   const url2=document.getElementById('csvUrlFac').value.trim();
   const st=document.getElementById('csvStatus');
   const sources=[];if(url1)sources.push({url:url1,label:'Course feedback',lsKey:LS_KEYS.feedback});if(url2)sources.push({url:url2,label:'Facilitator feedback',lsKey:LS_KEYS.feedbackFac});
-  if(!sources.length){st.textContent='Paste at least one published CSV link.';return;}
+  if(!sources.length){st.textContent='Paste at least one published CSV link.';return Promise.resolve();}
   st.textContent='Loading…';
-  Promise.all(sources.map(s=>fetch(s.url).then(r=>r.text()).then(text=>({...s,text}))))
+  return Promise.all(sources.map(s=>fetch(s.url).then(r=>r.text()).then(text=>({...s,text}))))
     .then(parts=>{const{merged,counts}=ingestSources(parts);
       const breakdown=counts.length>1?` (${counts.map(c=>`${c.label}: ${c.n}`).join(', ')})`:'';
       st.textContent=`Loaded ${merged.length} live responses`+breakdown+'.';
@@ -827,8 +839,12 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
   if(fU)document.getElementById('csvUrlFacs').value=fU;
   if(fbU)document.getElementById('csvUrl').value=fbU;
   if(fbfU)document.getElementById('csvUrlFac').value=fbfU;
-  if(cU||sU||fU)runRegisterLoad();
-  if(fbU||fbfU)runFeedbackLoad();
+  // Register loads first, then feedback, so facilitator attribution has a session list
+  // to work against on first paint. Attribution self-corrects either way (see
+  // ingestRegisterCSV), this ordering just avoids a visible flash of missing
+  // facilitation data while both requests are still in flight.
+  const registerPromise=(cU||sU||fU)?runRegisterLoad():Promise.resolve();
+  registerPromise.then(()=>{if(fbU||fbfU)runFeedbackLoad();});
 })();
 </script>
 </body>
