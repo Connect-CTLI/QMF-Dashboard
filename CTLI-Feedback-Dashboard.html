@@ -82,6 +82,8 @@ select:focus,input:focus{outline:2px solid var(--brand);outline-offset:1px;borde
 .rgroup h4 span{color:var(--ink-soft);font-weight:500}
 .rgroup.fac h4{color:var(--purple)}
 .facblock{border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:rgba(141,110,151,.04)}
+.facfinal{font-size:12.5px;margin-bottom:10px;padding:9px 12px;background:rgba(141,110,151,.1);border-radius:8px;border-left:3px solid var(--purple);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.facfinal b{font-family:'IBM Plex Mono',monospace;font-size:14px}
 .facblock .fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
 .facblock .fh b{font-family:'Space Grotesk';font-size:13px}
 .facblock .fh .fs{font-family:'IBM Plex Mono';font-weight:600;font-size:13px}
@@ -454,6 +456,11 @@ function renderSessionDetail(){
     const rows=D1.items.map(([code,label])=>{const v=facItemAvg(s.sid,fid,code);if(v==null)return '';
       return `<div class="ritem"><div class="rn"><span class="mono" style="color:#5B7F95">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/SCALE_MAX*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
     return `<div class="facblock"><div class="fh"><b>${esc(facName(fid))} <span class="mono" style="color:#5B7F95;font-weight:500">${fid}</span></b><span class="fs" style="color:${fs?scoreColor(fs):'#aabbc8'}">${fs?fs.toFixed(2):'-'}</span></div>${rows||'<span style="font-size:12px;color:#5B7F95">No facilitation responses yet.</span>'}</div>`;}).join('');
+  // Final facilitation rating: only meaningful with 2+ facilitators, otherwise it's just
+  // a duplicate of that one person's own score. Pools every individual D1 response across
+  // all facilitators, weighted by response count, rather than averaging their two means
+  // (which would overweight whoever got fewer responses).
+  const finalFacRating=facIds.length>1?sessionSectionAvg(s.sid,D1):null;
   const o=sessionOverall(s.sid);
   el.innerHTML=`<div class="detail-head"><div class="key">[${s.sid}] · session key · course ${c.cid}</div>
     <h2>${esc(c.plo||s.cid)}</h2>
@@ -461,7 +468,7 @@ function renderSessionDetail(){
     <div class="sub"><b style="color:${o?scoreColor(o):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${o?o.toFixed(2):'-'}/${SCALE_MAX}</b><span>${a.resp} responses</span></div>
     <div class="sub" style="margin-top:8px;gap:8px"><button class="btn" id="printSessionBtn" style="font-size:12px;padding:5px 10px">🖨 Print / Save PDF</button><button class="btn" id="exportSessionBtn" style="font-size:12px;padding:5px 10px">⬇ Excel</button></div></div>
     <div class="detail-body">
-      <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${facIds.length} rated separately</span></h4>${facBlocks}</div>
+      <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${facIds.length} rated separately</span></h4>${finalFacRating!=null?`<div class="facfinal">Final facilitation rating <span style="color:#5B7F95;font-weight:400">(combined across ${facIds.length} facilitators)</span><b style="color:${scoreColor(finalFacRating)}">${finalFacRating.toFixed(2)}/${SCALE_MAX}</b></div>`:''}${facBlocks}</div>
       ${sessGroups}</div>`;
   document.getElementById('printSessionBtn').onclick=()=>printSessionReport(s.sid);
   document.getElementById('exportSessionBtn').onclick=()=>exportSessionExcel(s.sid);
@@ -506,10 +513,11 @@ function buildSessionReportData(sk){
     const items=sec.items.map(([code,label])=>({code,label,score:sessItemAvg(sk,code)})).filter(it=>it.score!=null);
     return{name:sec.name,avg:sessionSectionAvg(sk,sec),items};
   }).filter(sec=>sec.items.length);
+  const finalFacRating=facilitators.length>1?sessionSectionAvg(sk,D1):null;
   return{
     sid:sk,courseTitle:c.plo||s.cid,cid:s.cid,sub:c.sub||'-',unit:c.unit||'-',mode:c.mode||'-',term:c.term||'-',
     dateDisplay:(weekday(s.date)?weekday(s.date)+', ':'')+fmtDate(s.date),
-    overall:o,responses:a?a.resp:0,facilitators,sections
+    overall:o,responses:a?a.resp:0,facilitators,sections,finalFacRating
   };
 }
 
@@ -555,6 +563,7 @@ function printSessionReport(sk){
         <tr><td>Overall satisfaction</td><td colspan="3"><b>${d.overall!=null?d.overall.toFixed(2):'-'} / ${SCALE_MAX}</b></td></tr>
       </table>
       <h3 class="prep-h3">Facilitation, by facilitator</h3>
+      ${d.finalFacRating!=null?`<div class="prep-scope"><b>Final facilitation rating (combined across ${d.facilitators.length} facilitators):</b> ${d.finalFacRating.toFixed(2)} / ${SCALE_MAX}</div>`:''}
       ${facHtml||'<p class="prep-muted">No facilitators assigned to this session on record.</p>'}
       <h3 class="prep-h3">Session feedback</h3>
       ${secHtml||'<p class="prep-muted">No responses recorded for this session at the time of reporting.</p>'}
@@ -592,6 +601,7 @@ function exportSessionExcel(sk){
   rows.push(['Overall satisfaction',d.overall!=null?`${d.overall.toFixed(2)} / ${SCALE_MAX}`:'-']);
   rows.push([]);
   rows.push(['FACILITATION, BY FACILITATOR']);
+  if(d.finalFacRating!=null)rows.push([`Final facilitation rating (combined across ${d.facilitators.length} facilitators)`,`${d.finalFacRating.toFixed(2)} / ${SCALE_MAX}`,asciiBar(d.finalFacRating,SCALE_MAX)]);
   if(!d.facilitators.length)rows.push(['No facilitators assigned to this session on record.']);
   d.facilitators.forEach(f=>{
     rows.push([]);
