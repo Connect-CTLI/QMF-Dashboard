@@ -359,6 +359,16 @@ function sessionOverall(sk){let sum=0,n=0;for(const sec of RUBRIC){const v=sessi
 function facInSession(sk,fid){const fi=AGG[sk].facItems[fid];if(!fi)return null;let sum=0,n=0;for(const[code]of D1.items){const it=fi[code];if(it){sum+=it.sum;n+=it.n;}}return n?sum/n:null;}
 function facItemAvg(sk,fid,code){const it=AGG[sk].facItems[fid]&&AGG[sk].facItems[fid][code];return it&&it.n?it.sum/it.n:null;}
 function sessItemAvg(sk,code){const it=AGG[sk].items[code];return it&&it.n?it.sum/it.n:null;}
+// The facilitators to *display* for a session are the union of who's registered against it
+// and who actually has facilitation responses recorded, not just the register list alone.
+// A respondent can explicitly select a facilitator (checkbox on the form) who isn't yet
+// reflected in the register, and that feedback still needs to surface rather than being
+// silently dropped because it doesn't match the register's assignment.
+function sessionFacilitatorIds(sk){
+  const s=SESSIONS.find(x=>x.sid===sk);const a=AGG[sk];
+  const registered=s?s.facs:[];const withData=a?Object.keys(a.facItems):[];
+  return[...new Set([...registered,...withData])];
+}
 
 // facilitator-wide
 function facAgg(fid){let items={},resp=0,sessions=new Set();
@@ -437,8 +447,9 @@ function renderSessionDetail(){
       return `<div class="ritem"><div class="rn"><span class="mono" style="color:#5B7F95">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/SCALE_MAX*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
     if(!rows.trim())return '';const sv=sessionSectionAvg(s.sid,sec);
     return `<div class="rgroup"><h4>${sec.name}<span>${sv?sv.toFixed(2):'-'}</span></h4>${rows}</div>`;}).join('');
-  // facilitation per facilitator
-  const facBlocks=s.facs.map(fid=>{
+  // facilitation per facilitator: union of register-assigned and anyone with actual data (see sessionFacilitatorIds)
+  const facIds=sessionFacilitatorIds(s.sid);
+  const facBlocks=facIds.map(fid=>{
     const fs=facInSession(s.sid,fid);
     const rows=D1.items.map(([code,label])=>{const v=facItemAvg(s.sid,fid,code);if(v==null)return '';
       return `<div class="ritem"><div class="rn"><span class="mono" style="color:#5B7F95">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/SCALE_MAX*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
@@ -450,7 +461,7 @@ function renderSessionDetail(){
     <div class="sub"><b style="color:${o?scoreColor(o):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${o?o.toFixed(2):'-'}/${SCALE_MAX}</b><span>${a.resp} responses</span></div>
     <div class="sub" style="margin-top:8px;gap:8px"><button class="btn" id="printSessionBtn" style="font-size:12px;padding:5px 10px">🖨 Print / Save PDF</button><button class="btn" id="exportSessionBtn" style="font-size:12px;padding:5px 10px">⬇ Excel</button></div></div>
     <div class="detail-body">
-      <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${s.facs.length} rated separately</span></h4>${facBlocks}</div>
+      <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${facIds.length} rated separately</span></h4>${facBlocks}</div>
       ${sessGroups}</div>`;
   document.getElementById('printSessionBtn').onclick=()=>printSessionReport(s.sid);
   document.getElementById('exportSessionBtn').onclick=()=>exportSessionExcel(s.sid);
@@ -486,7 +497,7 @@ function asciiBar(score,scaleMax,width){
 function buildSessionReportData(sk){
   const s=SESSIONS.find(x=>x.sid===sk);if(!s)return null;
   const c=CMAP[s.cid]||{};const a=AGG[sk];const o=sessionOverall(sk);
-  const facilitators=s.facs.map(fid=>{
+  const facilitators=sessionFacilitatorIds(sk).map(fid=>{
     const fs=facInSession(sk,fid);
     const items=D1.items.map(([code,label])=>({code,label,score:facItemAvg(sk,fid,code)})).filter(it=>it.score!=null);
     return{fid,name:facName(fid),score:fs,items};
@@ -638,7 +649,7 @@ function buildSummaryReportData(){
   const sections=RUBRIC.map(sec=>({name:sec.name,code:sec.code,avg:secN[sec.code]?secSum[sec.code]/secN[sec.code]:null})).filter(s=>s.avg!=null);
   const overall=n?sum/n:null;
   const facMap={};
-  for(const s of list){for(const fid of s.facs){const fs=facInSession(s.sid,fid);if(fs==null)continue;
+  for(const s of list){for(const fid of sessionFacilitatorIds(s.sid)){const fs=facInSession(s.sid,fid);if(fs==null)continue;
     if(!facMap[fid])facMap[fid]={fid,name:facName(fid),scores:[],sessions:0};
     facMap[fid].scores.push(fs);facMap[fid].sessions++;}}
   const facilitators=Object.values(facMap).map(f=>({fid:f.fid,name:f.name,sessions:f.sessions,avg:f.scores.reduce((a,b)=>a+b,0)/f.scores.length})).sort((a,b)=>a.avg-b.avg);
@@ -936,8 +947,9 @@ function textToScore(raw){
 // Parses one CSV source into raw {sk, facCodes, sessCodes} rows before facilitator attribution,
 // which needs the SESSIONS register and happens in ingestSources/ingestCSV once all sources are read.
 function parseResponseRows(text,label){const rows=parseCSV(text);if(rows.length<2)throw new Error((label?label+': ':'')+'sheet looks empty');const head=rows[0];
-  let keyCol=-1;const codeCols={};
+  let keyCol=-1,facCol=-1;const codeCols={};
   head.forEach((h,idx)=>{const H=h.trim();if(keyCol<0&&/session/i.test(H))keyCol=idx;
+    if(facCol<0&&/which facilitator|facilitator.*rating|select.*facilitator/i.test(H))facCol=idx;
     const code=matchQuestionCode(extractFragment(h));if(code)codeCols[idx]=code;});
   if(keyCol<0)for(let c=0;c<head.length;c++){if(rows.slice(1).some(r=>/\[\d{3,4}(-F\d+)?\]/i.test(r[c]||''))){keyCol=c;break;}}
   const out=[];for(const r of rows.slice(1)){
@@ -945,16 +957,22 @@ function parseResponseRows(text,label){const rows=parseCSV(text);if(rows.length<
     const mFac=raw.match(/\[(\d{3,4})-(F\d+)\]/i);
     const mSess=raw.match(/\[(\d{3,4})\]/i);
     if(!mFac&&!mSess)continue;
-    const sk=(mFac||mSess)[1];const explicitFid=mFac?mFac[2].toUpperCase():null;
+    const sk=(mFac||mSess)[1];let explicitFids=mFac?[mFac[2].toUpperCase()]:[];
+    // A dedicated "Which facilitator are you rating?" question, if present, is the most
+    // direct signal and overrides everything else. It can be single-select or a checkbox
+    // ("select all that apply"), Google Forms exports the latter as one comma-separated
+    // cell, so every bracketed code in the cell is picked up, not just the first.
+    if(facCol>=0){const cell=r[facCol]||'';const matches=[...cell.matchAll(/\[(F\d+)\]/gi)].map(m=>m[1].toUpperCase());if(matches.length)explicitFids=matches;}
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=textToScore(r[idx]);if(v!=null)scores[code]=v;}
-    if(Object.keys(scores).length)out.push({sk,explicitFid,scores});}
+    if(Object.keys(scores).length)out.push({sk,explicitFids,scores});}
   if(!out.length)throw new Error((label?label+': ':'')+'no rows matched, please check the session key column and question wording');
   return out;}
 
 // Splits each raw row's scores into facilitation (D1.x) vs everything else, and attributes the
-// facilitation portion to the right facilitator(s): the explicit ID if the form embeds one,
-// otherwise looked up from the session's register entry. A co-facilitated session with no
-// explicit ID duplicates the facilitation score across each assigned facilitator.
+// facilitation portion to the right facilitator(s): whoever was explicitly selected in the
+// "Which facilitator" question (one or more), otherwise looked up from the session's register
+// entry. A co-facilitated session with nobody explicitly selected duplicates the facilitation
+// score across every facilitator the register has assigned to that session.
 function attributeRows(rawRows){
   const out=[];
   for(const r of rawRows){
@@ -962,7 +980,7 @@ function attributeRows(rawRows){
     for(const[code,val]of Object.entries(r.scores)){(/^D1/.test(code)?facScores:sessScores)[code]=val;}
     if(Object.keys(sessScores).length)out.push({sk:r.sk,fid:null,scores:sessScores});
     if(Object.keys(facScores).length){
-      if(r.explicitFid){out.push({sk:r.sk,fid:r.explicitFid,scores:facScores});}
+      if(r.explicitFids&&r.explicitFids.length){for(const fid of r.explicitFids)out.push({sk:r.sk,fid,scores:facScores});}
       else{const s=SESSIONS.find(x=>x.sid===r.sk);const facs=s?s.facs:[];
         if(!facs.length){/* session has no facilitator on record yet, can't attribute, skip */}
         else for(const fid of facs)out.push({sk:r.sk,fid,scores:facScores});}
