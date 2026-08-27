@@ -263,13 +263,14 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   <div class="setup-grid">
     <div class="panel">
       <h2>Connect live responses</h2>
-      <div class="psub">The dashboard reads feedback from your form's response sheet. One-time setup:</div>
-      <div class="step"><div class="no">1</div><div class="st"><h4>Link form to a Sheet</h4><p>CTLI Professional Learning Feedback → Responses → link to Sheets.</p></div></div>
-      <div class="step"><div class="no">2</div><div class="st"><h4>Publish as CSV</h4><p>File → Share → Publish to web → responses tab → CSV → Publish.</p></div></div>
-      <div class="step"><div class="no">3</div><div class="st"><h4>Paste the link</h4><p>Fetched on load; live numbers replace the sample.</p></div></div>
+      <div class="psub">Feedback comes from two Google Forms — the main CTLI Professional Learning Feedback form, and a separate Facilitator Feedback form. Publish each form's response sheet as CSV (File → Share → Publish to web → responses tab → CSV → Publish) and paste both links below. The dashboard merges them, so loading one never overwrites the other.</div>
+      <div class="field" style="margin-bottom:6px"><label>CTLI Professional Learning Feedback form</label></div>
       <div class="urlrow"><input type="url" id="csvUrl" placeholder="https://docs.google.com/…/pub?output=csv"><button class="btn primary" id="loadCsv">Load</button></div>
       <div id="csvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
-      <div class="note"><b>Links are remembered</b> — once loaded, this browser reloads the same sheets automatically next time the dashboard opens.</div>
+      <div class="field" style="margin:14px 0 6px"><label>Facilitator Feedback form</label></div>
+      <div class="urlrow"><input type="url" id="facCsvUrl" placeholder="https://docs.google.com/…/pub?output=csv"><button class="btn primary" id="loadFacCsv">Load</button></div>
+      <div id="facCsvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
+      <div class="note"><b>Links are remembered</b> — once loaded, this browser reloads both sheets automatically next time the dashboard opens.</div>
     </div>
     <div class="panel">
       <h2>Link the register (live)</h2>
@@ -287,7 +288,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <div class="step"><div class="no">A</div><div class="st"><h4>Session × facilitator key</h4><p>Q1 = <i>"Which session are you evaluating?"</i> Each option ends in a compound key:<br><code>20 Feb · SACE Ethics Seminar · N. Adams [2701-F03]</code><br>The dashboard reads <code>2701</code> for the session and <code>F03</code> for the facilitator. Co-facilitated sessions appear once per facilitator. Copy the whole list from the Catalogue tab.</p></div></div>
       <div class="step"><div class="no">B</div><div class="st"><h4>Rubric matching</h4><p>Each Likert question is matched by its actual wording, not a code prefix — e.g. a column containing <i>"pitched at the right level of depth"</i> is read as <code>C2</code>, and <i>"EDULIS Library staff are knowledgeable and courteous"</i> is read as <code>EL4</code>. This means the sheet can be pasted in exactly as Google Forms exports it. Facilitation questions (<code>D1</code>) are attributed to whichever facilitator is ticked in the key.</p></div></div>
       <div class="note"><b>Numbers or text?</b> Numbered answers ("4" or "4 - Good") are read directly. Plain-text answers (e.g. "Strongly agree") aren't converted to a score yet — share the exact wording of your answer options and that mapping can be added.</div>
-      <div class="note"><b>One form or two?</b> This reads the same whether facilitation stays in this form or you split it into a dedicated facilitator form — as long as responses carry the <code>[2701-F03]</code> key.</div>
+      <div class="note"><b>One form or two?</b> Facilitation questions can live in the main form or the dedicated Facilitator Feedback form — either way, load it into the matching box above. Both sheets are matched and merged the same way, as long as responses carry the <code>[2701-F03]</code> key.</div>
     </div>
   </div>
 </section>
@@ -353,7 +354,7 @@ let COURSES=window.__MODEL__.courses.map(c=>({...c}));
 let SESSIONS=window.__MODEL__.sessions.map(s=>({...s,facs:[...s.facs]}));
 let FACS=window.__MODEL__.facilitators.map(f=>({...f}));
 let CMAP={},FMAP={};
-let RESPONSES=[]; let LIVE=false;
+let RESPONSES_MAIN=[]; let RESPONSES_FAC=[]; let RESPONSES=[]; let LIVE=false;
 let AGG={}; // sessionKey -> {n, items{}, facItems:{fid:{code:{sum,n}}}, facN:{fid}}
 let sel={session:null,course:null,fac:null,catSub:'sessions'};
 const state={view:'summary',term:'',sub:'',unit:'',mode:'',fac:'',q:'',sort:'rating'};
@@ -718,7 +719,7 @@ function scoreFromCell(raw){
   const m=s.match(/^(\d)/);if(m)return +m[1]; // numbered format, e.g. "3 - Good"
   return NaN; // plain-text label (e.g. "Strongly agree") — needs the real answer wording to map safely, see note in Setup tab
 }
-function ingestCSV(text){const rows=parseCSV(text);if(rows.length<2)throw new Error('empty');const head=rows[0];
+function parseResponseCSV(text){const rows=parseCSV(text);if(rows.length<2)throw new Error('empty');const head=rows[0];
   let keyCol=-1;const codeCols={};
   head.forEach((h,idx)=>{const H=norm(h);
     if(keyCol<0&&(/session/.test(H)||/professional learning opportunity that you are evaluating/.test(H)))keyCol=idx;
@@ -730,8 +731,15 @@ function ingestCSV(text){const rows=parseCSV(text);if(rows.length<2)throw new Er
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
     if(Object.keys(scores).length)out.push({sk:m[1],fid:m[2].toUpperCase(),scores});}
   if(!out.length)throw new Error('no rows matched — check the [key-Fxx] column and rubric wording');
-  RESPONSES=out;LIVE=true;aggregate();setBadge(true,out.length);renderActive();return out.length;}
-function setBadge(on,n){const b=document.getElementById('dataBadge'),t=document.getElementById('dataBadgeTxt');b.classList.toggle('on',on);t.textContent=on?`Live · ${n} responses`:'No responses connected yet';}
+  return out;}
+function mergeResponses(){RESPONSES=[...RESPONSES_MAIN,...RESPONSES_FAC];LIVE=RESPONSES.length>0;
+  aggregate();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
+function ingestCSV(text){RESPONSES_MAIN=parseResponseCSV(text);mergeResponses();return RESPONSES_MAIN.length;}
+function ingestFacCSV(text){RESPONSES_FAC=parseResponseCSV(text);mergeResponses();return RESPONSES_FAC.length;}
+function setBadge(mainN,facN){const b=document.getElementById('dataBadge'),t=document.getElementById('dataBadgeTxt');const on=(mainN+facN)>0;b.classList.toggle('on',on);
+  if(!on){t.textContent='No responses connected yet';return;}
+  const parts=[];if(mainN)parts.push(`${mainN} main form`);if(facN)parts.push(`${facN} facilitator form`);
+  t.textContent=`Live · ${parts.join(' + ')} response${(mainN+facN)!==1?'s':''}`;}
 
 /* export/import */
 function download(name,text,type){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
@@ -805,7 +813,10 @@ function importWorkbook(file){
 document.getElementById('copyAll').onclick=copyAllOptions;
 document.getElementById('loadCsv').onclick=()=>{const url=document.getElementById('csvUrl').value.trim();const st=document.getElementById('csvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
-  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} live responses.`;saveLink('link_responses',url);}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses.`;saveLink('link_responses',url);}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+document.getElementById('loadFacCsv').onclick=()=>{const url=document.getElementById('facCsvUrl').value.trim();const st=document.getElementById('facCsvStatus');
+  if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
+  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses.`;saveLink('link_responses_fac',url);}).catch(e=>{st.textContent='Could not load: '+e.message;});};
 
 function loadRegisterFromLinks(silent){
   const cUrl=document.getElementById('regCoursesUrl').value.trim();
@@ -833,19 +844,21 @@ document.getElementById('loadRegister').onclick=()=>loadRegisterFromLinks(false)
 rebuild();refreshFilters();setView('summary');
 if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessionCards();renderSessionDetail();}
 
-/* restore remembered links, register first (session/facilitator metadata), then responses — avoids the load-order race condition */
+/* restore remembered links, register first (session/facilitator metadata), then both response sheets — avoids the load-order race condition */
 (function(){
-  const savedResp=loadLink('link_responses');
+  const savedResp=loadLink('link_responses'),savedFacResp=loadLink('link_responses_fac');
   const savedC=loadLink('link_reg_courses'),savedS=loadLink('link_reg_sessions'),savedF=loadLink('link_reg_facs');
   if(savedResp)document.getElementById('csvUrl').value=savedResp;
+  if(savedFacResp)document.getElementById('facCsvUrl').value=savedFacResp;
   if(savedC)document.getElementById('regCoursesUrl').value=savedC;
   if(savedS)document.getElementById('regSessionsUrl').value=savedS;
   if(savedF)document.getElementById('regFacsUrl').value=savedF;
   const registerLoad=(savedC||savedS||savedF)?loadRegisterFromLinks(true):Promise.resolve();
   registerLoad.then(()=>{
-    if(!savedResp)return;
-    const st=document.getElementById('csvStatus');st.textContent='Loading…';
-    fetch(savedResp).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} live responses.`;}).catch(e=>{st.textContent='Could not reload saved link: '+e.message;});
+    if(savedResp){const st=document.getElementById('csvStatus');st.textContent='Loading…';
+      fetch(savedResp).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses.`;}).catch(e=>{st.textContent='Could not reload saved link: '+e.message;});}
+    if(savedFacResp){const st=document.getElementById('facCsvStatus');st.textContent='Loading…';
+      fetch(savedFacResp).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses.`;}).catch(e=>{st.textContent='Could not reload saved link: '+e.message;});}
   });
 })();
 </script>
