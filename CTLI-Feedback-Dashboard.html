@@ -152,6 +152,15 @@ table.sum tr.pdd-row td.rowlab{color:#00838a;font-weight:600}
 table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#f7f9fc}
 .edulis-note{font-size:12px;color:var(--ink-soft);margin-top:12px}
 .unit-chip{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px;vertical-align:middle}
+.pin-overlay{position:fixed;inset:0;background:rgba(12,30,62,.6);display:flex;align-items:center;justify-content:center;z-index:500}
+.pin-overlay.hidden{display:none}
+.pin-box{background:#fff;border-radius:14px;padding:26px 28px;width:280px;box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center}
+.pin-box h3{font-size:17px;margin-bottom:6px}
+.pin-box p{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px}
+.pin-box input{width:100%;font-size:24px;text-align:center;letter-spacing:10px;padding:10px 8px;border:1px solid var(--line);border-radius:9px;margin-bottom:12px;font-family:'IBM Plex Mono',monospace}
+.pin-box input:focus{outline:2px solid var(--brand);outline-offset:1px}
+.pin-actions{display:flex;gap:8px;justify-content:center}
+.pin-error{color:var(--poor);font-size:12px;margin-top:9px;min-height:15px}
 @media(max-width:1000px){.explorer{grid-template-columns:1fr}.detail{position:static;max-height:none}.pulse{grid-template-columns:1fr}.setup-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
@@ -168,8 +177,8 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 
     <button class="tab" role="tab" data-view="facilitators" aria-selected="false">Facilitators</button>
     <button class="tab" role="tab" data-view="rubric" aria-selected="false">Rubric</button>
-    <button class="tab" role="tab" data-view="catalogue" aria-selected="false">Catalogue</button>
-    <button class="tab" role="tab" data-view="setup" aria-selected="false">Setup</button>
+    <button class="tab" role="tab" data-view="catalogue" aria-selected="false">Catalogue 🔒</button>
+    <button class="tab" role="tab" data-view="setup" aria-selected="false">Setup 🔒</button>
   </nav>
 </div></header>
 <main class="wrap">
@@ -808,7 +817,37 @@ function setView(v){state.view=v;document.querySelectorAll('#tabs .tab').forEach
   document.querySelectorAll('.view').forEach(s=>s.classList.add('hidden'));document.getElementById('v-'+v).classList.remove('hidden');renderActive();}
 
 /* wire */
-document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>setView(t.dataset.view));
+/* admin PIN gate — Setup and Catalogue only, re-locks every new browser session */
+const ADMIN_PIN='2027'; // change this to set your own 4-digit PIN
+let pendingAdminView=null;
+function isAdminUnlocked(){try{return sessionStorage.getItem('ctli_admin_ok')==='1';}catch(e){return false;}}
+function requestAdminView(v){
+  if(isAdminUnlocked()){setView(v);return;}
+  pendingAdminView=v;
+  const err=document.getElementById('pinError'),inp=document.getElementById('pinInput');
+  err.textContent='';inp.value='';
+  document.getElementById('pinOverlay').classList.remove('hidden');
+  inp.focus();
+}
+function submitPin(){
+  const inp=document.getElementById('pinInput'),err=document.getElementById('pinError');
+  if(inp.value.trim()===ADMIN_PIN){
+    try{sessionStorage.setItem('ctli_admin_ok','1');}catch(e){}
+    document.getElementById('pinOverlay').classList.add('hidden');
+    setView(pendingAdminView);
+  }else{
+    err.textContent='Incorrect PIN.';inp.value='';inp.focus();
+  }
+}
+document.getElementById('pinSubmit').onclick=submitPin;
+document.getElementById('pinCancel').onclick=()=>document.getElementById('pinOverlay').classList.add('hidden');
+document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitPin();});
+
+document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>{
+  const v=t.dataset.view;
+  if(v==='setup'||v==='catalogue')requestAdminView(v);
+  else setView(v);
+});
 document.querySelectorAll('#catSub .subtab').forEach(t=>t.onclick=()=>{sel.catSub=t.dataset.sub;renderCat();});
 [['fTerm','term'],['fSub','sub'],['fUnit','unit'],['fMode','mode'],['fFac','fac'],['fSort','sort']].forEach(([id,k])=>document.getElementById(id).addEventListener('change',e=>{state[k]=e.target.value;renderSessionCards();}));
 document.getElementById('fSearch').addEventListener('input',e=>{state.q=e.target.value;renderSessionCards();});
@@ -903,5 +942,17 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
   });
 })();
 </script>
+<div class="pin-overlay hidden" id="pinOverlay">
+  <div class="pin-box">
+    <h3>Admin access</h3>
+    <p>Enter the 4-digit PIN to open Setup or Catalogue.</p>
+    <input type="password" id="pinInput" maxlength="4" inputmode="numeric" pattern="\d*" placeholder="••••" autocomplete="off">
+    <div class="pin-actions">
+      <button class="btn" id="pinCancel">Cancel</button>
+      <button class="btn primary" id="pinSubmit">Unlock</button>
+    </div>
+    <div id="pinError" class="pin-error"></div>
+  </div>
+</div>
 </body>
 </html>
