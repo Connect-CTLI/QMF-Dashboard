@@ -635,16 +635,15 @@ function renderSummary(){
   body+='</tbody>';
   const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.reduce((a,g)=>a+RUBRIC.filter(s=>s.group===g).length,0)+1}" style="text-align:right">Weighted mean across every rubric code, every session</td><td class="score" style="background:${overall?scoreColor(overall):'#c8cfda'};font-size:14px">${overall?overall.toFixed(2):'—'}</td></tr></tfoot>`;
   document.getElementById('sumTable').innerHTML=head+body+foot;
-  const unmatched=RUBRIC.flatMap(s=>s.items.filter(it=>!it[2])).map(it=>it[0]);
   document.getElementById('sumMethodNote').innerHTML=`<b>How ratings are calculated</b>
     <ul style="margin:8px 0 0;padding-left:18px">
       <li>Each rubric code (e.g. C2, D2.1) is the average of every matching response for that specific question, weighted by response count, for sessions hosted by that unit.</li>
-      <li><b>D1 Facilitation</b> is kept as one cumulative score — the average across every facilitation question and every facilitator on sessions hosted by that unit — rather than broken into individual items${unmatched.length?', since the question wording on the separate Facilitator Feedback form has not been confirmed yet':''}. As that wording is confirmed, the same item-level breakdown used for every other section can be added.</li>
+      <li><b>D1 Facilitation</b> is one cumulative score — the average across every facilitation question and every facilitator on sessions hosted by that unit.</li>
       <li>Content (C — Programme Design &amp; Development) is pooled once under <b>PDD</b>, across every session programme-wide, rather than against the hosting unit.</li>
       <li>Venue, Catering and Accommodation (S1–S3) are pooled once under <b>Corporate Services</b>, across every session programme-wide, rather than against the hosting unit.</li>
       <li><b>Final Quality Rating</b> is the plain average of every section score shown in that row.</li>
       <li><b>Programme overall</b> (footer) applies the same calculation across the whole programme.</li>
-    </ul>${unmatched.length?`<div style="margin-top:8px">Codes still on label text rather than confirmed wording: <span class="mono">${unmatched.join(', ')}</span>.</div>`:''}`;
+    </ul>`;
 }
 
 /* RUBRIC HEATMAP */
