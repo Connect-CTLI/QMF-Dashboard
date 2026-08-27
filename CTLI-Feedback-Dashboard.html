@@ -613,7 +613,7 @@ function renderSummary(){
   const groups=['design','delivery','corporate'];
   let head=`<thead><tr class="grp"><th class="rowlab" rowspan="2">Sub-directorate</th><th rowspan="2">Unit</th>`;
   groups.forEach(g=>{const n=RUBRIC.filter(s=>s.group===g).length;head+=`<th class="${GROUP_CLASS[g]}" colspan="${n}">${GROUP_LABEL[g]}</th>`;});
-  head+=`<th class="${GROUP_CLASS.edulis}">EDULIS<br></th><th rowspan="2">Final<br>Quality Rating</th></tr><tr class="code">`;
+  head+=`<th class="${GROUP_CLASS.edulis}">EDULIS</th><th rowspan="2">Final<br>Quality Rating</th></tr><tr class="code">`;
   groups.forEach(g=>{RUBRIC.filter(s=>s.group===g).forEach(s=>head+=`<th title="${esc(s.name)}${s.code==='D1'?' — cumulative score, see note below':''}">${s.code}${s.code==='D1'?' *':''}</th>`);});
   head+=`<th title="EDULIS Library">EL</th></tr></thead>`;
 
