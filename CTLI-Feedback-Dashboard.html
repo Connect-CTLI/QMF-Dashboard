@@ -269,6 +269,17 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <div class="step"><div class="no">3</div><div class="st"><h4>Paste the link</h4><p>Fetched on load; live numbers replace the sample.</p></div></div>
       <div class="urlrow"><input type="url" id="csvUrl" placeholder="https://docs.google.com/…/pub?output=csv"><button class="btn primary" id="loadCsv">Load</button></div>
       <div id="csvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
+      <div class="note"><b>Links are remembered</b> — once loaded, this browser reloads the same sheets automatically next time the dashboard opens.</div>
+    </div>
+    <div class="panel">
+      <h2>Link the register (live)</h2>
+      <div class="psub">The Course &amp; Session Register has three tabs. Publish each one as CSV (File → Share → Publish to web → pick the tab → CSV) and paste its link below — same as the response sheet.</div>
+      <div class="field" style="margin-bottom:8px"><label>Courses tab</label><input type="url" id="regCoursesUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
+      <div class="field" style="margin-bottom:8px"><label>Sessions tab</label><input type="url" id="regSessionsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
+      <div class="field" style="margin-bottom:8px"><label>Facilitators tab</label><input type="url" id="regFacsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
+      <button class="btn primary" id="loadRegister">Load register</button>
+      <div id="regStatus" class="mono" style="font-size:12px;color:var(--ink-soft);margin-top:8px"></div>
+      <div class="note">Prefer a one-off upload instead of a live link? Use <b>Import register (.xlsx)</b> on the Catalogue tab — same result, no link required.</div>
     </div>
     <div class="panel">
       <h2>How the form maps</h2>
@@ -695,6 +706,8 @@ function bindCat(kind){
 }
 
 /* CSV ingest (compound key) */
+function saveLink(key,url){try{localStorage.setItem('ctli_'+key,url);}catch(e){}}
+function loadLink(key){try{return localStorage.getItem('ctli_'+key)||'';}catch(e){return '';}}
 function parseCSV(text){const rows=[];let row=[],cur='',q=false;for(let i=0;i<text.length;i++){const ch=text[i];
   if(q){if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
   else{if(ch==='"')q=true;else if(ch===','){row.push(cur);cur='';}else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur='';}else if(ch==='\r'){}else cur+=ch;}}
@@ -765,33 +778,77 @@ document.getElementById('addRow').onclick=()=>{
 document.getElementById('expJson').onclick=exportJSON;
 document.getElementById('impFile').addEventListener('change',e=>{if(e.target.files[0])importFile(e.target.files[0]);});
 document.getElementById('impXlsx').addEventListener('change',e=>{if(e.target.files[0])importWorkbook(e.target.files[0]);});
+function pickField(row,keys){for(const k of Object.keys(row)){const kl=k.toLowerCase().trim();if(keys.some(x=>kl.includes(x)))return row[k];}return null;}
+function fmtRegDate(v){if(v==null||v==='')return null;if(v instanceof Date){const p=n=>String(n).padStart(2,'0');return v.getFullYear()+'-'+p(v.getMonth()+1)+'-'+p(v.getDate());}
+  let s=String(v).trim();const m=s.match(/^(\d{4}-\d{2}-\d{2})/);if(m)return m[1];return s||null;}
+function csvRowsToObjects(text){const rows=parseCSV(text);if(rows.length<2)return[];const head=rows[0].map(h=>h.trim());
+  return rows.slice(1).map(r=>{const o={};head.forEach((h,i)=>o[h]=r[i]!==undefined?r[i]:null);return o;});}
+function applyRegisterRows(cRows,sRows,fRows){
+  if(cRows&&cRows.length)COURSES=cRows.filter(r=>pickField(r,['course id'])).map(r=>({cid:String(pickField(r,['course id'])).trim(),plo:pickField(r,['professional learning','plo'])||'',sub:pickField(r,['sub'])||null,unit:pickField(r,['hosting'])||null,days:pickField(r,['day'])!=null&&pickField(r,['day'])!==''?String(pickField(r,['day'])):null,hours:pickField(r,['hour'])!=null&&pickField(r,['hour'])!==''?String(pickField(r,['hour'])):null,term:pickField(r,['term'])!=null&&pickField(r,['term'])!==''?String(pickField(r,['term'])).replace(/\.0$/,''):null,mode:pickField(r,['mode'])||null}));
+  if(sRows&&sRows.length)SESSIONS=sRows.filter(r=>pickField(r,['session id'])).map(r=>{const f=pickField(r,['facilitator id','facilitator'])||'';return {sid:String(pickField(r,['session id'])).replace(/\.0$/,'').trim(),cid:String(pickField(r,['course id'])||'').trim(),date:fmtRegDate(pickField(r,['date'])),facs:String(f).split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),online:false};});
+  if(fRows&&fRows.length)FACS=fRows.filter(r=>pickField(r,['facilitator id'])).map(r=>({fid:String(pickField(r,['facilitator id'])).trim(),name:pickField(r,['name'])||''}));
+  const cm={};COURSES.forEach(c=>cm[c.cid]=(c.mode||'').toLowerCase());SESSIONS.forEach(s=>{s.online=/online|blended/.test(cm[s.cid]||'');});
+  rebuild();refreshFilters();renderCat();renderActive();
+  return {courses:COURSES.length,sessions:SESSIONS.length,facs:FACS.length,assigned:SESSIONS.filter(s=>s.facs.length).length};
+}
 function importWorkbook(file){
   if(typeof XLSX==='undefined'){alert('Spreadsheet reader is still loading — try again in a moment.');return;}
   const fr=new FileReader();
   fr.onload=()=>{try{
     const wb=XLSX.read(new Uint8Array(fr.result),{type:'array',cellDates:true});
     const grab=names=>{for(const n of wb.SheetNames){if(names.some(x=>n.toLowerCase().includes(x)))return XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:null});}return null;};
-    const pick=(row,keys)=>{for(const k of Object.keys(row)){const kl=k.toLowerCase().trim();if(keys.some(x=>kl.includes(x)))return row[k];}return null;};
-    const fmtD=v=>{if(v==null||v==='')return null;if(v instanceof Date){const p=n=>String(n).padStart(2,'0');return v.getFullYear()+'-'+p(v.getMonth()+1)+'-'+p(v.getDate());}const s=String(v).trim();return s||null;};
     const cRows=grab(['course']),sRows=grab(['session']),fRows=grab(['facilit']);
-    if(cRows&&cRows.length)COURSES=cRows.filter(r=>pick(r,['course id'])).map(r=>({cid:String(pick(r,['course id'])).trim(),plo:pick(r,['professional learning','plo'])||'',sub:pick(r,['sub'])||null,unit:pick(r,['hosting'])||null,days:pick(r,['day'])!=null?String(pick(r,['day'])):null,hours:pick(r,['hour'])!=null?String(pick(r,['hour'])):null,term:pick(r,['term'])!=null?String(pick(r,['term'])).replace(/\.0$/,''):null,mode:pick(r,['mode'])||null}));
-    if(sRows&&sRows.length)SESSIONS=sRows.filter(r=>pick(r,['session id'])).map(r=>{const f=pick(r,['facilitator id','facilitator'])||'';return {sid:String(pick(r,['session id'])).replace(/\.0$/,'').trim(),cid:String(pick(r,['course id'])||'').trim(),date:fmtD(pick(r,['date'])),facs:String(f).split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),online:false};});
-    if(fRows&&fRows.length)FACS=fRows.filter(r=>pick(r,['facilitator id'])).map(r=>({fid:String(pick(r,['facilitator id'])).trim(),name:pick(r,['name'])||''}));
-    const cm={};COURSES.forEach(c=>cm[c.cid]=(c.mode||'').toLowerCase());SESSIONS.forEach(s=>{s.online=/online|blended/.test(cm[s.cid]||'');});
-    rebuild();refreshFilters();renderCat();renderActive();
-    const assigned=SESSIONS.filter(s=>s.facs.length).length;
-    alert(`Loaded from register: ${COURSES.length} courses, ${SESSIONS.length} sessions, ${FACS.length} facilitators.`+(assigned<SESSIONS.length?`\n${SESSIONS.length-assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:''));
+    const r=applyRegisterRows(cRows,sRows,fRows);
+    alert(`Loaded from register: ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators.`+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:''));
   }catch(err){alert('Could not read workbook: '+err.message);}};
   fr.readAsArrayBuffer(file);
 }
 document.getElementById('copyAll').onclick=copyAllOptions;
 document.getElementById('loadCsv').onclick=()=>{const url=document.getElementById('csvUrl').value.trim();const st=document.getElementById('csvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
-  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} live responses.`;}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} live responses.`;saveLink('link_responses',url);}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+
+function loadRegisterFromLinks(silent){
+  const cUrl=document.getElementById('regCoursesUrl').value.trim();
+  const sUrl=document.getElementById('regSessionsUrl').value.trim();
+  const fUrl=document.getElementById('regFacsUrl').value.trim();
+  const st=document.getElementById('regStatus');
+  if(!cUrl&&!sUrl&&!fUrl){if(!silent)st.textContent='Paste at least one sheet link first.';return Promise.resolve();}
+  if(!silent)st.textContent='Loading…';
+  return Promise.all([cUrl,sUrl,fUrl].map(u=>u?fetch(u).then(r=>r.text()):Promise.resolve(null)))
+    .then(([cText,sText,fText])=>{
+      const cRows=cText?csvRowsToObjects(cText):null;
+      const sRows=sText?csvRowsToObjects(sText):null;
+      const fRows=fText?csvRowsToObjects(fText):null;
+      const r=applyRegisterRows(cRows,sRows,fRows);
+      st.textContent=`✓ Loaded ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators.`;
+      if(cUrl)saveLink('link_reg_courses',cUrl);
+      if(sUrl)saveLink('link_reg_sessions',sUrl);
+      if(fUrl)saveLink('link_reg_facs',fUrl);
+    })
+    .catch(e=>{st.textContent='Could not load: '+e.message;});
+}
+document.getElementById('loadRegister').onclick=()=>loadRegisterFromLinks(false);
 
 /* boot */
 rebuild();refreshFilters();setView('summary');
 if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessionCards();renderSessionDetail();}
+
+/* restore remembered links, register first (session/facilitator metadata), then responses — avoids the load-order race condition */
+(function(){
+  const savedResp=loadLink('link_responses');
+  const savedC=loadLink('link_reg_courses'),savedS=loadLink('link_reg_sessions'),savedF=loadLink('link_reg_facs');
+  if(savedResp)document.getElementById('csvUrl').value=savedResp;
+  if(savedC)document.getElementById('regCoursesUrl').value=savedC;
+  if(savedS)document.getElementById('regSessionsUrl').value=savedS;
+  if(savedF)document.getElementById('regFacsUrl').value=savedF;
+  const registerLoad=(savedC||savedS||savedF)?loadRegisterFromLinks(true):Promise.resolve();
+  registerLoad.then(()=>{
+    if(!savedResp)return;
+    const st=document.getElementById('csvStatus');st.textContent='Loading…';
+    fetch(savedResp).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} live responses.`;}).catch(e=>{st.textContent='Could not reload saved link: '+e.message;});
+  });
+})();
 </script>
 </body>
 </html>
