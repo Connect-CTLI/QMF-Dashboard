@@ -242,9 +242,9 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   <div class="panel"><h2>Rubric heatmap</h2>
     <div class="psub">Average score per rubric section across hosting units. Deeper red is weaker, deeper green stronger.</div>
     <div class="heat-scroll"><table class="heat" id="heat"></table></div>
-    <div class="legend"><span class="sw"><i style="background:var(--poor)"></i>1.0–2.9</span>
-      <span class="sw"><i style="background:var(--mid)"></i>3.0–3.9</span>
-      <span class="sw"><i style="background:var(--good)"></i>4.0–5.0</span>
+    <div class="legend"><span class="sw"><i style="background:var(--poor)"></i>1.0–2.0</span>
+      <span class="sw"><i style="background:var(--mid)"></i>2.1–3.0</span>
+      <span class="sw"><i style="background:var(--good)"></i>3.1–4.0</span>
       <span style="margin-left:auto" class="mono" id="heatMeta"></span></div>
   </div>
 </section>
@@ -391,7 +391,7 @@ function fmtDate(iso){if(!iso)return '—';const d=new Date(iso+'T00:00:00');ret
 function weekday(iso){if(!iso)return '';const d=new Date(iso+'T00:00:00');return isNaN(d)?'':['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function mix(a,b,t){return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(',')})`;}
-function scoreColor(v){if(v==null||isNaN(v))return '#c8cfda';if(v<3){return mix([198,65,58],[224,160,48],(v-1)/2);}return mix([224,160,48],[46,139,87],Math.max(0,Math.min(1,(v-3)/2)));}
+function scoreColor(v){if(v==null||isNaN(v))return '#c8cfda';if(v<2.5){return mix([198,65,58],[224,160,48],Math.max(0,(v-1)/1.5));}return mix([224,160,48],[46,139,87],Math.max(0,Math.min(1,(v-2.5)/1.5)));}
 
 function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);}
 function facName(fid){return (FMAP[fid]&&FMAP[fid].name)||fid;}
@@ -486,14 +486,14 @@ function renderHero(){
   for(const s of SESSIONS){const a=AGG[s.sid];resp+=a.resp;
     for(const sec of RUBRIC){const v=sessionSectionAvg(s.sid,sec);if(v!=null){secSum[sec.code]=(secSum[sec.code]||0)+v*a.resp;secN[sec.code]=(secN[sec.code]||0)+a.resp;}}
     const o=sessionOverall(s.sid);if(o!=null){sum+=o*a.resp;n+=a.resp;}}
-  const overall=n?sum/n:null,pct=(overall||0)/5,R=64,C=2*Math.PI*R,off=C*(1-pct*0.75),col=scoreColor(overall);
+  const overall=n?sum/n:null,pct=(overall||0)/4,R=64,C=2*Math.PI*R,off=C*(1-pct*0.75),col=scoreColor(overall);
   document.getElementById('gauge').innerHTML=`<svg width="180" height="140" viewBox="0 0 180 140">
     <circle cx="90" cy="90" r="${R}" fill="none" stroke="#e7ebf2" stroke-width="15" stroke-dasharray="${C*0.75} ${C}" transform="rotate(135 90 90)" stroke-linecap="round"/>
     <circle cx="90" cy="90" r="${R}" fill="none" stroke="${col}" stroke-width="15" stroke-dasharray="${C*0.75} ${C}" stroke-dashoffset="${off}" transform="rotate(135 90 90)" stroke-linecap="round"/>
     <text x="90" y="86" text-anchor="middle" style="font-family:Space Grotesk;font-weight:700;font-size:34px;fill:var(--ink)">${overall!=null?overall.toFixed(2):'—'}</text>
-    <text x="90" y="106" text-anchor="middle" style="font-family:Inter;font-size:12px;fill:#3a4a67">out of 5.0</text></svg><div class="lab">Overall satisfaction</div>`;
+    <text x="90" y="106" text-anchor="middle" style="font-family:Inter;font-size:12px;fill:#3a4a67">out of 4.0</text></svg><div class="lab">Overall satisfaction</div>`;
   document.getElementById('sectbars').innerHTML=RUBRIC.map(sec=>{const v=secN[sec.code]?secSum[sec.code]/secN[sec.code]:null;
-    return `<div class="sbar"><div class="nm">${sec.name}</div><div class="track"><div class="fill" style="width:${v?v/5*100:0}%;background:${scoreColor(v)}"></div></div><div class="sc" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(2):'—'}</div></div>`;}).join('');
+    return `<div class="sbar"><div class="nm">${sec.name}</div><div class="track"><div class="fill" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="sc" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(2):'—'}</div></div>`;}).join('');
   const low=SESSIONS.filter(s=>{const o=sessionOverall(s.sid);return o!=null&&o<3.5;}).length;
   const fbCourses=feedbackCourseIds().size,fbSessions=feedbackSessions().length,fbFacs=feedbackFacIds().size;
   document.getElementById('stats').innerHTML=`
@@ -528,20 +528,20 @@ function renderSessionDetail(){
   // session-level sections
   const sessGroups=SESSION_SECS.map(sec=>{
     const rows=sec.items.map(([code,label])=>{const v=sessItemAvg(s.sid,code);if(v==null)return '';
-      return `<div class="ritem"><div class="rn"><span class="mono" style="color:#8a94a8">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/5*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+      return `<div class="ritem"><div class="rn"><span class="mono" style="color:#8a94a8">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
     if(!rows.trim())return '';const sv=sessionSectionAvg(s.sid,sec);
     return `<div class="rgroup"><h4>${sec.name}<span>${sv?sv.toFixed(2):'—'}</span></h4>${rows}</div>`;}).join('');
   // facilitation per facilitator
   const facBlocks=s.facs.map(fid=>{
     const fs=facInSession(s.sid,fid);
     const rows=D1.items.map(([code,label])=>{const v=facItemAvg(s.sid,fid,code);if(v==null)return '';
-      return `<div class="ritem"><div class="rn"><span class="mono" style="color:#8a94a8">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/5*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+      return `<div class="ritem"><div class="rn"><span class="mono" style="color:#8a94a8">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
     return `<div class="facblock"><div class="fh"><b>${esc(facName(fid))} <span class="mono" style="color:#8a94a8;font-weight:500">${fid}</span></b><span class="fs" style="color:${fs?scoreColor(fs):'#aab'}">${fs?fs.toFixed(2):'—'}</span></div>${rows||'<span style="font-size:12px;color:#8a94a8">No facilitation responses yet.</span>'}</div>`;}).join('');
   const o=sessionOverall(s.sid);
   el.innerHTML=`<div class="detail-head"><div class="key">[${s.sid}] · session key · course ${c.cid}</div>
     <h2>${esc(c.plo||s.cid)}</h2>
     <div class="sub"><span class="pill">${c.sub||'—'}</span><span class="pill">${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span><span>${weekday(s.date)?weekday(s.date)+', ':''}${fmtDate(s.date)}</span></div>
-    <div class="sub"><b style="color:${o?scoreColor(o):'#aab'};font-size:15px;font-family:Space Grotesk">${o?o.toFixed(2):'—'}/5</b><span>${a.resp} responses</span></div></div>
+    <div class="sub"><b style="color:${o?scoreColor(o):'#aab'};font-size:15px;font-family:Space Grotesk">${o?o.toFixed(2):'—'}/4</b><span>${a.resp} responses</span></div></div>
     <div class="detail-body">
       <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${s.facs.length} rated separately</span></h4>${facBlocks||'<span style="font-size:12px;color:#8a94a8">No facilitator assigned to this session yet — add one on the Catalogue tab to enable facilitation reporting.</span>'}</div>
       ${sessGroups}</div>`;
@@ -564,11 +564,11 @@ function renderCourseDetail(){
   if(!c){el.className='detail empty';el.innerHTML='<div>Select a course.</div>';return;}
   el.className='detail';const ag=courseAgg(c.cid);
   const ss=ag.sessions.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-  const spark=ss.map(s=>{const o=sessionOverall(s.sid);return `<i style="height:${o?o/5*100:4}%;background:${scoreColor(o)}" title="${fmtDate(s.date)}: ${o?o.toFixed(2):'—'}"></i>`;}).join('');
-  const rows=ss.map(s=>{const o=sessionOverall(s.sid);return `<div class="ritem" style="grid-template-columns:1fr 80px 34px"><div class="rn"><span class="key mono">[${s.sid}]</span> ${fmtDate(s.date)} · ${s.facs.map(facName).join(', ')}</div><div class="rt"><div class="rf" style="width:${o?o/5*100:0}%;background:${scoreColor(o)}"></div></div><div class="rv" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(1):'—'}</div></div>`;}).join('');
+  const spark=ss.map(s=>{const o=sessionOverall(s.sid);return `<i style="height:${o?o/4*100:4}%;background:${scoreColor(o)}" title="${fmtDate(s.date)}: ${o?o.toFixed(2):'—'}"></i>`;}).join('');
+  const rows=ss.map(s=>{const o=sessionOverall(s.sid);return `<div class="ritem" style="grid-template-columns:1fr 80px 34px"><div class="rn"><span class="key mono">[${s.sid}]</span> ${fmtDate(s.date)} · ${s.facs.map(facName).join(', ')}</div><div class="rt"><div class="rf" style="width:${o?o/4*100:0}%;background:${scoreColor(o)}"></div></div><div class="rv" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(1):'—'}</div></div>`;}).join('');
   el.innerHTML=`<div class="detail-head"><div class="key">${c.cid} · course</div><h2>${esc(c.plo)}</h2>
     <div class="sub"><span class="pill">${c.sub||'—'}</span><span class="pill">${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span></div>
-    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/5</b><span>${ss.length} sessions · ${ag.resp} responses</span></div></div>
+    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${ss.length} sessions · ${ag.resp} responses</span></div></div>
     <div class="detail-body"><div class="rgroup"><h4>Score across deliveries<span>oldest → newest</span></h4><div class="spark">${spark}</div></div>
     <div class="rgroup"><h4>Sessions</h4>${rows}</div></div>`;
 }
@@ -590,13 +590,13 @@ function renderFacDetail(){
   if(!f){el.className='detail empty';el.innerHTML='<div>Select a facilitator.</div>';return;}
   el.className='detail';const ag=facAgg(f.fid);
   const itemRows=D1.items.map(([code,label])=>{const it=ag.items[code];const v=it&&it.n?it.sum/it.n:null;if(v==null)return '';
-    return `<div class="ritem"><div class="rn"><span class="mono" style="color:#8a94a8">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/5*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+    return `<div class="ritem"><div class="rn"><span class="mono" style="color:#8a94a8">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
   const norm=ag.overall;
   const sessRows=ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);const c=CMAP[s.cid]||{};const fs=facInSession(sk,f.fid);
     const flag=(fs!=null&&norm!=null&&fs<norm-0.4)?` <span class="pill" style="background:#fdeceb;color:#a3352f">below norm</span>`:'';
-    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sk}]</span> ${esc(c.plo||'')} · ${fmtDate(s.date)}${flag}</div><div class="rt"><div class="rf" style="width:${fs?fs/5*100:0}%;background:${scoreColor(fs)}"></div></div><div class="rv" style="color:${fs?scoreColor(fs):'#aab'}">${fs?fs.toFixed(1):'—'}</div></div>`;}).join('');
+    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sk}]</span> ${esc(c.plo||'')} · ${fmtDate(s.date)}${flag}</div><div class="rt"><div class="rf" style="width:${fs?fs/4*100:0}%;background:${scoreColor(fs)}"></div></div><div class="rv" style="color:${fs?scoreColor(fs):'#aab'}">${fs?fs.toFixed(1):'—'}</div></div>`;}).join('');
   el.innerHTML=`<div class="detail-head"><div class="key">${f.fid} · facilitator</div><h2>${esc(f.name)}</h2>
-    <div class="sub"><b style="color:${norm?scoreColor(norm):'#aab'};font-size:15px;font-family:Space Grotesk">${norm?norm.toFixed(2):'—'}/5</b><span>facilitation · ${ag.sessions.length} sessions · ${ag.resp} responses</span></div></div>
+    <div class="sub"><b style="color:${norm?scoreColor(norm):'#aab'};font-size:15px;font-family:Space Grotesk">${norm?norm.toFixed(2):'—'}/4</b><span>facilitation · ${ag.sessions.length} sessions · ${ag.resp} responses</span></div></div>
     <div class="detail-body"><div class="rgroup fac"><h4>Facilitation items (all sessions)</h4>${itemRows}</div>
     <div class="rgroup"><h4>Per session<span>flagged if &gt;0.4 below their norm</span></h4>${sessRows}</div></div>`;
 }
@@ -610,7 +610,7 @@ function renderSummary(){
   const overall=programmeFinalRating();
   const fbCourses=feedbackCourseIds().size,fbSessions=feedbackSessions().length,fbFacs=feedbackFacIds().size;
   document.getElementById('sumChips').innerHTML=`
-    <div class="qr-chip"><div class="n" style="color:${overall?scoreColor(overall):'#fff'}">${overall?overall.toFixed(2):'—'}/5</div><div class="l">Final quality rating</div></div>
+    <div class="qr-chip"><div class="n" style="color:${overall?scoreColor(overall):'#fff'}">${overall?overall.toFixed(2):'—'}/4</div><div class="l">Final quality rating</div></div>
     <div class="qr-chip"><div class="n">${fbCourses}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${COURSES.length}</span></div><div class="l">Courses with feedback</div></div>
     <div class="qr-chip"><div class="n">${fbSessions}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${SESSIONS.length}</span></div><div class="l">Sessions with feedback</div></div>
     <div class="qr-chip"><div class="n">${fbFacs}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${FACS.length}</span></div><div class="l">Facilitators rated</div></div>`;
