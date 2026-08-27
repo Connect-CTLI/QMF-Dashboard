@@ -822,17 +822,22 @@ document.getElementById('expJson').onclick=exportJSON;
 document.getElementById('impFile').addEventListener('change',e=>{if(e.target.files[0])importFile(e.target.files[0]);});
 document.getElementById('impXlsx').addEventListener('change',e=>{if(e.target.files[0])importWorkbook(e.target.files[0]);});
 function pickField(row,keys){for(const k of Object.keys(row)){const kl=k.toLowerCase().trim();if(keys.some(x=>kl.includes(x)))return row[k];}return null;}
+function pickUnitField(row){
+  const v=pickField(row,['hosting']);if(v!=null)return v; // prefer an explicit "hosting" column
+  for(const k of Object.keys(row)){if(/\bunit\b/.test(k.toLowerCase().trim()))return row[k];} // whole-word "unit" only — plain includes() would also match "Opportunity"
+  return null;}
 function fmtRegDate(v){if(v==null||v==='')return null;if(v instanceof Date){const p=n=>String(n).padStart(2,'0');return v.getFullYear()+'-'+p(v.getMonth()+1)+'-'+p(v.getDate());}
   let s=String(v).trim();const m=s.match(/^(\d{4}-\d{2}-\d{2})/);if(m)return m[1];return s||null;}
 function csvRowsToObjects(text){const rows=parseCSV(text);if(rows.length<2)return[];const head=rows[0].map(h=>h.trim());
   return rows.slice(1).map(r=>{const o={};head.forEach((h,i)=>o[h]=r[i]!==undefined?r[i]:null);return o;});}
 function applyRegisterRows(cRows,sRows,fRows){
-  if(cRows&&cRows.length)COURSES=cRows.filter(r=>pickField(r,['course id'])).map(r=>({cid:String(pickField(r,['course id'])).trim(),plo:pickField(r,['professional learning','plo'])||'',sub:pickField(r,['sub'])||null,unit:pickField(r,['hosting'])||null,days:pickField(r,['day'])!=null&&pickField(r,['day'])!==''?String(pickField(r,['day'])):null,hours:pickField(r,['hour'])!=null&&pickField(r,['hour'])!==''?String(pickField(r,['hour'])):null,term:pickField(r,['term'])!=null&&pickField(r,['term'])!==''?String(pickField(r,['term'])).replace(/\.0$/,''):null,mode:pickField(r,['mode'])||null}));
+  if(cRows&&cRows.length)COURSES=cRows.filter(r=>pickField(r,['course id'])).map(r=>({cid:String(pickField(r,['course id'])).trim(),plo:pickField(r,['professional learning','plo'])||'',sub:pickField(r,['sub'])||null,unit:pickUnitField(r)||null,days:pickField(r,['day'])!=null&&pickField(r,['day'])!==''?String(pickField(r,['day'])):null,hours:pickField(r,['hour'])!=null&&pickField(r,['hour'])!==''?String(pickField(r,['hour'])):null,term:pickField(r,['term'])!=null&&pickField(r,['term'])!==''?String(pickField(r,['term'])).replace(/\.0$/,''):null,mode:pickField(r,['mode'])||null}));
   if(sRows&&sRows.length)SESSIONS=sRows.filter(r=>pickField(r,['session id'])).map(r=>{const f=pickField(r,['facilitator id','facilitator'])||'';return {sid:String(pickField(r,['session id'])).replace(/\.0$/,'').trim(),cid:String(pickField(r,['course id'])||'').trim(),date:fmtRegDate(pickField(r,['date'])),facs:String(f).split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),online:false};});
   if(fRows&&fRows.length)FACS=fRows.filter(r=>pickField(r,['facilitator id'])).map(r=>({fid:String(pickField(r,['facilitator id'])).trim(),name:pickField(r,['name'])||''}));
   const cm={};COURSES.forEach(c=>cm[c.cid]=(c.mode||'').toLowerCase());SESSIONS.forEach(s=>{s.online=/online|blended/.test(cm[s.cid]||'');});
   rebuild();refreshFilters();renderCat();renderActive();
-  return {courses:COURSES.length,sessions:SESSIONS.length,facs:FACS.length,assigned:SESSIONS.filter(s=>s.facs.length).length};
+  const unitsFound=new Set(COURSES.map(c=>c.unit).filter(Boolean)).size;
+  return {courses:COURSES.length,sessions:SESSIONS.length,facs:FACS.length,assigned:SESSIONS.filter(s=>s.facs.length).length,unitsFound};
 }
 function importWorkbook(file){
   if(typeof XLSX==='undefined'){alert('Spreadsheet reader is still loading — try again in a moment.');return;}
@@ -842,7 +847,7 @@ function importWorkbook(file){
     const grab=names=>{for(const n of wb.SheetNames){if(names.some(x=>n.toLowerCase().includes(x)))return XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:null});}return null;};
     const cRows=grab(['course']),sRows=grab(['session']),fRows=grab(['facilit']);
     const r=applyRegisterRows(cRows,sRows,fRows);
-    alert(`Loaded from register: ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators.`+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:''));
+    alert(`Loaded from register: ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators.`+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:'')+(r.courses&&!r.unitsFound?`\n⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab. Every unit row will be blank until this is fixed.`:''));
   }catch(err){alert('Could not read workbook: '+err.message);}};
   fr.readAsArrayBuffer(file);
 }
@@ -868,7 +873,7 @@ function loadRegisterFromLinks(silent){
       const sRows=sText?csvRowsToObjects(sText):null;
       const fRows=fText?csvRowsToObjects(fText):null;
       const r=applyRegisterRows(cRows,sRows,fRows);
-      st.textContent=`✓ Loaded ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators.`;
+      st.textContent=`✓ Loaded ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators.`+(r.courses&&!r.unitsFound?' ⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab.':'');
       if(cUrl)saveLink('link_reg_courses',cUrl);
       if(sUrl)saveLink('link_reg_sessions',sUrl);
       if(fUrl)saveLink('link_reg_facs',fUrl);
