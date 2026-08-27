@@ -252,8 +252,8 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <button class="btn" id="expJson">Export JSON</button>
       <label class="btn" style="cursor:pointer">Import JSON<input type="file" id="impFile" accept=".json" class="hidden"></label>
       <label class="btn primary" style="cursor:pointer">Import register (.xlsx)<input type="file" id="impXlsx" accept=".xlsx" class="hidden"></label>
-      <button class="btn" id="copySessions" style="margin-left:auto">Copy session options (course feedback form)</button>
-      <button class="btn" id="copyAll">Copy session × facilitator options (facilitator form)</button>
+      <button class="btn" id="copySessions" style="margin-left:auto">Copy session options (both forms)</button>
+      <button class="btn" id="copyAll">Copy facilitator roster ("Select your facilitator" options)</button>
     </div>
     <div id="catBody"></div>
     <div class="note" id="catNote"></div>
@@ -285,11 +285,11 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
     </div>
     <div class="panel">
       <h2>How the form maps</h2>
-      <div class="psub">Two things let the dashboard read each response:</div>
-      <div class="step"><div class="no">A</div><div class="st"><h4>Session key (two forms, two key formats)</h4><p>The <b>course feedback form</b>'s session question just needs the plain session key:<br><code>20 Feb · SACE Ethics Seminar [2701]</code><br>The <b>facilitator form</b>'s session question needs the compound key, since it identifies who's being rated:<br><code>20 Feb · SACE Ethics Seminar · N. Adams [2701-F03]</code><br>Co-facilitated sessions appear once per facilitator on the facilitator form only. Copy both lists from the Catalogue tab.</p></div></div>
-      <div class="step"><div class="no">B</div><div class="st"><h4>Rubric matching</h4><p>Each Likert question is matched by its actual wording, not a code prefix — e.g. a column containing <i>"pitched at the right level of depth"</i> is read as <code>C2</code>, and <i>"EDULIS Library staff are knowledgeable and courteous"</i> is read as <code>EL4</code>. This means the sheet can be pasted in exactly as Google Forms exports it. Facilitation questions (<code>D1</code>) are attributed to whichever facilitator is ticked in the key.</p></div></div>
-      <div class="note"><b>Numbers or text?</b> Numbered answers ("4" or "4 - Good") are read directly. Plain-text answers (e.g. "Strongly agree") aren't converted to a score yet — share the exact wording of your answer options and that mapping can be added.</div>
-      <div class="note"><b>Two forms, two keys.</b> The course feedback form only needs the plain <code>[2701]</code> session key — no facilitator required. The facilitator form needs the compound <code>[2701-F03]</code> key, since that's how the dashboard knows which facilitator a rating belongs to. Load each into its matching box on the left.</div>
+      <div class="psub">Three things let the dashboard read each response:</div>
+      <div class="step"><div class="no">A</div><div class="st"><h4>Session key (same on both forms)</h4><p>Both forms' session question uses the same plain session key:<br><code>20 Feb · SACE Ethics Seminar [2701]</code><br>Copy the list from Catalogue → <b>Copy session options</b> and paste it into each form's session question.</p></div></div>
+      <div class="step"><div class="no">B</div><div class="st"><h4>Who facilitated (facilitator form only)</h4><p>The facilitator form has a separate <i>"Select your facilitator"</i> checkbox question — respondents tick who ran the session, e.g. <code>F03 A. Petersen</code>. Ticking more than one attributes the same ratings to each. If nobody ticks a name, the dashboard falls back to whoever the register has assigned to that session. Copy the checkbox options from Catalogue → <b>Copy facilitator roster</b>.</p></div></div>
+      <div class="step"><div class="no">C</div><div class="st"><h4>Rubric matching</h4><p>Each Likert question is matched by its actual wording, not a code prefix — e.g. a column containing <i>"pitched at the right level of depth"</i> is read as <code>C2</code>, and <i>"demonstrated good knowledge of the subject"</i> is read as <code>D1.1</code>. This means the sheet can be pasted in exactly as Google Forms exports it.</p></div></div>
+      <div class="note"><b>Numbers or text?</b> Both are read. Numbered answers ("4" or "4 - Agree") use the leading digit. Plain-text agreement answers ("Strongly agree", "Agree", "Disagree", "Strongly disagree") are also read directly. Other plain-text scales need their exact wording confirmed before they're added.</div>
     </div>
   </div>
 </section>
@@ -309,7 +309,12 @@ const RUBRIC=[
    ['C7','Topics supported objectives','supported the objectives of the learning opportunity'],
    ['C8','Professionally designed','content looked professionally designed'],
    ['C10','Collaboration','share, collaborate and engage with others']]},
- {code:'D1',name:'Facilitator',kind:'facilitator',group:'delivery',items:[['D1.1','Support received'],['D1.2','Quality of feedback'],['D1.3','Punctuality'],['D1.4','Respectfulness'],['D1.5','Knowledgeable and skilled'],['D1.6','Well prepared'],['D1.7','Presentation style']]},
+ {code:'D1',name:'Facilitator',kind:'facilitator',group:'delivery',items:[
+   ['D1.1','Subject knowledge','demonstrated good knowledge of the subject'],
+   ['D1.2','Explained content clearly','explained the content clearly'],
+   ['D1.3','Encouraged participation','encouraged participation and interaction'],
+   ['D1.4','Responded to questions','responded effectively to questions and contributions'],
+   ['D1.5','Overall facilitation satisfaction','satisfied with the facilitation of this session']]},
  {code:'D2',name:'Delivery & Logistics',kind:'session',group:'delivery',items:[
    ['D2.1','Communication','communication about the learning opportunity prior to the start'],
    ['D2.2','Logistics well executed','logistical arrangements (registration, accommodation, transport'],
@@ -370,8 +375,6 @@ function scoreColor(v){if(v==null||isNaN(v))return '#c8cfda';if(v<3){return mix(
 function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);}
 function facName(fid){return (FMAP[fid]&&FMAP[fid].name)||fid;}
 function courseOf(sk){const s=SESSIONS.find(x=>x.sid===sk);return s?CMAP[s.cid]:null;}
-function sessionLabel(s,fid){const c=CMAP[s.cid]||{};const wd=weekday(s.date);const dt=fmtDate(s.date);
-  return `${wd?wd+', ':''}${dt} · ${c.plo||s.cid} · ${facName(fid)} [${s.sid}-${fid}]`;}
 function sessionLabelPlain(s){const c=CMAP[s.cid]||{};const wd=weekday(s.date);const dt=fmtDate(s.date);
   return `${wd?wd+', ':''}${dt} · ${c.plo||s.cid} [${s.sid}]`;}
 
@@ -686,15 +689,15 @@ function renderCat(){
     note.innerHTML='<b>Facilitators</b> are the roster. Assign them to sessions on the Sessions tab (comma-separated IDs). Facilitation feedback rolls up per person from here.';
     bindCat('facs');
   } else {
-    body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>Key</th><th>Course</th><th>Date</th><th>Facilitator IDs</th><th>Mode</th><th>Facilitator-form options</th><th></th></tr></thead><tbody>${SESSIONS.map((s,i)=>{const c=CMAP[s.cid]||{};
+    body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>Key</th><th>Course</th><th>Date</th><th>Facilitator IDs</th><th>Mode</th><th>Fallback if unticked</th><th></th></tr></thead><tbody>${SESSIONS.map((s,i)=>{const c=CMAP[s.cid]||{};
       return `<tr data-i="${i}"><td class="keycell">${s.sid}</td>
       <td><select data-f="cid">${COURSES.map(cc=>`<option value="${cc.cid}"${cc.cid===s.cid?' selected':''}>${cc.cid} · ${esc((cc.plo||'').slice(0,32))}</option>`).join('')}</select></td>
       <td><input value="${esc(s.date||'')}" data-f="date" placeholder="YYYY-MM-DD" style="min-width:110px"></td>
       <td><input value="${esc(s.facs.join(', '))}" data-f="facs" style="min-width:110px" title="e.g. F01, F07"></td>
       <td class="mono" style="font-size:11px;color:#8a94a8">${c.mode||'—'}</td>
-      <td class="mono" style="font-size:10.5px;color:#8a94a8">${s.facs.length} option${s.facs.length!==1?'s':''}</td>
+      <td class="mono" style="font-size:10.5px;color:#8a94a8">${s.facs.length?s.facs.join(', '):'none set'}</td>
       <td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
-    note.innerHTML='<b>Sessions</b> are individual deliveries. For the <b>course feedback form</b>, each session is one option with a plain key, e.g. <span class="mono">[2701]</span> — copy that list with <b>Copy session options</b>. For the <b>facilitator form</b>, each session generates one option <i>per facilitator</i> — a co-facilitated session yields two options with keys like <span class="mono">[2701-F03]</span> and <span class="mono">[2701-F07]</span> — copy that list with <b>Copy session × facilitator options</b>.';
+    note.innerHTML='<b>Sessions</b> are individual deliveries. Both forms use the same plain session key, e.g. <span class="mono">[2701]</span> — copy that list with <b>Copy session options</b>. The facilitator form additionally needs a roster of facilitator names for its "Select your facilitator" checkbox question — copy that separately with <b>Copy facilitator roster</b>. If a facilitator-form response leaves that checkbox blank, ratings fall back to the facilitators assigned here.';
     bindCat('sessions');
   }
 }
@@ -716,30 +719,58 @@ function parseCSV(text){const rows=[];let row=[],cur='',q=false;for(let i=0;i<te
   else{if(ch==='"')q=true;else if(ch===','){row.push(cur);cur='';}else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur='';}else if(ch==='\r'){}else cur+=ch;}}
   if(cur.length||row.length){row.push(cur);rows.push(row);}return rows.filter(r=>r.some(c=>c!==''));}
 function norm(s){return String(s||'').replace(/\s+/g,' ').trim().toLowerCase();}
+const TEXT_SCORE_MAP={'strongly disagree':1,'disagree':2,'agree':3,'strongly agree':4};
 function scoreFromCell(raw){
   if(raw==null)return NaN;const s=String(raw).trim();if(!s)return NaN;
   const n=parseFloat(s);if(!isNaN(n))return n; // plain number, e.g. "4"
-  const m=s.match(/^(\d)/);if(m)return +m[1]; // numbered format, e.g. "3 - Good"
-  return NaN; // plain-text label (e.g. "Strongly agree") — needs the real answer wording to map safely, see note in Setup tab
+  const m=s.match(/^(\d)/);if(m)return +m[1]; // numbered format, e.g. "3 - Agree"
+  const key=norm(s);if(TEXT_SCORE_MAP.hasOwnProperty(key))return TEXT_SCORE_MAP[key]; // confirmed plain-text scale, e.g. "Strongly agree"
+  return NaN; // unrecognised plain-text label
 }
-function parseResponseCSV(text,requireFac){const rows=parseCSV(text);if(rows.length<2)throw new Error('empty');const head=rows[0];
+function parseResponseCSV(text){const rows=parseCSV(text);if(rows.length<2)throw new Error('empty');const head=rows[0];
   let keyCol=-1;const codeCols={};
-  const keyPattern=requireFac?/\[(\d{3,4})-(F\d+)\]/i:/\[(\d{3,4})(?:-(F\d+))?\]/i;
+  const keyPattern=/\[(\d{3,4})\]/;
   head.forEach((h,idx)=>{const H=norm(h);
     if(keyCol<0&&(/session/.test(H)||/professional learning opportunity that you are evaluating/.test(H)))keyCol=idx;
     let best=null;
     for(const item of ALL_ITEM_DEFS){if(item.kw&&H.includes(item.kw)){if(!best||item.kw.length>best.kw.length)best=item;}}
     if(best)codeCols[idx]=best.code;});
   if(keyCol<0)for(let c=0;c<head.length;c++){if(rows.slice(1).some(r=>keyPattern.test(r[c]||''))){keyCol=c;break;}}
-  const out=[];for(const r of rows.slice(1)){const m=(r[keyCol]||'').match(keyPattern);if(!m)continue;if(requireFac&&!m[2])continue;
+  const out=[];for(const r of rows.slice(1)){const m=(r[keyCol]||'').match(keyPattern);if(!m)continue;
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
-    if(Object.keys(scores).length)out.push({sk:m[1],fid:m[2]?m[2].toUpperCase():null,scores});}
-  if(!out.length)throw new Error(requireFac?'no rows matched — check the [key-Fxx] column and rubric wording':'no rows matched — check the [key] column and rubric wording');
+    if(Object.keys(scores).length)out.push({sk:m[1],fid:null,scores});}
+  if(!out.length)throw new Error('no rows matched — check the [key] column and rubric wording');
+  return out;}
+function findFacilitatorCol(head){
+  for(let i=0;i<head.length;i++){const H=norm(head[i]);if(H.includes('select your facilitator')||(H.includes('facilitator')&&H.includes('select')))return i;}
+  return -1;}
+function extractFacIds(cell){if(!cell)return[];const m=String(cell).match(/F\d{1,3}/gi)||[];return[...new Set(m.map(x=>x.toUpperCase()))];}
+function parseFacilitatorCSV(text){const rows=parseCSV(text);if(rows.length<2)throw new Error('empty');const head=rows[0];
+  let keyCol=-1;const codeCols={};
+  const keyPattern=/\[(\d{3,4})\]/;
+  head.forEach((h,idx)=>{const H=norm(h);
+    if(keyCol<0&&/session/.test(H))keyCol=idx;
+    let best=null;
+    for(const item of ALL_ITEM_DEFS){if(item.kw&&H.includes(item.kw)){if(!best||item.kw.length>best.kw.length)best=item;}}
+    if(best)codeCols[idx]=best.code;});
+  if(keyCol<0)for(let c=0;c<head.length;c++){if(rows.slice(1).some(r=>keyPattern.test(r[c]||''))){keyCol=c;break;}}
+  const facCol=findFacilitatorCol(head);
+  const out=[];
+  for(const r of rows.slice(1)){
+    const m=(r[keyCol]||'').match(keyPattern);if(!m)continue;const sk=m[1];
+    const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
+    if(!Object.keys(scores).length)continue;
+    let fids=facCol>=0?extractFacIds(r[facCol]):[];
+    if(!fids.length){const s=SESSIONS.find(x=>x.sid===sk);fids=s?s.facs:[];} // no facilitator ticked — fall back to whoever the register has assigned
+    if(!fids.length){out.push({sk,fid:null,scores});continue;}
+    for(const fid of fids)out.push({sk,fid,scores});
+  }
+  if(!out.length)throw new Error('no rows matched — check the [key] column, the "Select your facilitator" column, and rubric wording');
   return out;}
 function mergeResponses(){RESPONSES=[...RESPONSES_MAIN,...RESPONSES_FAC];LIVE=RESPONSES.length>0;
   aggregate();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
-function ingestCSV(text){RESPONSES_MAIN=parseResponseCSV(text,false);mergeResponses();return RESPONSES_MAIN.length;}
-function ingestFacCSV(text){RESPONSES_FAC=parseResponseCSV(text,true);mergeResponses();return RESPONSES_FAC.length;}
+function ingestCSV(text){RESPONSES_MAIN=parseResponseCSV(text);mergeResponses();return RESPONSES_MAIN.length;}
+function ingestFacCSV(text){RESPONSES_FAC=parseFacilitatorCSV(text);mergeResponses();return RESPONSES_FAC.length;}
 function setBadge(mainN,facN){const b=document.getElementById('dataBadge'),t=document.getElementById('dataBadgeTxt');const on=(mainN+facN)>0;b.classList.toggle('on',on);
   if(!on){t.textContent='No responses connected yet';return;}
   const parts=[];if(mainN)parts.push(`${mainN} main form`);if(facN)parts.push(`${facN} facilitator form`);
@@ -752,9 +783,9 @@ function importFile(file){const fr=new FileReader();fr.onload=()=>{try{const m=J
   COURSES=(m.courses||[]).map(c=>({...c}));SESSIONS=(m.sessions||[]).map(s=>({...s,facs:[...(s.facs||[])]}));FACS=(m.facilitators||[]).map(f=>({...f}));
   rebuild();refreshFilters();renderCat();renderActive();}catch(e){alert('Could not read file: '+e.message);}};fr.readAsText(file);}
 function copySessionOptions(){const lines=SESSIONS.map(sessionLabelPlain);
-  navigator.clipboard.writeText(lines.join('\n'));const b=document.getElementById('copySessions');b.textContent=`✓ Copied ${lines.length} options`;setTimeout(()=>b.textContent='Copy session options (course feedback form)',1500);}
-function copyAllOptions(){const lines=[];for(const s of SESSIONS)for(const fid of s.facs)lines.push(sessionLabel(s,fid));
-  navigator.clipboard.writeText(lines.join('\n'));const b=document.getElementById('copyAll');b.textContent=`✓ Copied ${lines.length} options`;setTimeout(()=>b.textContent='Copy session × facilitator options (facilitator form)',1500);}
+  navigator.clipboard.writeText(lines.join('\n'));const b=document.getElementById('copySessions');b.textContent=`✓ Copied ${lines.length} options`;setTimeout(()=>b.textContent='Copy session options (both forms)',1500);}
+function copyFacilitatorRoster(){const lines=FACS.map(f=>`${f.fid} ${f.name||''}`.trim());
+  navigator.clipboard.writeText(lines.join('\n'));const b=document.getElementById('copyAll');b.textContent=`✓ Copied ${lines.length} options`;setTimeout(()=>b.textContent='Copy facilitator roster ("Select your facilitator" options)',1500);}
 
 /* filters UI */
 function refreshFilters(){
@@ -817,7 +848,7 @@ function importWorkbook(file){
   fr.readAsArrayBuffer(file);
 }
 document.getElementById('copySessions').onclick=copySessionOptions;
-document.getElementById('copyAll').onclick=copyAllOptions;
+document.getElementById('copyAll').onclick=copyFacilitatorRoster;
 document.getElementById('loadCsv').onclick=()=>{const url=document.getElementById('csvUrl').value.trim();const st=document.getElementById('csvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
   fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses.`;saveLink('link_responses',url);}).catch(e=>{st.textContent='Could not load: '+e.message;});};
