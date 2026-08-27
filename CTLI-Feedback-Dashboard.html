@@ -185,7 +185,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   </div>
   <div class="panel">
     <h2>Rating scale by sub-directorate and unit</h2>
-    <div class="psub">Average score per rubric code, rolled up by hosting unit. Content also gets a programme-wide summary under <b>PDD</b>. Venue, catering and accommodation feedback is reported once, under <b>Corporate Services</b>, rather than against each hosting unit. EDULIS Library is tracked separately from both.</div>
+    <div class="psub">Average score per rubric code, rolled up by hosting unit. Content and logistics (venue, catering, accommodation) also get programme-wide summaries under <b>PDD</b> and <b>Corporate Services</b> respectively, on top of each unit's own scores. EDULIS Library is tracked separately from both.</div>
     <div class="sum-scroll"><table class="sum" id="sumTable"></table></div>
     <div class="note" id="sumMethodNote"></div>
   </div>
@@ -410,7 +410,6 @@ function sectionAvgForSessions(sessList,sec){let sum=0,n=0;
   for(const s of sessList){const v=sessionSectionAvg(s.sid,sec);const rn=AGG[s.sid].resp;if(v!=null){sum+=v*rn;n+=rn;}}
   return n?sum/n:null;}
 function unitSectionAvg(unit,sec){
-  if(sec.group==='corporate')return null; // logistics scores roll up to Corporate Services, not the hosting unit
   const ss=SESSIONS.filter(s=>(CMAP[s.cid]||{}).unit===unit);
   return sectionAvgForSessions(ss,sec);}
 function corporateSectionAvg(sec){
@@ -646,7 +645,7 @@ function renderSummary(){
       <li>Each rubric code (e.g. C2, D2.1) is the average of every matching response for that specific question, weighted by response count, for sessions hosted by that unit.</li>
       <li><b>D1 Facilitation</b> is one cumulative score — the average across every facilitation question and every facilitator on sessions hosted by that unit.</li>
       <li>Content (C — Programme Design &amp; Development) is reported per unit like every other section, plus pooled once more under <b>PDD</b> as a programme-wide summary.</li>
-      <li>Venue, Catering and Accommodation (S1–S3) are pooled once under <b>Corporate Services</b>, across every session programme-wide, rather than against the hosting unit.</li>
+      <li>Venue, Catering and Accommodation (S1–S3) are reported per unit like every other section, plus pooled once more under <b>Corporate Services</b> as a programme-wide summary.</li>
       <li><b>Final Quality Rating</b> is the plain average of every section score shown in that row.</li>
       <li><b>Programme overall</b> (footer) applies the same calculation across the whole programme.</li>
     </ul>`;
@@ -658,13 +657,13 @@ function renderHeat(){
   const cols=[...units,PDD_UNIT,CORPORATE_UNIT];
   let head=`<thead><tr><th class="row">Section ↓ / Unit →</th>${cols.map(u=>`<th${u===CORPORATE_UNIT?' style="color:#5b3a99"':u===PDD_UNIT?' style="color:#00838a"':''}>${u}</th>`).join('')}<th>All</th></tr></thead>`;
   let body='<tbody>';
-  for(const sec of RUBRIC){body+=`<tr><th class="row" title="${sec.name}">${sec.name}${sec.group==='corporate'?' *':''}</th>`;
+  for(const sec of RUBRIC){body+=`<tr><th class="row" title="${sec.name}">${sec.name}</th>`;
     for(const u of cols){
       const v=sectionAvgForUnit(u,sec);
       body+=v!=null?`<td class="cell" style="background:${scoreColor(v)}">${v.toFixed(1)}</td>`:'<td style="color:#c8cfda">—</td>';}
     const gv=sectionAvgForSessions(SESSIONS,sec);body+=gv!=null?`<td class="cell" style="background:${scoreColor(gv)}">${gv.toFixed(1)}</td>`:'<td>—</td>';body+='</tr>';}
   document.getElementById('heat').innerHTML=head+body+'</tbody>';
-  document.getElementById('heatMeta').textContent=`${units.length} units + PDD + Corporate Services × ${RUBRIC.length} sections · PDD is a programme-wide Content summary · * venue/catering/accommodation reported once, under Corporate Services`;
+  document.getElementById('heatMeta').textContent=`${units.length} units + PDD + Corporate Services × ${RUBRIC.length} sections · PDD and Corporate Services are programme-wide summaries on top of each unit's own scores`;
 }
 
 /* CATALOGUE */
