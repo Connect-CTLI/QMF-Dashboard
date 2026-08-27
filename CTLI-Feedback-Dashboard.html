@@ -136,12 +136,11 @@ table.cat .plo input{min-width:210px;font-weight:500}
 .sum-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
 table.sum{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff;min-width:920px}
 table.sum th,table.sum td{padding:8px 10px;border-bottom:1px solid var(--line-soft);text-align:center}
-table.sum thead tr.grp th{background:#eef2f9;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--brand);font-weight:700;border-bottom:1px solid var(--line)}
-table.sum thead tr.grp th.g-design{background:#eaf1ff}
-table.sum thead tr.grp th.g-delivery{background:#eaf7f2}
-table.sum thead tr.grp th.g-corp{background:#f3eefb;color:#5b3a99}
-table.sum thead tr.grp th.g-edulis{background:#fdf3dd;color:#8a5b00}
-table.sum thead tr.code th{font-size:11px;color:var(--ink-soft);font-weight:600;background:#f7f9fc}
+table.sum thead th{background:#eef2f9;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);font-weight:700;border-bottom:1px solid var(--line)}
+table.sum thead th.g-design{background:#eaf1ff}
+table.sum thead th.g-delivery{background:#eaf7f2}
+table.sum thead th.g-corp{background:#f3eefb;color:#5b3a99}
+table.sum thead th.g-edulis{background:#fdf3dd;color:#8a5b00}
 table.sum td.rowlab{text-align:left;font-weight:500;white-space:nowrap}
 table.sum td.rowlab .sub{display:block;font-size:10.5px;color:var(--ink-soft);font-weight:450}
 table.sum td.na{color:#c8cfda}
@@ -195,7 +194,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   </div>
   <div class="panel">
     <h2>Rating scale by sub-directorate and unit</h2>
-    <div class="psub">Average score per rubric code, rolled up by hosting unit. Content and logistics (venue, catering, accommodation) also get programme-wide summaries under <b>PDD</b> and <b>Corporate Services</b> respectively, on top of each unit's own scores. EDULIS Library is tracked separately from both.</div>
+    <div class="psub">Ratings grouped into Content, Delivery, Support Services and Library Services, rolled up by hosting unit. Individual rubric codes (C1, D2.1, etc.) are on the Rubric tab. Content and logistics also get programme-wide summaries under <b>PDD</b> and <b>Corporate Services</b> respectively, on top of each unit's own scores.</div>
     <div class="sum-scroll"><table class="sum" id="sumTable"></table></div>
     <div class="note" id="sumMethodNote"></div>
   </div>
@@ -281,7 +280,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <div class="field" style="margin:14px 0 6px"><label>Facilitator Feedback form</label></div>
       <div class="urlrow"><input type="url" id="facCsvUrl" placeholder="https://docs.google.com/…/pub?output=csv"><button class="btn primary" id="loadFacCsv">Load</button></div>
       <div id="facCsvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
-      <div class="note"><b>Links are remembered</b> — once loaded, this browser reloads both sheets automatically next time the dashboard opens.</div>
+      <div class="note"><b>Links are remembered</b> — once loaded, this browser reloads both sheets automatically next time the dashboard opens. On a shared or managed computer, browser storage can get cleared without warning — see "Bookmark this setup" below for a backup that doesn't depend on the browser remembering anything.</div>
     </div>
     <div class="panel">
       <h2>Link the register (live)</h2>
@@ -292,6 +291,11 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <button class="btn primary" id="loadRegister">Load register</button>
       <div id="regStatus" class="mono" style="font-size:12px;color:var(--ink-soft);margin-top:8px"></div>
       <div class="note">Prefer a one-off upload instead of a live link? Use <b>Import register (.xlsx)</b> on the Catalogue tab — same result, no link required.</div>
+    </div>
+    <div class="panel">
+      <h2>Bookmark this setup</h2>
+      <div class="psub">This is the reliable way to keep all five links, immune to browser storage being cleared. Once everything above is loaded, click below and bookmark the resulting address (or save it somewhere safe) — opening that exact link always restores every sheet, on any device, with no browser memory involved.</div>
+      <button class="btn primary" id="copySetupLink">Copy setup link</button>
     </div>
     <div class="panel">
       <h2>How the form maps</h2>
@@ -603,8 +607,12 @@ function renderFacDetail(){
 }
 
 /* SUMMARY (front page) */
-const GROUP_LABEL={design:'Programme Design & Development',delivery:'Delivery Units',corporate:'Corporate Service',edulis:'EDULIS Library'};
+const GROUP_LABEL={design:'Content',delivery:'Delivery',corporate:'Support Services',edulis:'Library Services'};
 const GROUP_CLASS={design:'g-design',delivery:'g-delivery',corporate:'g-corp',edulis:'g-edulis'};
+function groupAvgForUnit(u,g){
+  const vals=RUBRIC.filter(s=>s.group===g).map(sec=>sectionAvgForUnit(u,sec)).filter(v=>v!=null);
+  return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+}
 function renderSummary(){
   const banner=document.getElementById('ctliBanner');
   if(banner&&!banner.style.backgroundImage)banner.style.backgroundImage=`url(${BANNER_IMG})`;
@@ -623,19 +631,15 @@ function renderSummary(){
   const SUB_FALLBACK=['#5B7F95','#8D6E97','#92AD12','#00A1A3','#C6413A'];
   let fbIdx=0;const subColor={};subs.forEach(s=>{subColor[s]=SUB_PALETTE[s]||SUB_FALLBACK[fbIdx++%SUB_FALLBACK.length];});
 
-  const groups=['design','delivery','corporate'];
-  let head=`<thead><tr class="grp"><th class="rowlab" rowspan="2">Sub-directorate</th><th rowspan="2">Unit</th>`;
-  groups.forEach(g=>{const n=RUBRIC.filter(s=>s.group===g).length;head+=`<th class="${GROUP_CLASS[g]}" colspan="${n}">${GROUP_LABEL[g]}</th>`;});
-  head+=`<th class="${GROUP_CLASS.edulis}">EDULIS</th><th rowspan="2">Final<br>Quality Rating</th></tr><tr class="code">`;
-  groups.forEach(g=>{RUBRIC.filter(s=>s.group===g).forEach(s=>head+=`<th title="${esc(s.name)}${s.code==='D1'?' — cumulative score, see note below':''}">${s.code}${s.code==='D1'?' *':''}</th>`);});
-  head+=`<th title="EDULIS Library">EL</th></tr></thead>`;
+  const groups=['design','delivery','corporate','edulis'];
+  let head=`<thead><tr><th class="rowlab">Sub-directorate</th><th>Unit</th>`;
+  groups.forEach(g=>head+=`<th class="${GROUP_CLASS[g]}" title="${g==='delivery'?'Facilitation, logistics and digital experience, combined':g==='corporate'?'Venue, catering and accommodation, combined':GROUP_LABEL[g]}">${GROUP_LABEL[g]}</th>`);
+  head+=`<th>Final<br>Quality Rating</th></tr></thead>`;
 
   function rowCells(u){
     let cells='';
-    groups.forEach(g=>{RUBRIC.filter(s=>s.group===g).forEach(sec=>{const v=sectionAvgForUnit(u,sec);
-      cells+=v!=null?`<td class="score" style="background:${scoreColor(v)}">${v.toFixed(1)}</td>`:`<td class="na">—</td>`;});});
-    const el=RUBRIC.find(s=>s.group==='edulis');const ev=sectionAvgForUnit(u,el);
-    cells+=ev!=null?`<td class="score" style="background:${scoreColor(ev)}">${ev.toFixed(1)}</td>`:`<td class="na">—</td>`;
+    groups.forEach(g=>{const v=groupAvgForUnit(u,g);
+      cells+=v!=null?`<td class="score" style="background:${scoreColor(v)}">${v.toFixed(1)}</td>`:`<td class="na">—</td>`;});
     const fr=rowFinalRating(u);
     cells+=fr!=null?`<td class="score" style="background:${scoreColor(fr)};font-size:13px">${fr.toFixed(2)}</td>`:`<td class="na">—</td>`;
     return cells;
@@ -660,15 +664,16 @@ function renderSummary(){
   body+=rowCells(CORPORATE_UNIT);
   body+='</tr>';
   body+='</tbody>';
-  const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.reduce((a,g)=>a+RUBRIC.filter(s=>s.group===g).length,0)+1}" style="text-align:right">Weighted mean across every rubric code, every session</td><td class="score" style="background:${overall?scoreColor(overall):'#c8cfda'};font-size:14px">${overall?overall.toFixed(2):'—'}</td></tr></tfoot>`;
+  const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.length}" style="text-align:right">Weighted mean across every rubric code, every session</td><td class="score" style="background:${overall?scoreColor(overall):'#c8cfda'};font-size:14px">${overall?overall.toFixed(2):'—'}</td></tr></tfoot>`;
   document.getElementById('sumTable').innerHTML=head+body+foot;
   document.getElementById('sumMethodNote').innerHTML=`<b>How ratings are calculated</b>
     <ul style="margin:8px 0 0;padding-left:18px">
-      <li>Each rubric code (e.g. C2, D2.1) is the average of every matching response for that specific question, weighted by response count, for sessions hosted by that unit.</li>
-      <li><b>D1 Facilitation</b> is one cumulative score — the average across every facilitation question and every facilitator on sessions hosted by that unit.</li>
-      <li>Content (C — Programme Design &amp; Development) is reported per unit like every other section, plus pooled once more under <b>PDD</b> as a programme-wide summary.</li>
-      <li>Venue, Catering and Accommodation (S1–S3) are reported per unit like every other section, plus pooled once more under <b>Corporate Services</b> as a programme-wide summary.</li>
-      <li><b>Final Quality Rating</b> is the plain average of every section score shown in that row.</li>
+      <li>Each rubric code (e.g. C2, D2.1 — see the Rubric tab for the full list) is the average of every matching response for that specific question, weighted by response count, for sessions hosted by that unit.</li>
+      <li>This table groups those codes into four plain-language columns: <b>Content</b> (Course &amp; Content), <b>Delivery</b> (Facilitation, Logistics, Digital experience), <b>Support Services</b> (Venue, Catering, Accommodation), and <b>Library Services</b> (EDULIS). Each column is the average of its underlying sections — the individual codes stay on the Rubric heatmap tab.</li>
+      <li><b>Delivery's</b> Facilitation figure is cumulative — the average across every facilitation question and every facilitator on sessions hosted by that unit.</li>
+      <li><b>Content</b> is reported per unit like every other column, plus pooled once more under <b>PDD</b> as a programme-wide summary.</li>
+      <li><b>Support Services</b> is reported per unit like every other column, plus pooled once more under <b>Corporate Services</b> as a programme-wide summary.</li>
+      <li><b>Final Quality Rating</b> is the plain average of every underlying rubric section's score for that row, not the four displayed columns — so it stays accurate regardless of how the columns are grouped for display.</li>
       <li><b>Programme overall</b> (footer) applies the same calculation across the whole programme.</li>
     </ul>`;
 }
@@ -734,6 +739,39 @@ function bindCat(kind){
 /* CSV ingest (compound key) */
 function saveLink(key,url){try{localStorage.setItem('ctli_'+key,url);}catch(e){}}
 function loadLink(key){try{return localStorage.getItem('ctli_'+key)||'';}catch(e){return '';}}
+/* URL-hash based setup persistence — survives browsers/managed devices that clear localStorage,
+   because the links live in the bookmarked address itself, not in browser storage. */
+function currentLinkFields(){
+  return {
+    r:document.getElementById('csvUrl').value.trim(),
+    f:document.getElementById('facCsvUrl').value.trim(),
+    c:document.getElementById('regCoursesUrl').value.trim(),
+    s:document.getElementById('regSessionsUrl').value.trim(),
+    fa:document.getElementById('regFacsUrl').value.trim()
+  };
+}
+function syncSetupHash(){
+  const fields=currentLinkFields();
+  const nonEmpty=Object.fromEntries(Object.entries(fields).filter(([k,v])=>v));
+  if(!Object.keys(nonEmpty).length)return;
+  try{
+    const encoded=encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(nonEmpty)))));
+    history.replaceState(null,'','#setup='+encoded);
+  }catch(e){}
+}
+function decodeSetupHash(){
+  const m=location.hash.match(/#setup=([^&]+)/);
+  if(!m)return null;
+  try{return JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));}catch(e){return null;}
+}
+function copySetupLink(){
+  syncSetupHash();
+  const btn=document.getElementById('copySetupLink');
+  navigator.clipboard.writeText(location.href).then(()=>{
+    btn.textContent='✓ Copied — bookmark or save this link';
+    setTimeout(()=>btn.textContent='Copy setup link',2000);
+  }).catch(()=>{btn.textContent='Could not copy — copy the address bar manually';setTimeout(()=>btn.textContent='Copy setup link',2000);});
+}
 function parseCSV(text){const rows=[];let row=[],cur='',q=false;for(let i=0;i<text.length;i++){const ch=text[i];
   if(q){if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
   else{if(ch==='"')q=true;else if(ch===','){row.push(cur);cur='';}else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur='';}else if(ch==='\r'){}else cur+=ch;}}
@@ -906,10 +944,10 @@ document.getElementById('copySessions').onclick=copySessionOptions;
 document.getElementById('copyAll').onclick=copyFacilitatorRoster;
 document.getElementById('loadCsv').onclick=()=>{const url=document.getElementById('csvUrl').value.trim();const st=document.getElementById('csvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
-  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses.`;saveLink('link_responses',url);}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses.`;saveLink('link_responses',url);syncSetupHash();}).catch(e=>{st.textContent='Could not load: '+e.message;});};
 document.getElementById('loadFacCsv').onclick=()=>{const url=document.getElementById('facCsvUrl').value.trim();const st=document.getElementById('facCsvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
-  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses.`;saveLink('link_responses_fac',url);}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses.`;saveLink('link_responses_fac',url);syncSetupHash();}).catch(e=>{st.textContent='Could not load: '+e.message;});};
 
 function loadRegisterFromLinks(silent){
   const cUrl=document.getElementById('regCoursesUrl').value.trim();
@@ -928,19 +966,23 @@ function loadRegisterFromLinks(silent){
       if(cUrl)saveLink('link_reg_courses',cUrl);
       if(sUrl)saveLink('link_reg_sessions',sUrl);
       if(fUrl)saveLink('link_reg_facs',fUrl);
+      syncSetupHash();
     })
     .catch(e=>{st.textContent='Could not load: '+e.message;});
 }
 document.getElementById('loadRegister').onclick=()=>loadRegisterFromLinks(false);
+document.getElementById('copySetupLink').onclick=copySetupLink;
 
 /* boot */
 rebuild();refreshFilters();setView('summary');
 if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessionCards();renderSessionDetail();}
 
-/* restore remembered links, register first (session/facilitator metadata), then both response sheets — avoids the load-order race condition */
+/* restore remembered links, register first (session/facilitator metadata), then both response sheets — avoids the load-order race condition.
+   The URL hash (bookmarkable, storage-independent) takes priority over localStorage, since managed devices can clear browser storage at any time. */
 (function(){
-  const savedResp=loadLink('link_responses'),savedFacResp=loadLink('link_responses_fac');
-  const savedC=loadLink('link_reg_courses'),savedS=loadLink('link_reg_sessions'),savedF=loadLink('link_reg_facs');
+  const hashLinks=decodeSetupHash()||{};
+  const savedResp=hashLinks.r||loadLink('link_responses'),savedFacResp=hashLinks.f||loadLink('link_responses_fac');
+  const savedC=hashLinks.c||loadLink('link_reg_courses'),savedS=hashLinks.s||loadLink('link_reg_sessions'),savedF=hashLinks.fa||loadLink('link_reg_facs');
   if(savedResp)document.getElementById('csvUrl').value=savedResp;
   if(savedFacResp)document.getElementById('facCsvUrl').value=savedFacResp;
   if(savedC)document.getElementById('regCoursesUrl').value=savedC;
@@ -953,6 +995,7 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
     if(savedFacResp){const st=document.getElementById('facCsvStatus');st.textContent='Loading…';
       fetch(savedFacResp).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses.`;}).catch(e=>{st.textContent='Could not reload saved link: '+e.message;});}
   });
+  if(Object.keys(hashLinks).length)syncSetupHash(); // normalise the hash once fields are populated
 })();
 </script>
 </body>
