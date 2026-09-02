@@ -163,16 +163,19 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .pin-error{color:var(--poor);font-size:12px;margin-top:9px;min-height:15px}
 .fac-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
 .fac-toolbar-note{font-size:12.5px;color:var(--ink-soft);background:#fdf3dd;border:1px solid #f0dcae;border-radius:9px;padding:8px 12px;flex:1;min-width:280px}
-#facSummaryPrint{padding:30px}
-#facSummaryPrint h1{font-family:'Space Grotesk';font-size:20px;margin-bottom:2px}
-#facSummaryPrint .meta{font-size:12px;color:var(--ink-soft);margin-bottom:18px}
-#facSummaryPrint table{border-collapse:collapse;width:100%;font-size:12.5px}
-#facSummaryPrint th,#facSummaryPrint td{border:1px solid #ccc;padding:6px 9px;text-align:left}
-#facSummaryPrint th{background:#eef2f9}
+#facSummaryPrint,#reportPrint{padding:30px}
+#facSummaryPrint h1,#reportPrint h1{font-family:'Space Grotesk';font-size:20px;margin-bottom:2px}
+#facSummaryPrint .meta,#reportPrint .meta{font-size:12px;color:var(--ink-soft);margin-bottom:18px}
+#facSummaryPrint table,#reportPrint table{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:16px}
+#facSummaryPrint th,#facSummaryPrint td,#reportPrint th,#reportPrint td{border:1px solid #ccc;padding:6px 9px;text-align:left}
+#facSummaryPrint th,#reportPrint th{background:#eef2f9}
+#reportPrint h2{font-family:'Space Grotesk';font-size:15px;margin:20px 0 8px}
+#reportPrint .headline{font-size:13px;margin-bottom:14px}
+#reportPrint .headline b{font-family:'Space Grotesk';font-size:18px}
 @media print{
   body *{visibility:hidden}
-  #facSummaryPrint,#facSummaryPrint *{visibility:visible}
-  #facSummaryPrint{position:absolute;top:0;left:0;width:100%;display:block!important}
+  #facSummaryPrint,#facSummaryPrint *,#reportPrint,#reportPrint *{visibility:visible}
+  #facSummaryPrint,#reportPrint{position:absolute;top:0;left:0;width:100%;display:block!important}
 }
 @media(max-width:1000px){.explorer{grid-template-columns:1fr}.detail{position:static;max-height:none}.pulse{grid-template-columns:1fr}.setup-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -248,13 +251,14 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 <section id="v-facilitators" class="view hidden">
   <div class="fac-toolbar">
     <div class="fac-toolbar-note">🔒 Facilitator names are only shown here, inside this PIN-gated tab. Everywhere else on the dashboard (Sessions, Courses, Summary), facilitators appear by ID only.</div>
-    <button class="btn primary" id="genFacSummary">Generate facilitator summary</button>
+    <button class="btn primary" id="genFacSummary">Generate all-facilitators summary</button>
   </div>
   <div class="explorer"><div class="cards" id="facCards"></div>
     <aside class="detail empty" id="facDetail"><div>Select a facilitator to see their facilitation scores across every session they ran.</div></aside>
   </div>
 </section>
 <div id="facSummaryPrint" class="hidden"></div>
+<div id="reportPrint" class="hidden"></div>
 
 <section id="v-rubric" class="view hidden">
   <div class="panel"><h2>Rubric heatmap</h2>
@@ -580,7 +584,7 @@ function renderSessionDetail(){
   el.innerHTML=`<div class="detail-head"><div class="key">[${s.sid}] · session key · course ${c.cid}</div>
     <h2>${esc(c.plo||s.cid)}</h2>
     <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span><span>${weekday(s.date)?weekday(s.date)+', ':''}${fmtDate(s.date)}</span></div>
-    <div class="sub"><b style="color:${o?scoreColor(o):'#aab'};font-size:15px;font-family:Space Grotesk">${o?o.toFixed(2):'—'}/4</b><span>${a.resp} responses</span></div></div>
+    <div class="sub"><b style="color:${o?scoreColor(o):'#aab'};font-size:15px;font-family:Space Grotesk">${o?o.toFixed(2):'—'}/4</b><span>${a.resp} responses</span><button class="btn" style="margin-left:auto" onclick="generateSessionReport('${s.sid}')">Generate report</button></div></div>
     <div class="detail-body">
       <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${s.facs.length} rated separately</span></h4>${facBlocks||'<span style="font-size:12px;color:#8a94a8">No facilitator assigned to this session yet — add one on the Catalogue tab to enable facilitation reporting.</span>'}</div>
       ${sessGroups}</div>`;
@@ -607,7 +611,7 @@ function renderCourseDetail(){
   const rows=ss.map(s=>{const o=sessionOverall(s.sid);return `<div class="ritem" style="grid-template-columns:1fr 80px 34px"><div class="rn"><span class="key mono">[${s.sid}]</span> ${fmtDate(s.date)} · ${s.facs.map(facName).join(', ')}</div><div class="rt"><div class="rf" style="width:${o?o/4*100:0}%;background:${scoreColor(o)}"></div></div><div class="rv" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(1):'—'}</div></div>`;}).join('');
   el.innerHTML=`<div class="detail-head"><div class="key">${c.cid} · course</div><h2>${esc(c.plo)}</h2>
     <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span>${coordForUnit(c.unit)?`<span class="pill" style="background:#e9f6f3;color:#0b6b57">${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'} ${esc(coordForUnit(c.unit))}</span>`:''}</div>
-    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${ss.length} sessions · ${ag.resp} responses</span></div></div>
+    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${ss.length} sessions · ${ag.resp} responses</span><button class="btn" style="margin-left:auto" onclick="generateCourseReport('${c.cid}')">Generate report</button></div></div>
     <div class="detail-body"><div class="rgroup"><h4>Score across deliveries<span>oldest → newest</span></h4><div class="spark">${spark}</div></div>
     <div class="rgroup"><h4>Sessions</h4>${rows}</div></div>`;
 }
@@ -635,7 +639,7 @@ function renderFacDetail(){
     const flag=(fs!=null&&norm!=null&&fs<norm-0.4)?` <span class="pill" style="background:#fdeceb;color:#a3352f">below norm</span>`:'';
     return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sk}]</span> ${esc(c.plo||'')} · ${fmtDate(s.date)}${flag}</div><div class="rt"><div class="rf" style="width:${fs?fs/4*100:0}%;background:${scoreColor(fs)}"></div></div><div class="rv" style="color:${fs?scoreColor(fs):'#aab'}">${fs?fs.toFixed(1):'—'}</div></div>`;}).join('');
   el.innerHTML=`<div class="detail-head"><div class="key">${f.fid} · facilitator</div><h2>${esc(f.name)}</h2>
-    <div class="sub"><b style="color:${norm?scoreColor(norm):'#aab'};font-size:15px;font-family:Space Grotesk">${norm?norm.toFixed(2):'—'}/4</b><span>facilitation · ${ag.sessions.length} sessions · ${ag.resp} responses</span></div></div>
+    <div class="sub"><b style="color:${norm?scoreColor(norm):'#aab'};font-size:15px;font-family:Space Grotesk">${norm?norm.toFixed(2):'—'}/4</b><span>facilitation · ${ag.sessions.length} sessions · ${ag.resp} responses</span><button class="btn" style="margin-left:auto" onclick="generateSingleFacilitatorReport('${f.fid}')">Generate report</button></div></div>
     <div class="detail-body"><div class="rgroup fac"><h4>Facilitation items (all sessions)</h4>${itemRows}</div>
     <div class="rgroup"><h4>Per session<span>flagged if &gt;0.4 below their norm</span></h4>${sessRows}</div></div>`;
 }
@@ -702,13 +706,14 @@ function renderSummary(){
   document.getElementById('sumTable').innerHTML=head+body+foot;
   document.getElementById('sumMethodNote').innerHTML=`<b>How ratings are calculated</b>
     <ul style="margin:8px 0 0;padding-left:18px">
-      <li>Every individual question is averaged across every matching response, weighted by response count, for sessions hosted by that unit.</li>
-      <li>Those questions group into four plain-language columns: <b>Content</b> (Course &amp; Content), <b>Delivery</b> (Facilitation, Logistics, Digital experience), <b>Support Services</b> (Venue, Catering, Accommodation), and <b>Library Services</b> (EDULIS). Each column is the average of its underlying sections.</li>
-      <li><b>Delivery's</b> Facilitation figure is cumulative — the average across every facilitation question and every facilitator on sessions hosted by that unit.</li>
+      <li><b>Within a section</b> (e.g. Course &amp; Content), every response to every question in it is pooled together and divided by the total number of responses — this is fully <b>response-weighted</b>: a question answered by 100 people counts proportionally more than one answered by 10, with no distortion from uneven response counts between questions.</li>
+      <li><b>Between sections</b> — combining sections into the four columns below, into a unit's Final Quality Rating, and into the Programme overall figure — each section counts as <b>one equal vote</b>, regardless of how many responses or questions sit behind it. This is a deliberate choice so a heavily-answered section can't dominate a score purely by volume.</li>
+      <li>The four columns are <b>Content</b> (Course &amp; Content), <b>Delivery</b> (Facilitation, Logistics, Digital experience), <b>Support Services</b> (Venue, Catering, Accommodation), and <b>Library Services</b> (EDULIS) — each is the equal-weighted average of its underlying sections, per the rule above.</li>
+      <li><b>Delivery's</b> Facilitation figure is cumulative — the response-weighted average across every facilitation question and every facilitator on sessions hosted by that unit.</li>
       <li><b>Content</b> is reported per unit like every other column, plus pooled once more under <b>PDD</b> as a programme-wide summary.</li>
       <li><b>Support Services</b> is reported per unit like every other column, plus pooled once more under <b>Corporate Services</b> as a programme-wide summary.</li>
-      <li><b>Final Quality Rating</b> is the plain average of every underlying rubric section's score for that row, not the four displayed columns — so it stays accurate regardless of how the columns are grouped for display.</li>
-      <li><b>Programme overall</b> (footer) applies the same calculation across the whole programme.</li>
+      <li><b>Final Quality Rating</b> is the equal-weighted average of every underlying rubric section's score for that row (not the four displayed columns), so it stays accurate regardless of how columns are grouped for display.</li>
+      <li><b>Programme overall</b> (footer) applies the same two-level calculation across the whole programme.</li>
     </ul>`;
 }
 
@@ -1011,6 +1016,62 @@ function importWorkbook(file){
     alert(`Loaded from register: ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:'')+(r.courses&&!r.unitsFound?`\n⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab. Every unit row will be blank until this is fixed.`:''));
   }catch(err){alert('Could not read workbook: '+err.message);}};
   fr.readAsArrayBuffer(file);
+}
+function generateSessionReport(sid){
+  const s=SESSIONS.find(x=>x.sid===sid);if(!s)return;
+  const c=CMAP[s.cid]||{};const a=AGG[sid];const o=sessionOverall(sid);
+  const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
+  const secRows=RUBRIC.map(sec=>{
+    const itemRows=sec.items.map(([code,label])=>{const v=sessItemAvg(sid,code);return v!=null?`<tr><td>${esc(label)}</td><td>${v.toFixed(2)}</td></tr>`:'';}).join('');
+    if(!itemRows.trim())return '';
+    const sv=sessionSectionAvg(sid,sec);
+    return `<h2>${esc(sec.name)}${sv!=null?` — ${sv.toFixed(2)} / 4`:''}</h2><table><thead><tr><th>Question</th><th>Score</th></tr></thead><tbody>${itemRows}</tbody></table>`;
+  }).join('');
+  const facRows=s.facs.map(fid=>{const fs=facInSession(sid,fid);return `<tr><td>${esc(facFullName(fid))} <span style="color:#888">(${esc(fid)})</span></td><td>${fs!=null?fs.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('');
+  document.getElementById('reportPrint').innerHTML=`
+    <h1>CTLI Session Report — [${esc(sid)}]</h1>
+    <div class="meta">Generated ${today} · ${esc(c.cid||'')} ${esc(c.plo||'')} · ${esc(c.sub||'—')} / ${esc(c.unit||'—')} · ${esc(c.mode||'—')} · ${fmtDate(s.date)}</div>
+    <div class="headline"><b style="color:${o?'#000':'#888'}">${o!=null?o.toFixed(2)+' / 4':'—'}</b> overall · ${a.resp} response${a.resp!==1?'s':''}</div>
+    ${s.facs.length?`<h2>Facilitation</h2><table><thead><tr><th>Facilitator ID</th><th>Score</th></tr></thead><tbody>${facRows}</tbody></table>`:''}
+    ${secRows}`;
+  window.print();
+}
+function generateCourseReport(cid){
+  const c=CMAP[cid];if(!c)return;
+  const ag=courseAgg(cid);
+  const ss=ag.sessions.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
+  const coord=coordForUnit(c.unit);
+  const sessRows=ss.map(s=>{const o=sessionOverall(s.sid);const resp=AGG[s.sid]?AGG[s.sid].resp:0;
+    const facs=s.facs.map(fid=>facFullName(fid)).join(', ')||'—';
+    return `<tr><td>[${esc(s.sid)}]</td><td>${fmtDate(s.date)}</td><td>${esc(facs)}</td><td>${resp}</td><td>${o!=null?o.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('');
+  const secRows=RUBRIC.map(sec=>{
+    const v=sectionAvgForSessions(ss,sec);
+    return v!=null?`<tr><td>${esc(sec.name)}</td><td>${v.toFixed(2)} / 4</td></tr>`:'';
+  }).join('');
+  document.getElementById('reportPrint').innerHTML=`
+    <h1>CTLI Course Report — ${esc(cid)}</h1>
+    <div class="meta">Generated ${today} · ${esc(c.sub||'—')} / ${esc(c.unit||'—')} · ${esc(c.mode||'—')}${coord?` · ${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'}: ${esc(coord)}`:''}</div>
+    <h1 style="font-size:16px;margin-top:0">${esc(c.plo)}</h1>
+    <div class="headline"><b style="color:${ag.overall?'#000':'#888'}">${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'—'}</b> overall · ${ss.length} session${ss.length!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</div>
+    ${secRows?`<h2>By rubric section</h2><table><thead><tr><th>Section</th><th>Score</th></tr></thead><tbody>${secRows}</tbody></table>`:''}
+    <h2>Sessions</h2><table><thead><tr><th>Key</th><th>Date</th><th>Facilitator(s)</th><th>Responses</th><th>Score</th></tr></thead><tbody>${sessRows}</tbody></table>`;
+  window.print();
+}
+function generateSingleFacilitatorReport(fid){
+  const f=FMAP[fid];if(!f)return;
+  const ag=facAgg(fid);
+  const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
+  const itemRows=D1.items.map(([code,label])=>{const it=ag.items[code];const v=it&&it.n?it.sum/it.n:null;return v!=null?`<tr><td>${esc(label)}</td><td>${v.toFixed(2)} / 4</td></tr>`:'';}).join('');
+  const sessRows=ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);const c=CMAP[s.cid]||{};const fs=facInSession(sk,fid);
+    return `<tr><td>[${esc(sk)}]</td><td>${esc(c.plo||'')}</td><td>${fmtDate(s.date)}</td><td>${fs!=null?fs.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('');
+  document.getElementById('reportPrint').innerHTML=`
+    <h1>CTLI Facilitator Report — ${esc(f.name||fid)}</h1>
+    <div class="meta">Generated ${today} · Facilitator ID ${esc(fid)} · For training coordinator use · Not for public distribution</div>
+    <div class="headline"><b style="color:${ag.overall?'#000':'#888'}">${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'—'}</b> overall facilitation score · ${ag.sessions.length} session${ag.sessions.length!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</div>
+    ${itemRows?`<h2>By facilitation item</h2><table><thead><tr><th>Question</th><th>Score</th></tr></thead><tbody>${itemRows}</tbody></table>`:''}
+    <h2>Sessions</h2><table><thead><tr><th>Key</th><th>Course</th><th>Date</th><th>Score</th></tr></thead><tbody>${sessRows||'<tr><td colspan="4">No sessions yet.</td></tr>'}</tbody></table>`;
+  window.print();
 }
 function generateFacilitatorSummary(){
   const rows=FACS.map(f=>{const ag=facAgg(f.fid);return {f,ag};}).sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
