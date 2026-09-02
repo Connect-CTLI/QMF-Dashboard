@@ -419,8 +419,8 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','
 function mix(a,b,t){return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(',')})`;}
 function scoreColor(v){if(v==null||isNaN(v))return '#c8cfda';if(v<2.5){return mix([198,65,58],[224,160,48],Math.max(0,(v-1)/1.5));}return mix([224,160,48],[46,139,87],Math.max(0,Math.min(1,(v-2.5)/1.5)));}
 
-function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);COORDMAP={};COORDS.forEach(co=>{if(co.unit)COORDMAP[co.unit]=co;});}
-function coordForUnit(unit){const co=COORDMAP[unit];if(!co)return null;return co.name?`${co.name} (${co.coid})`:co.coid;} // shown openly — coordinators aren't individually rated, unlike facilitators
+function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);COORDMAP={};COORDS.forEach(co=>{if(co.unit)(COORDMAP[co.unit]=COORDMAP[co.unit]||[]).push(co);});}
+function coordForUnit(unit){const list=COORDMAP[unit];if(!list||!list.length)return null;return list.map(co=>co.name?`${co.name} (${co.coid})`:co.coid).join(', ');} // shown openly — coordinators aren't individually rated, unlike facilitators
 function facName(fid){return fid;} // public dashboard — ID only, never a real name (POPIA: avoid exposing facilitator identity on an openly-shared link)
 function facFullName(fid){return (FMAP[fid]&&FMAP[fid].name)||fid;} // protected use only — inside the PIN-gated Facilitators tab
 function courseOf(sk){const s=SESSIONS.find(x=>x.sid===sk);return s?CMAP[s.cid]:null;}
@@ -454,7 +454,11 @@ const PDD_UNIT='PDD';
 const SHARED_UNITS=[CORPORATE_UNIT,PDD_UNIT];
 // Fixed master list of official CTLI units, by sub-directorate — Summary always shows every one of these,
 // even with zero courses currently loaded for it, rather than only whatever happens to be in the register.
-const UNIT_MASTER={LA:['SLMC','SLMP'],PD:['PD'],TPI:['FP','IP','SP','FET','IE']};
+const UNIT_MASTER={LA:['SLMC','SLMP'],PD:['PD'],TPI:['FP','IP','SP','FET','IE','NTI']};
+const UNIT_FULLNAME={SLMC:'School Leadership and Management Courses',SLMP:'School Leadership and Management Programme',PD:'Professional Development',FP:'Foundation Phase',IP:'Intermediate Phase',SP:'Senior Phase',FET:'Further Education and Training',IE:'Inclusive Education',NTI:'New Teacher Induction'};
+function unitTitle(u){return UNIT_FULLNAME[u]?` title="${esc(UNIT_FULLNAME[u])}"`:'';}
+const SUB_FULLNAME={LA:'Leadership Academy',PD:'Professional Development',TPI:'Teacher Practice Improvement'};
+function subTitle(s){return SUB_FULLNAME[s]?` title="${esc(SUB_FULLNAME[s])}"`:'';}
 const UNIT_MASTER_SUB={};Object.entries(UNIT_MASTER).forEach(([sub,us])=>us.forEach(u=>UNIT_MASTER_SUB[u]=sub));
 const UNIT_MASTER_FLAT=Object.values(UNIT_MASTER).flat();
 const SUB_CODES=['LA','PD','TPI'];
@@ -575,7 +579,7 @@ function renderSessionDetail(){
   const o=sessionOverall(s.sid);
   el.innerHTML=`<div class="detail-head"><div class="key">[${s.sid}] · session key · course ${c.cid}</div>
     <h2>${esc(c.plo||s.cid)}</h2>
-    <div class="sub"><span class="pill">${c.sub||'—'}</span><span class="pill">${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span><span>${weekday(s.date)?weekday(s.date)+', ':''}${fmtDate(s.date)}</span></div>
+    <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span><span>${weekday(s.date)?weekday(s.date)+', ':''}${fmtDate(s.date)}</span></div>
     <div class="sub"><b style="color:${o?scoreColor(o):'#aab'};font-size:15px;font-family:Space Grotesk">${o?o.toFixed(2):'—'}/4</b><span>${a.resp} responses</span></div></div>
     <div class="detail-body">
       <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${s.facs.length} rated separately</span></h4>${facBlocks||'<span style="font-size:12px;color:#8a94a8">No facilitator assigned to this session yet — add one on the Catalogue tab to enable facilitation reporting.</span>'}</div>
@@ -587,7 +591,7 @@ function renderCourseCards(){
   const el=document.getElementById('courseCards');
   const list=COURSES.map(c=>({c,ag:courseAgg(c.cid)})).sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
   el.innerHTML=list.map(({c,ag})=>`<div class="scard" data-cid="${c.cid}" aria-selected="${c.cid===sel.course}" tabindex="0" role="button">
-    <div class="meta"><span class="cidcell mono" style="padding:1px 7px">${c.cid}</span><span class="pill">${c.sub||'—'}·${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''} · Term ${c.term||'—'}</span></div>
+    <div class="meta"><span class="cidcell mono" style="padding:1px 7px">${c.cid}</span><span class="pill"><span${subTitle(c.sub)}>${c.sub||'—'}</span>·<span${unitTitle(c.unit)}>${c.unit||'—'}</span></span><span class="pill mode">${c.mode||'—'}</span><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''} · Term ${c.term||'—'}</span></div>
     <h3>${esc(c.plo)}</h3>
     <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aab'}">${ag.overall?ag.overall.toFixed(2):'—'}</div><div class="n2">${ag.resp} responses</div></div>
    </div>`).join('');
@@ -602,7 +606,7 @@ function renderCourseDetail(){
   const spark=ss.map(s=>{const o=sessionOverall(s.sid);return `<i style="height:${o?o/4*100:4}%;background:${scoreColor(o)}" title="${fmtDate(s.date)}: ${o?o.toFixed(2):'—'}"></i>`;}).join('');
   const rows=ss.map(s=>{const o=sessionOverall(s.sid);return `<div class="ritem" style="grid-template-columns:1fr 80px 34px"><div class="rn"><span class="key mono">[${s.sid}]</span> ${fmtDate(s.date)} · ${s.facs.map(facName).join(', ')}</div><div class="rt"><div class="rf" style="width:${o?o/4*100:0}%;background:${scoreColor(o)}"></div></div><div class="rv" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(1):'—'}</div></div>`;}).join('');
   el.innerHTML=`<div class="detail-head"><div class="key">${c.cid} · course</div><h2>${esc(c.plo)}</h2>
-    <div class="sub"><span class="pill">${c.sub||'—'}</span><span class="pill">${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span>${coordForUnit(c.unit)?`<span class="pill" style="background:#e9f6f3;color:#0b6b57">Coordinator ${esc(coordForUnit(c.unit))}</span>`:''}</div>
+    <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span>${coordForUnit(c.unit)?`<span class="pill" style="background:#e9f6f3;color:#0b6b57">${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'} ${esc(coordForUnit(c.unit))}</span>`:''}</div>
     <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${ss.length} sessions · ${ag.resp} responses</span></div></div>
     <div class="detail-body"><div class="rgroup"><h4>Score across deliveries<span>oldest → newest</span></h4><div class="spark">${spark}</div></div>
     <div class="rgroup"><h4>Sessions</h4>${rows}</div></div>`;
@@ -679,8 +683,8 @@ function renderSummary(){
   for(const sub of subs){
     bySub[sub].forEach((u,i)=>{
       body+='<tr>';
-      if(i===0)body+=`<td class="rowlab" rowspan="${bySub[sub].length}" style="border-left:4px solid ${subColor[sub]}"><span class="unit-chip" style="background:${subColor[sub]}"></span>${esc(sub)}<span class="sub">${bySub[sub].length} unit${bySub[sub].length!==1?'s':''}</span></td>`;
-      body+=`<td class="rowlab">${esc(u)}</td>`;
+      if(i===0)body+=`<td class="rowlab" rowspan="${bySub[sub].length}" style="border-left:4px solid ${subColor[sub]}"${subTitle(sub)}><span class="unit-chip" style="background:${subColor[sub]}"></span>${esc(sub)}<span class="sub">${SUB_FULLNAME[sub]?esc(SUB_FULLNAME[sub])+' · ':''}${bySub[sub].length} unit${bySub[sub].length!==1?'s':''}</span></td>`;
+      body+=`<td class="rowlab"${unitTitle(u)}>${esc(u)}${UNIT_FULLNAME[u]?`<span class="sub">${esc(UNIT_FULLNAME[u])}</span>`:''}</td>`;
       body+=rowCells(u);
       body+='</tr>';
     });
@@ -712,7 +716,7 @@ function renderSummary(){
 function renderHeat(){
   const units=[...new Set(COURSES.map(c=>c.unit).filter(isValidUnit))].sort();
   const cols=[...units,PDD_UNIT,CORPORATE_UNIT];
-  let head=`<thead><tr><th class="row">Section ↓ / Unit →</th>${cols.map(u=>`<th${u===CORPORATE_UNIT?' style="color:#5b3a99"':u===PDD_UNIT?' style="color:#00838a"':''}>${u}</th>`).join('')}<th>All</th></tr></thead>`;
+  let head=`<thead><tr><th class="row">Section ↓ / Unit →</th>${cols.map(u=>`<th${u===CORPORATE_UNIT?' style="color:#5b3a99"':u===PDD_UNIT?' style="color:#00838a"':''}${unitTitle(u)}>${u}</th>`).join('')}<th>All</th></tr></thead>`;
   let body='<tbody>';
   for(const sec of RUBRIC){body+=`<tr><th class="row" title="${sec.name}">${sec.name}</th>`;
     for(const u of cols){
@@ -744,7 +748,7 @@ function renderCat(){
     note.innerHTML='<b>Facilitators</b> are the roster. Assign them to sessions on the Sessions tab (comma-separated IDs). Facilitation feedback rolls up per person from here.';
     bindCat('facs');
   } else if(sel.catSub==='coords'){
-    const allUnits=[...new Set(COURSES.map(c=>c.unit).filter(isValidUnit))].sort();
+    const allUnits=[...new Set([...COURSES.map(c=>c.unit).filter(isValidUnit),...COORDS.map(co=>co.unit).filter(Boolean)])].sort();
     body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>Unit</th><th>Coordinator ID</th><th>Coordinator name</th><th>Courses covered</th><th></th></tr></thead><tbody>${COORDS.map((co,i)=>{const ncourses=COURSES.filter(c=>c.unit===co.unit).length;
       return `<tr data-i="${i}"><td><select data-f="unit"><option value=""></option>${allUnits.map(u=>`<option value="${u}"${u===co.unit?' selected':''}>${u}</option>`).join('')}</select></td><td class="cidcell" style="color:#0b6b57;background:#e9f6f3"><input value="${esc(co.coid||'')}" data-f="coid" style="background:transparent;color:inherit;text-align:center"></td><td class="plo"><input value="${esc(co.name||'')}" data-f="name"></td><td class="mono" style="color:#8a94a8">${ncourses}</td><td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
     note.innerHTML='<b>Coordinators</b> are assigned per <b>Unit</b> — one row here covers every course hosted by that unit, so there is no need to set a coordinator on each course individually. Unlike facilitators, coordinators are not individually rated, so their name shows openly on the course detail.';
