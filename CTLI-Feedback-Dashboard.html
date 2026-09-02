@@ -161,6 +161,19 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .pin-box input:focus{outline:2px solid var(--brand);outline-offset:1px}
 .pin-actions{display:flex;gap:8px;justify-content:center}
 .pin-error{color:var(--poor);font-size:12px;margin-top:9px;min-height:15px}
+.fac-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.fac-toolbar-note{font-size:12.5px;color:var(--ink-soft);background:#fdf3dd;border:1px solid #f0dcae;border-radius:9px;padding:8px 12px;flex:1;min-width:280px}
+#facSummaryPrint{padding:30px}
+#facSummaryPrint h1{font-family:'Space Grotesk';font-size:20px;margin-bottom:2px}
+#facSummaryPrint .meta{font-size:12px;color:var(--ink-soft);margin-bottom:18px}
+#facSummaryPrint table{border-collapse:collapse;width:100%;font-size:12.5px}
+#facSummaryPrint th,#facSummaryPrint td{border:1px solid #ccc;padding:6px 9px;text-align:left}
+#facSummaryPrint th{background:#eef2f9}
+@media print{
+  body *{visibility:hidden}
+  #facSummaryPrint,#facSummaryPrint *{visibility:visible}
+  #facSummaryPrint{position:absolute;top:0;left:0;width:100%;display:block!important}
+}
 @media(max-width:1000px){.explorer{grid-template-columns:1fr}.detail{position:static;max-height:none}.pulse{grid-template-columns:1fr}.setup-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
@@ -175,7 +188,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
     <button class="tab" role="tab" data-view="sessions" aria-selected="false">Sessions</button>
     <button class="tab" role="tab" data-view="courses" aria-selected="false">Courses</button>
 
-    <button class="tab" role="tab" data-view="facilitators" aria-selected="false">Facilitators</button>
+    <button class="tab" role="tab" data-view="facilitators" aria-selected="false">Facilitators 🔒</button>
     <button class="tab" role="tab" data-view="rubric" aria-selected="false">Rubric</button>
     <button class="tab" role="tab" data-view="catalogue" aria-selected="false">Catalogue 🔒</button>
     <button class="tab" role="tab" data-view="setup" aria-selected="false">Setup 🔒</button>
@@ -233,10 +246,15 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 </section>
 
 <section id="v-facilitators" class="view hidden">
+  <div class="fac-toolbar">
+    <div class="fac-toolbar-note">🔒 Facilitator names are only shown here, inside this PIN-gated tab. Everywhere else on the dashboard (Sessions, Courses, Summary), facilitators appear by ID only.</div>
+    <button class="btn primary" id="genFacSummary">Generate facilitator summary</button>
+  </div>
   <div class="explorer"><div class="cards" id="facCards"></div>
     <aside class="detail empty" id="facDetail"><div>Select a facilitator to see their facilitation scores across every session they ran.</div></aside>
   </div>
 </section>
+<div id="facSummaryPrint" class="hidden"></div>
 
 <section id="v-rubric" class="view hidden">
   <div class="panel"><h2>Rubric heatmap</h2>
@@ -255,6 +273,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <button class="subtab" data-sub="sessions" aria-selected="true">Sessions</button>
       <button class="subtab" data-sub="courses" aria-selected="false">Courses</button>
       <button class="subtab" data-sub="facs" aria-selected="false">Facilitators</button>
+      <button class="subtab" data-sub="coords" aria-selected="false">Coordinators</button>
     </div>
     <div class="cat-tools">
       <button class="btn primary" id="addRow">+ Add row</button>
@@ -284,10 +303,11 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
     </div>
     <div class="panel">
       <h2>Link the register (live)</h2>
-      <div class="psub">The Course &amp; Session Register has three tabs. Publish each one as CSV (File → Share → Publish to web → pick the tab → CSV) and paste its link below — same as the response sheet.</div>
+      <div class="psub">The Course &amp; Session Register has three core tabs, plus an optional Coordinators tab. Publish each one as CSV (File → Share → Publish to web → pick the tab → CSV) and paste its link below — same as the response sheet. A Coordinators tab needs three columns: <b>Unit</b>, <b>Coordinator ID</b> and <b>Name</b> — one row per unit, and every course in that unit picks it up automatically.</div>
       <div class="field" style="margin-bottom:8px"><label>Courses tab</label><input type="url" id="regCoursesUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <div class="field" style="margin-bottom:8px"><label>Sessions tab</label><input type="url" id="regSessionsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <div class="field" style="margin-bottom:8px"><label>Facilitators tab</label><input type="url" id="regFacsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
+      <div class="field" style="margin-bottom:8px"><label>Coordinators tab <span style="font-weight:400;text-transform:none;color:var(--ink-soft)">(optional)</span></label><input type="url" id="regCoordsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <button class="btn primary" id="loadRegister">Load register</button>
       <div id="regStatus" class="mono" style="font-size:12px;color:var(--ink-soft);margin-top:8px"></div>
       <div class="note">Prefer a one-off upload instead of a live link? Use <b>Import register (.xlsx)</b> on the Catalogue tab — same result, no link required.</div>
@@ -313,7 +333,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 <div class="pin-overlay hidden" id="pinOverlay">
   <div class="pin-box">
     <h3>Admin access</h3>
-    <p>Enter the 4-digit PIN to open Setup or Catalogue.</p>
+    <p>Enter the 4-digit PIN to open Setup, Catalogue, or Facilitators.</p>
     <input type="password" id="pinInput" maxlength="4" inputmode="numeric" pattern="\d*" placeholder="****" autocomplete="off">
     <div class="pin-actions">
       <button class="btn" id="pinCancel">Cancel</button>
@@ -385,7 +405,8 @@ const ALL_ITEMS=RUBRIC.flatMap(s=>s.items.map(i=>i[0]));
 let COURSES=window.__MODEL__.courses.map(c=>({...c}));
 let SESSIONS=window.__MODEL__.sessions.map(s=>({...s,facs:[...s.facs]}));
 let FACS=window.__MODEL__.facilitators.map(f=>({...f}));
-let CMAP={},FMAP={};
+let COORDS=(window.__MODEL__.coordinators||[]).map(c=>({...c}));
+let CMAP={},FMAP={},COORDMAP={};
 let RESPONSES_MAIN=[]; let RESPONSES_FAC=[]; let RESPONSES=[]; let LIVE=false;
 let AGG={}; // sessionKey -> {n, items{}, facItems:{fid:{code:{sum,n}}}, facN:{fid}}
 let sel={session:null,course:null,fac:null,catSub:'sessions'};
@@ -398,8 +419,10 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','
 function mix(a,b,t){return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(',')})`;}
 function scoreColor(v){if(v==null||isNaN(v))return '#c8cfda';if(v<2.5){return mix([198,65,58],[224,160,48],Math.max(0,(v-1)/1.5));}return mix([224,160,48],[46,139,87],Math.max(0,Math.min(1,(v-2.5)/1.5)));}
 
-function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);}
-function facName(fid){return (FMAP[fid]&&FMAP[fid].name)||fid;}
+function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);COORDMAP={};COORDS.forEach(co=>{if(co.unit)COORDMAP[co.unit]=co;});}
+function coordForUnit(unit){const co=COORDMAP[unit];if(!co)return null;return co.name?`${co.name} (${co.coid})`:co.coid;} // shown openly — coordinators aren't individually rated, unlike facilitators
+function facName(fid){return fid;} // public dashboard — ID only, never a real name (POPIA: avoid exposing facilitator identity on an openly-shared link)
+function facFullName(fid){return (FMAP[fid]&&FMAP[fid].name)||fid;} // protected use only — inside the PIN-gated Facilitators tab
 function courseOf(sk){const s=SESSIONS.find(x=>x.sid===sk);return s?CMAP[s.cid]:null;}
 function sessionLabelPlain(s){const c=CMAP[s.cid]||{};const wd=weekday(s.date);const dt=fmtDate(s.date);
   return `${wd?wd+', ':''}${dt} · ${c.plo||s.cid} [${s.sid}]`;}
@@ -429,9 +452,16 @@ function sessionOverall(sk){let sum=0,n=0;for(const sec of RUBRIC){const v=sessi
 const CORPORATE_UNIT='Corporate Services';
 const PDD_UNIT='PDD';
 const SHARED_UNITS=[CORPORATE_UNIT,PDD_UNIT];
-function unitList(){const u=[...new Set(COURSES.map(c=>c.unit).filter(Boolean))].sort();
+// Fixed master list of official CTLI units, by sub-directorate — Summary always shows every one of these,
+// even with zero courses currently loaded for it, rather than only whatever happens to be in the register.
+const UNIT_MASTER={LA:['SLMC','SLMP'],PD:['PD'],TPI:['FP','IP','SP','FET','IE']};
+const UNIT_MASTER_SUB={};Object.entries(UNIT_MASTER).forEach(([sub,us])=>us.forEach(u=>UNIT_MASTER_SUB[u]=sub));
+const UNIT_MASTER_FLAT=Object.values(UNIT_MASTER).flat();
+const SUB_CODES=['LA','PD','TPI'];
+function isValidUnit(u){if(!u)return false;if(SUB_CODES.includes(u)&&!UNIT_MASTER_FLAT.includes(u))return false;return true;} // rejects a Unit field mistakenly set to a sub-directorate code (e.g. "LA"), while still allowing "PD" since that's genuinely also a real unit
+function unitList(){const u=[...new Set([...UNIT_MASTER_FLAT,...COURSES.map(c=>c.unit).filter(isValidUnit)])].sort();
   SHARED_UNITS.forEach(su=>{if(!u.includes(su))u.push(su);});return u;}
-function subOfUnit(u){if(u===CORPORATE_UNIT)return 'Corporate Services';if(u===PDD_UNIT)return 'PDD';const c=COURSES.find(c=>c.unit===u);return c?c.sub:'—';}
+function subOfUnit(u){if(u===CORPORATE_UNIT)return 'Corporate Services';if(u===PDD_UNIT)return 'PDD';if(UNIT_MASTER_SUB[u])return UNIT_MASTER_SUB[u];const c=COURSES.find(c=>c.unit===u);return c?c.sub:'—';}
 function sectionAvgForSessions(sessList,sec){let sum=0,n=0;
   for(const s of sessList){const v=sessionSectionAvg(s.sid,sec);const rn=AGG[s.sid].resp;if(v!=null){sum+=v*rn;n+=rn;}}
   return n?sum/n:null;}
@@ -533,14 +563,14 @@ function renderSessionDetail(){
   // session-level sections
   const sessGroups=SESSION_SECS.map(sec=>{
     const rows=sec.items.map(([code,label])=>{const v=sessItemAvg(s.sid,code);if(v==null)return '';
-      return `<div class="ritem"><div class="rn"><span class="mono" style="color:#8a94a8">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+      return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
     if(!rows.trim())return '';const sv=sessionSectionAvg(s.sid,sec);
     return `<div class="rgroup"><h4>${sec.name}<span>${sv?sv.toFixed(2):'—'}</span></h4>${rows}</div>`;}).join('');
   // facilitation per facilitator
   const facBlocks=s.facs.map(fid=>{
     const fs=facInSession(s.sid,fid);
     const rows=D1.items.map(([code,label])=>{const v=facItemAvg(s.sid,fid,code);if(v==null)return '';
-      return `<div class="ritem"><div class="rn"><span class="mono" style="color:#8a94a8">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+      return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
     return `<div class="facblock"><div class="fh"><b>${esc(facName(fid))} <span class="mono" style="color:#8a94a8;font-weight:500">${fid}</span></b><span class="fs" style="color:${fs?scoreColor(fs):'#aab'}">${fs?fs.toFixed(2):'—'}</span></div>${rows||'<span style="font-size:12px;color:#8a94a8">No facilitation responses yet.</span>'}</div>`;}).join('');
   const o=sessionOverall(s.sid);
   el.innerHTML=`<div class="detail-head"><div class="key">[${s.sid}] · session key · course ${c.cid}</div>
@@ -572,7 +602,7 @@ function renderCourseDetail(){
   const spark=ss.map(s=>{const o=sessionOverall(s.sid);return `<i style="height:${o?o/4*100:4}%;background:${scoreColor(o)}" title="${fmtDate(s.date)}: ${o?o.toFixed(2):'—'}"></i>`;}).join('');
   const rows=ss.map(s=>{const o=sessionOverall(s.sid);return `<div class="ritem" style="grid-template-columns:1fr 80px 34px"><div class="rn"><span class="key mono">[${s.sid}]</span> ${fmtDate(s.date)} · ${s.facs.map(facName).join(', ')}</div><div class="rt"><div class="rf" style="width:${o?o/4*100:0}%;background:${scoreColor(o)}"></div></div><div class="rv" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(1):'—'}</div></div>`;}).join('');
   el.innerHTML=`<div class="detail-head"><div class="key">${c.cid} · course</div><h2>${esc(c.plo)}</h2>
-    <div class="sub"><span class="pill">${c.sub||'—'}</span><span class="pill">${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span></div>
+    <div class="sub"><span class="pill">${c.sub||'—'}</span><span class="pill">${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span>${coordForUnit(c.unit)?`<span class="pill" style="background:#e9f6f3;color:#0b6b57">Coordinator ${esc(coordForUnit(c.unit))}</span>`:''}</div>
     <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${ss.length} sessions · ${ag.resp} responses</span></div></div>
     <div class="detail-body"><div class="rgroup"><h4>Score across deliveries<span>oldest → newest</span></h4><div class="spark">${spark}</div></div>
     <div class="rgroup"><h4>Sessions</h4>${rows}</div></div>`;
@@ -595,7 +625,7 @@ function renderFacDetail(){
   if(!f){el.className='detail empty';el.innerHTML='<div>Select a facilitator.</div>';return;}
   el.className='detail';const ag=facAgg(f.fid);
   const itemRows=D1.items.map(([code,label])=>{const it=ag.items[code];const v=it&&it.n?it.sum/it.n:null;if(v==null)return '';
-    return `<div class="ritem"><div class="rn"><span class="mono" style="color:#8a94a8">${code}</span> ${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+    return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
   const norm=ag.overall;
   const sessRows=ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);const c=CMAP[s.cid]||{};const fs=facInSession(sk,f.fid);
     const flag=(fs!=null&&norm!=null&&fs<norm-0.4)?` <span class="pill" style="background:#fdeceb;color:#a3352f">below norm</span>`:'';
@@ -668,8 +698,8 @@ function renderSummary(){
   document.getElementById('sumTable').innerHTML=head+body+foot;
   document.getElementById('sumMethodNote').innerHTML=`<b>How ratings are calculated</b>
     <ul style="margin:8px 0 0;padding-left:18px">
-      <li>Each rubric code (e.g. C2, D2.1 — see the Rubric tab for the full list) is the average of every matching response for that specific question, weighted by response count, for sessions hosted by that unit.</li>
-      <li>This table groups those codes into four plain-language columns: <b>Content</b> (Course &amp; Content), <b>Delivery</b> (Facilitation, Logistics, Digital experience), <b>Support Services</b> (Venue, Catering, Accommodation), and <b>Library Services</b> (EDULIS). Each column is the average of its underlying sections — the individual codes stay on the Rubric heatmap tab.</li>
+      <li>Every individual question is averaged across every matching response, weighted by response count, for sessions hosted by that unit.</li>
+      <li>Those questions group into four plain-language columns: <b>Content</b> (Course &amp; Content), <b>Delivery</b> (Facilitation, Logistics, Digital experience), <b>Support Services</b> (Venue, Catering, Accommodation), and <b>Library Services</b> (EDULIS). Each column is the average of its underlying sections.</li>
       <li><b>Delivery's</b> Facilitation figure is cumulative — the average across every facilitation question and every facilitator on sessions hosted by that unit.</li>
       <li><b>Content</b> is reported per unit like every other column, plus pooled once more under <b>PDD</b> as a programme-wide summary.</li>
       <li><b>Support Services</b> is reported per unit like every other column, plus pooled once more under <b>Corporate Services</b> as a programme-wide summary.</li>
@@ -680,7 +710,7 @@ function renderSummary(){
 
 /* RUBRIC HEATMAP */
 function renderHeat(){
-  const units=[...new Set(COURSES.map(c=>c.unit).filter(Boolean))].sort();
+  const units=[...new Set(COURSES.map(c=>c.unit).filter(isValidUnit))].sort();
   const cols=[...units,PDD_UNIT,CORPORATE_UNIT];
   let head=`<thead><tr><th class="row">Section ↓ / Unit →</th>${cols.map(u=>`<th${u===CORPORATE_UNIT?' style="color:#5b3a99"':u===PDD_UNIT?' style="color:#00838a"':''}>${u}</th>`).join('')}<th>All</th></tr></thead>`;
   let body='<tbody>';
@@ -706,13 +736,19 @@ function renderCat(){
       <td><input value="${esc(c.days||'')}" data-f="days" style="min-width:56px"></td><td><input value="${esc(c.hours||'')}" data-f="hours" style="min-width:56px"></td>
       <td><select data-f="term"><option value=""></option>${opts(['1','2','3'],c.term)}</select></td><td><select data-f="mode">${opts(MODES,c.mode)}</select></td>
       <td><button class="rowdel" data-del="${i}">×</button></td></tr>`).join('')}</tbody></table></div>`;
-    note.innerHTML='<b>Courses</b> are the stable layer — one row per PLO, IDs frozen. Each course fans out into sessions on the Sessions tab.';
+    note.innerHTML='<b>Courses</b> are the stable layer — one row per PLO, IDs frozen. Each course fans out into sessions on the Sessions tab. Its <b>Coordinator</b> comes automatically from whoever coordinates its Unit — set that once on the Coordinators tab.';
     bindCat('courses');
   } else if(sel.catSub==='facs'){
     body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>ID</th><th>Facilitator name</th><th>Sessions</th><th></th></tr></thead><tbody>${FACS.map((f,i)=>{const nsess=SESSIONS.filter(s=>s.facs.includes(f.fid)).length;
       return `<tr data-i="${i}"><td class="cidcell" style="color:#5b3a99;background:#f3eefb">${f.fid}</td><td class="plo"><input value="${esc(f.name||'')}" data-f="name"></td><td class="mono" style="color:#8a94a8">${nsess}</td><td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
     note.innerHTML='<b>Facilitators</b> are the roster. Assign them to sessions on the Sessions tab (comma-separated IDs). Facilitation feedback rolls up per person from here.';
     bindCat('facs');
+  } else if(sel.catSub==='coords'){
+    const allUnits=[...new Set(COURSES.map(c=>c.unit).filter(isValidUnit))].sort();
+    body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>Unit</th><th>Coordinator ID</th><th>Coordinator name</th><th>Courses covered</th><th></th></tr></thead><tbody>${COORDS.map((co,i)=>{const ncourses=COURSES.filter(c=>c.unit===co.unit).length;
+      return `<tr data-i="${i}"><td><select data-f="unit"><option value=""></option>${allUnits.map(u=>`<option value="${u}"${u===co.unit?' selected':''}>${u}</option>`).join('')}</select></td><td class="cidcell" style="color:#0b6b57;background:#e9f6f3"><input value="${esc(co.coid||'')}" data-f="coid" style="background:transparent;color:inherit;text-align:center"></td><td class="plo"><input value="${esc(co.name||'')}" data-f="name"></td><td class="mono" style="color:#8a94a8">${ncourses}</td><td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
+    note.innerHTML='<b>Coordinators</b> are assigned per <b>Unit</b> — one row here covers every course hosted by that unit, so there is no need to set a coordinator on each course individually. Unlike facilitators, coordinators are not individually rated, so their name shows openly on the course detail.';
+    bindCat('coords');
   } else {
     body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>Key</th><th>Course</th><th>Date</th><th>Facilitator IDs</th><th>Mode</th><th>Fallback if unticked</th><th></th></tr></thead><tbody>${SESSIONS.map((s,i)=>{const c=CMAP[s.cid]||{};
       return `<tr data-i="${i}"><td class="keycell">${s.sid}</td>
@@ -727,7 +763,7 @@ function renderCat(){
   }
 }
 function bindCat(kind){
-  const arr=kind==='courses'?COURSES:kind==='facs'?FACS:SESSIONS;
+  const arr=kind==='courses'?COURSES:kind==='facs'?FACS:kind==='coords'?COORDS:SESSIONS;
   document.querySelectorAll('#catBody input[data-f],#catBody select[data-f]').forEach(inp=>inp.addEventListener('change',e=>{
     const i=+e.target.closest('tr').getAttribute('data-i');const f=e.target.getAttribute('data-f');let v=e.target.value.trim();
     if(f==='facs'){arr[i].facs=v.split(',').map(x=>x.trim().toUpperCase()).filter(Boolean);}
@@ -747,22 +783,52 @@ function currentLinkFields(){
     f:document.getElementById('facCsvUrl').value.trim(),
     c:document.getElementById('regCoursesUrl').value.trim(),
     s:document.getElementById('regSessionsUrl').value.trim(),
-    fa:document.getElementById('regFacsUrl').value.trim()
+    fa:document.getElementById('regFacsUrl').value.trim(),
+    co:document.getElementById('regCoordsUrl').value.trim()
   };
+}
+// Google's "publish to web" CSV links are almost entirely a repeated template around one long ID —
+// several links (e.g. the register's three tabs) often share that same ID, differing only in gid.
+// Storing {id, gid} instead of the full URL, and each unique id only once, keeps the bookmark short.
+const GSHEET_PUB_RE=/^https:\/\/docs\.google\.com\/spreadsheets\/d\/e\/([^/]+)\/pub\?gid=(\d+)&single=true&output=csv$/;
+const LINK_ORDER=['r','f','c','s','fa','co'];
+function compactEncodeLinks(fields){
+  const ids=[];
+  const slots=LINK_ORDER.map(k=>{
+    const url=(fields[k]||'').trim();
+    if(!url)return '';
+    const m=url.match(GSHEET_PUB_RE);
+    if(m){let idx=ids.indexOf(m[1]);if(idx<0){ids.push(m[1]);idx=ids.length-1;}return idx+'_'+m[2];}
+    return 'U'+encodeURIComponent(url); // fallback for a link that isn't a standard Google publish URL
+  });
+  if(!ids.length&&slots.every(v=>!v))return null;
+  return ids.join('.')+'|'+slots.join('|');
+}
+function compactDecodeLinks(str){
+  const bar=str.indexOf('|');
+  const ids=(bar<0?str:str.slice(0,bar)).split('.').filter(Boolean);
+  const slots=(bar<0?'':str.slice(bar+1)).split('|');
+  const out={};
+  LINK_ORDER.forEach((k,i)=>{
+    const v=slots[i];if(!v)return;
+    if(v[0]==='U')out[k]=decodeURIComponent(v.slice(1));
+    else{const[idx,gid]=v.split('_');if(ids[idx])out[k]=`https://docs.google.com/spreadsheets/d/e/${ids[idx]}/pub?gid=${gid}&single=true&output=csv`;}
+  });
+  return out;
 }
 function syncSetupHash(){
   const fields=currentLinkFields();
-  const nonEmpty=Object.fromEntries(Object.entries(fields).filter(([k,v])=>v));
-  if(!Object.keys(nonEmpty).length)return;
-  try{
-    const encoded=encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(nonEmpty)))));
-    history.replaceState(null,'','#setup='+encoded);
-  }catch(e){}
+  const compact=compactEncodeLinks(fields);
+  if(!compact)return;
+  try{history.replaceState(null,'','#s='+encodeURIComponent(compact));}catch(e){}
 }
 function decodeSetupHash(){
-  const m=location.hash.match(/#setup=([^&]+)/);
-  if(!m)return null;
-  try{return JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));}catch(e){return null;}
+  const m=location.hash.match(/#s=([^&]+)/);
+  if(m){try{return compactDecodeLinks(decodeURIComponent(m[1]));}catch(e){return null;}}
+  // backward compatible with the older, longer #setup= links already shared/bookmarked
+  const old=location.hash.match(/#setup=([^&]+)/);
+  if(old){try{return JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(old[1])))));}catch(e){return null;}}
+  return null;
 }
 function copySetupLink(){
   syncSetupHash();
@@ -836,9 +902,9 @@ function setBadge(mainN,facN){const b=document.getElementById('dataBadge'),t=doc
 
 /* export/import */
 function download(name,text,type){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
-function exportJSON(){download('ctli-model.json',JSON.stringify({courses:COURSES,sessions:SESSIONS,facilitators:FACS},null,2),'application/json');}
+function exportJSON(){download('ctli-model.json',JSON.stringify({courses:COURSES,sessions:SESSIONS,facilitators:FACS,coordinators:COORDS},null,2),'application/json');}
 function importFile(file){const fr=new FileReader();fr.onload=()=>{try{const m=JSON.parse(fr.result);
-  COURSES=(m.courses||[]).map(c=>({...c}));SESSIONS=(m.sessions||[]).map(s=>({...s,facs:[...(s.facs||[])]}));FACS=(m.facilitators||[]).map(f=>({...f}));
+  COURSES=(m.courses||[]).map(c=>({...c}));SESSIONS=(m.sessions||[]).map(s=>({...s,facs:[...(s.facs||[])]}));FACS=(m.facilitators||[]).map(f=>({...f}));COORDS=(m.coordinators||[]).map(c=>({...c}));
   rebuild();refreshFilters();renderCat();renderActive();}catch(e){alert('Could not read file: '+e.message);}};fr.readAsText(file);}
 function copySessionOptions(){const lines=SESSIONS.map(sessionLabelPlain);
   navigator.clipboard.writeText(lines.join('\n'));const b=document.getElementById('copySessions');b.textContent=`✓ Copied ${lines.length} options`;setTimeout(()=>b.textContent='Copy session options (both forms)',1500);}
@@ -849,7 +915,7 @@ function copyFacilitatorRoster(){const lines=FACS.map(f=>`${f.fid} ${f.name||''}
 function refreshFilters(){
   fillSel('fTerm','All terms',[...new Set(COURSES.map(c=>c.term).filter(Boolean))].sort(),state.term);
   fillSel('fSub','All sub-directorates',[...new Set(COURSES.map(c=>c.sub).filter(Boolean))].sort(),state.sub);
-  fillSel('fUnit','All units',[...new Set(COURSES.map(c=>c.unit).filter(Boolean))].sort(),state.unit);
+  fillSel('fUnit','All units',[...new Set(COURSES.map(c=>c.unit).filter(isValidUnit))].sort(),state.unit);
   fillSel('fMode','All modes',[...new Set(COURSES.map(c=>c.mode).filter(Boolean))].sort(),state.mode);
   fillSel('fFac','All facilitators',FACS.map(f=>f.fid),state.fac,fid=>facName(fid));
 }
@@ -896,7 +962,7 @@ document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='E
 
 document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>{
   const v=t.dataset.view;
-  if(v==='setup'||v==='catalogue')requestAdminView(v);
+  if(v==='setup'||v==='catalogue'||v==='facilitators')requestAdminView(v);
   else setView(v);
 });
 document.querySelectorAll('#catSub .subtab').forEach(t=>t.onclick=()=>{sel.catSub=t.dataset.sub;renderCat();});
@@ -905,6 +971,7 @@ document.getElementById('fSearch').addEventListener('input',e=>{state.q=e.target
 document.getElementById('addRow').onclick=()=>{
   if(sel.catSub==='courses'){const n=COURSES.length+1;COURSES.push({cid:'C'+String(n).padStart(3,'0'),plo:'New course',sub:'TPI',unit:'',days:'',hours:'',term:'1',mode:'Face-to-Face',seed:null});}
   else if(sel.catSub==='facs'){const n=FACS.length+1;FACS.push({fid:'F'+String(n).padStart(2,'0'),name:'New facilitator'});}
+  else if(sel.catSub==='coords'){const n=COORDS.length+1;COORDS.push({unit:'',coid:'TC'+String(n).padStart(2,'0'),name:'New coordinator'});}
   else{const maxk=Math.max(2700,...SESSIONS.map(s=>+s.sid||0))+1;SESSIONS.push({sid:String(maxk),cid:COURSES[0]?.cid||'C001',date:null,facs:[],online:false});}
   rebuild();refreshFilters();renderCat();renderActive();};
 document.getElementById('expJson').onclick=exportJSON;
@@ -919,14 +986,15 @@ function fmtRegDate(v){if(v==null||v==='')return null;if(v instanceof Date){cons
   let s=String(v).trim();const m=s.match(/^(\d{4}-\d{2}-\d{2})/);if(m)return m[1];return s||null;}
 function csvRowsToObjects(text){const rows=parseCSV(text);if(rows.length<2)return[];const head=rows[0].map(h=>h.trim());
   return rows.slice(1).map(r=>{const o={};head.forEach((h,i)=>o[h]=r[i]!==undefined?r[i]:null);return o;});}
-function applyRegisterRows(cRows,sRows,fRows){
+function applyRegisterRows(cRows,sRows,fRows,coRows){
   if(cRows&&cRows.length)COURSES=cRows.filter(r=>pickField(r,['course id'])).map(r=>({cid:String(pickField(r,['course id'])).trim(),plo:pickField(r,['professional learning','plo'])||'',sub:pickField(r,['sub'])||null,unit:pickUnitField(r)||null,days:pickField(r,['day'])!=null&&pickField(r,['day'])!==''?String(pickField(r,['day'])):null,hours:pickField(r,['hour'])!=null&&pickField(r,['hour'])!==''?String(pickField(r,['hour'])):null,term:pickField(r,['term'])!=null&&pickField(r,['term'])!==''?String(pickField(r,['term'])).replace(/\.0$/,''):null,mode:pickField(r,['mode'])||null}));
   if(sRows&&sRows.length)SESSIONS=sRows.filter(r=>pickField(r,['session id'])).map(r=>{const f=pickField(r,['facilitator id','facilitator'])||'';return {sid:String(pickField(r,['session id'])).replace(/\.0$/,'').trim(),cid:String(pickField(r,['course id'])||'').trim(),date:fmtRegDate(pickField(r,['date'])),facs:String(f).split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),online:false};});
   if(fRows&&fRows.length)FACS=fRows.filter(r=>pickField(r,['facilitator id'])).map(r=>({fid:String(pickField(r,['facilitator id'])).trim(),name:pickField(r,['name'])||''}));
+  if(coRows&&coRows.length)COORDS=coRows.filter(r=>pickUnitField(r)).map(r=>({unit:pickUnitField(r),coid:pickField(r,['coordinator id'])?String(pickField(r,['coordinator id'])).trim().toUpperCase():'',name:pickField(r,['name'])||''}));
   const cm={};COURSES.forEach(c=>cm[c.cid]=(c.mode||'').toLowerCase());SESSIONS.forEach(s=>{s.online=/online|blended/.test(cm[s.cid]||'');});
   rebuild();refreshFilters();renderCat();renderActive();
   const unitsFound=new Set(COURSES.map(c=>c.unit).filter(Boolean)).size;
-  return {courses:COURSES.length,sessions:SESSIONS.length,facs:FACS.length,assigned:SESSIONS.filter(s=>s.facs.length).length,unitsFound};
+  return {courses:COURSES.length,sessions:SESSIONS.length,facs:FACS.length,coords:COORDS.length,assigned:SESSIONS.filter(s=>s.facs.length).length,unitsFound};
 }
 function importWorkbook(file){
   if(typeof XLSX==='undefined'){alert('Spreadsheet reader is still loading — try again in a moment.');return;}
@@ -934,12 +1002,23 @@ function importWorkbook(file){
   fr.onload=()=>{try{
     const wb=XLSX.read(new Uint8Array(fr.result),{type:'array',cellDates:true});
     const grab=names=>{for(const n of wb.SheetNames){if(names.some(x=>n.toLowerCase().includes(x)))return XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:null});}return null;};
-    const cRows=grab(['course']),sRows=grab(['session']),fRows=grab(['facilit']);
-    const r=applyRegisterRows(cRows,sRows,fRows);
-    alert(`Loaded from register: ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators.`+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:'')+(r.courses&&!r.unitsFound?`\n⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab. Every unit row will be blank until this is fixed.`:''));
+    const cRows=grab(['course']),sRows=grab(['session']),fRows=grab(['facilit']),coRows=grab(['coordinat']);
+    const r=applyRegisterRows(cRows,sRows,fRows,coRows);
+    alert(`Loaded from register: ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:'')+(r.courses&&!r.unitsFound?`\n⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab. Every unit row will be blank until this is fixed.`:''));
   }catch(err){alert('Could not read workbook: '+err.message);}};
   fr.readAsArrayBuffer(file);
 }
+function generateFacilitatorSummary(){
+  const rows=FACS.map(f=>{const ag=facAgg(f.fid);return {f,ag};}).sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
+  const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
+  const trs=rows.map(({f,ag})=>`<tr><td>${esc(f.fid)}</td><td>${esc(f.name||'—')}</td><td>${ag.sessions.length}</td><td>${ag.resp}</td><td>${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'—'}</td></tr>`).join('');
+  document.getElementById('facSummaryPrint').innerHTML=`
+    <h1>CTLI Facilitator Summary</h1>
+    <div class="meta">Generated ${today} · For training coordinator use · Not for public distribution (contains facilitator names)</div>
+    <table><thead><tr><th>ID</th><th>Name</th><th>Sessions</th><th>Responses</th><th>Facilitation score</th></tr></thead><tbody>${trs}</tbody></table>`;
+  window.print();
+}
+document.getElementById('genFacSummary').onclick=generateFacilitatorSummary;
 document.getElementById('copySessions').onclick=copySessionOptions;
 document.getElementById('copyAll').onclick=copyFacilitatorRoster;
 document.getElementById('loadCsv').onclick=()=>{const url=document.getElementById('csvUrl').value.trim();const st=document.getElementById('csvStatus');
@@ -953,19 +1032,22 @@ function loadRegisterFromLinks(silent){
   const cUrl=document.getElementById('regCoursesUrl').value.trim();
   const sUrl=document.getElementById('regSessionsUrl').value.trim();
   const fUrl=document.getElementById('regFacsUrl').value.trim();
+  const coUrl=document.getElementById('regCoordsUrl').value.trim();
   const st=document.getElementById('regStatus');
-  if(!cUrl&&!sUrl&&!fUrl){if(!silent)st.textContent='Paste at least one sheet link first.';return Promise.resolve();}
+  if(!cUrl&&!sUrl&&!fUrl&&!coUrl){if(!silent)st.textContent='Paste at least one sheet link first.';return Promise.resolve();}
   if(!silent)st.textContent='Loading…';
-  return Promise.all([cUrl,sUrl,fUrl].map(u=>u?fetch(u).then(r=>r.text()):Promise.resolve(null)))
-    .then(([cText,sText,fText])=>{
+  return Promise.all([cUrl,sUrl,fUrl,coUrl].map(u=>u?fetch(u).then(r=>r.text()):Promise.resolve(null)))
+    .then(([cText,sText,fText,coText])=>{
       const cRows=cText?csvRowsToObjects(cText):null;
       const sRows=sText?csvRowsToObjects(sText):null;
       const fRows=fText?csvRowsToObjects(fText):null;
-      const r=applyRegisterRows(cRows,sRows,fRows);
-      st.textContent=`✓ Loaded ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators.`+(r.courses&&!r.unitsFound?' ⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab.':'');
+      const coRows=coText?csvRowsToObjects(coText):null;
+      const r=applyRegisterRows(cRows,sRows,fRows,coRows);
+      st.textContent=`✓ Loaded ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`+(r.courses&&!r.unitsFound?' ⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab.':'');
       if(cUrl)saveLink('link_reg_courses',cUrl);
       if(sUrl)saveLink('link_reg_sessions',sUrl);
       if(fUrl)saveLink('link_reg_facs',fUrl);
+      if(coUrl)saveLink('link_reg_coords',coUrl);
       syncSetupHash();
     })
     .catch(e=>{st.textContent='Could not load: '+e.message;});
@@ -982,13 +1064,14 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
 (function(){
   const hashLinks=decodeSetupHash()||{};
   const savedResp=hashLinks.r||loadLink('link_responses'),savedFacResp=hashLinks.f||loadLink('link_responses_fac');
-  const savedC=hashLinks.c||loadLink('link_reg_courses'),savedS=hashLinks.s||loadLink('link_reg_sessions'),savedF=hashLinks.fa||loadLink('link_reg_facs');
+  const savedC=hashLinks.c||loadLink('link_reg_courses'),savedS=hashLinks.s||loadLink('link_reg_sessions'),savedF=hashLinks.fa||loadLink('link_reg_facs'),savedCo=hashLinks.co||loadLink('link_reg_coords');
   if(savedResp)document.getElementById('csvUrl').value=savedResp;
   if(savedFacResp)document.getElementById('facCsvUrl').value=savedFacResp;
   if(savedC)document.getElementById('regCoursesUrl').value=savedC;
   if(savedS)document.getElementById('regSessionsUrl').value=savedS;
   if(savedF)document.getElementById('regFacsUrl').value=savedF;
-  const registerLoad=(savedC||savedS||savedF)?loadRegisterFromLinks(true):Promise.resolve();
+  if(savedCo)document.getElementById('regCoordsUrl').value=savedCo;
+  const registerLoad=(savedC||savedS||savedF||savedCo)?loadRegisterFromLinks(true):Promise.resolve();
   registerLoad.then(()=>{
     if(savedResp){const st=document.getElementById('csvStatus');st.textContent='Loading…';
       fetch(savedResp).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses.`;}).catch(e=>{st.textContent='Could not reload saved link: '+e.message;});}
