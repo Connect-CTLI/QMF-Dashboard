@@ -163,19 +163,23 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .pin-error{color:var(--poor);font-size:12px;margin-top:9px;min-height:15px}
 .fac-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
 .fac-toolbar-note{font-size:12.5px;color:var(--ink-soft);background:#fdf3dd;border:1px solid #f0dcae;border-radius:9px;padding:8px 12px;flex:1;min-width:280px}
-#facSummaryPrint,#reportPrint{padding:30px}
-#facSummaryPrint h1,#reportPrint h1{font-family:'Space Grotesk';font-size:20px;margin-bottom:2px}
-#facSummaryPrint .meta,#reportPrint .meta{font-size:12px;color:var(--ink-soft);margin-bottom:18px}
-#facSummaryPrint table,#reportPrint table{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:16px}
-#facSummaryPrint th,#facSummaryPrint td,#reportPrint th,#reportPrint td{border:1px solid #ccc;padding:6px 9px;text-align:left}
-#facSummaryPrint th,#reportPrint th{background:#eef2f9}
+#reportPrint{padding:30px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#reportPrint *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#reportPrint .ritem{margin-bottom:6px}
+#reportPrint .rgroup{margin-bottom:16px}
+#reportPrint .rgroup h4{font-family:'Space Grotesk';font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--brand);margin-bottom:8px;display:flex;justify-content:space-between}
+#reportPrint h1{font-family:'Space Grotesk';font-size:20px;margin-bottom:2px}
+#reportPrint .meta{font-size:12px;color:var(--ink-soft);margin-bottom:18px}
+#reportPrint table{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:16px}
+#reportPrint th,#reportPrint td{border:1px solid #ccc;padding:6px 9px;text-align:left}
+#reportPrint th{background:#eef2f9}
 #reportPrint h2{font-family:'Space Grotesk';font-size:15px;margin:20px 0 8px}
 #reportPrint .headline{font-size:13px;margin-bottom:14px}
 #reportPrint .headline b{font-family:'Space Grotesk';font-size:18px}
 @media print{
   body *{visibility:hidden}
-  #facSummaryPrint,#facSummaryPrint *,#reportPrint,#reportPrint *{visibility:visible}
-  #facSummaryPrint,#reportPrint{position:absolute;top:0;left:0;width:100%;display:block!important}
+  #reportPrint,#reportPrint *{visibility:visible}
+  #reportPrint{position:absolute;top:0;left:0;width:100%;display:block!important}
 }
 @media(max-width:1000px){.explorer{grid-template-columns:1fr}.detail{position:static;max-height:none}.pulse{grid-template-columns:1fr}.setup-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -250,14 +254,12 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 
 <section id="v-facilitators" class="view hidden">
   <div class="fac-toolbar">
-    <div class="fac-toolbar-note">🔒 Facilitator names are only shown here, inside this PIN-gated tab. Everywhere else on the dashboard (Sessions, Courses, Summary), facilitators appear by ID only.</div>
-    <button class="btn primary" id="genFacSummary">Generate all-facilitators summary</button>
+    <div class="fac-toolbar-note">🔒 Facilitator names are only shown here, inside this PIN-gated tab. Everywhere else on the dashboard (Sessions, Courses, Summary), facilitators appear by ID only. For scores and detailed performance, generate a report from the relevant course.</div>
   </div>
   <div class="explorer"><div class="cards" id="facCards"></div>
-    <aside class="detail empty" id="facDetail"><div>Select a facilitator to see their facilitation scores across every session they ran.</div></aside>
+    <aside class="detail empty" id="facDetail"><div>Select a facilitator to see the courses and sessions they've facilitated.</div></aside>
   </div>
 </section>
-<div id="facSummaryPrint" class="hidden"></div>
 <div id="reportPrint" class="hidden"></div>
 
 <section id="v-rubric" class="view hidden">
@@ -619,11 +621,10 @@ function renderCourseDetail(){
 /* FACILITATORS */
 function renderFacCards(){
   const el=document.getElementById('facCards');
-  const list=FACS.map(f=>({f,ag:facAgg(f.fid)})).sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
+  const list=FACS.map(f=>({f,ag:facAgg(f.fid)})).sort((a,b)=>esc(a.f.name).localeCompare(esc(b.f.name)));
   el.innerHTML=list.map(({f,ag})=>`<div class="scard" data-fid="${f.fid}" aria-selected="${f.fid===sel.fac}" tabindex="0" role="button">
-    <div class="meta"><span class="pill fac mono">${f.fid}</span><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''} · ${ag.resp} responses</span></div>
-    <h3>${esc(f.name)}</h3><div class="meta"><span>Facilitation score</span></div>
-    <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aab'}">${ag.overall?ag.overall.toFixed(2):'—'}</div><div class="n2">D1 mean</div></div>
+    <div class="meta"><span class="pill fac mono">${f.fid}</span></div>
+    <h3>${esc(f.name)}</h3><div class="meta"><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''}</span></div>
    </div>`).join('');
   el.querySelectorAll('.scard[data-fid]').forEach(c=>{const k=c.getAttribute('data-fid');
     c.onclick=()=>{sel.fac=k;renderFacCards();renderFacDetail();};c.onkeydown=e=>{if(e.key==='Enter'){c.onclick();}};});
@@ -632,16 +633,11 @@ function renderFacDetail(){
   const el=document.getElementById('facDetail');const f=FMAP[sel.fac];
   if(!f){el.className='detail empty';el.innerHTML='<div>Select a facilitator.</div>';return;}
   el.className='detail';const ag=facAgg(f.fid);
-  const itemRows=D1.items.map(([code,label])=>{const it=ag.items[code];const v=it&&it.n?it.sum/it.n:null;if(v==null)return '';
-    return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
-  const norm=ag.overall;
-  const sessRows=ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);const c=CMAP[s.cid]||{};const fs=facInSession(sk,f.fid);
-    const flag=(fs!=null&&norm!=null&&fs<norm-0.4)?` <span class="pill" style="background:#fdeceb;color:#a3352f">below norm</span>`:'';
-    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sk}]</span> ${esc(c.plo||'')} · ${fmtDate(s.date)}${flag}</div><div class="rt"><div class="rf" style="width:${fs?fs/4*100:0}%;background:${scoreColor(fs)}"></div></div><div class="rv" style="color:${fs?scoreColor(fs):'#aab'}">${fs?fs.toFixed(1):'—'}</div></div>`;}).join('');
+  const sessRows=ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);const c=CMAP[s.cid]||{};
+    return `<div class="ritem" style="grid-template-columns:1fr"><div class="rn"><span class="key mono">[${sk}]</span> ${esc(c.plo||'')} <span style="color:#8a94a8">· ${c.cid||''} · ${fmtDate(s.date)}</span></div></div>`;}).join('');
   el.innerHTML=`<div class="detail-head"><div class="key">${f.fid} · facilitator</div><h2>${esc(f.name)}</h2>
-    <div class="sub"><b style="color:${norm?scoreColor(norm):'#aab'};font-size:15px;font-family:Space Grotesk">${norm?norm.toFixed(2):'—'}/4</b><span>facilitation · ${ag.sessions.length} sessions · ${ag.resp} responses</span><button class="btn" style="margin-left:auto" onclick="generateSingleFacilitatorReport('${f.fid}')">Generate report</button></div></div>
-    <div class="detail-body"><div class="rgroup fac"><h4>Facilitation items (all sessions)</h4>${itemRows}</div>
-    <div class="rgroup"><h4>Per session<span>flagged if &gt;0.4 below their norm</span></h4>${sessRows}</div></div>`;
+    <div class="sub"><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''} across ${new Set(ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);return s?s.cid:null;})).size} course${new Set(ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);return s?s.cid:null;})).size!==1?'s':''}</span></div></div>
+    <div class="detail-body"><div class="rgroup"><h4>Courses &amp; sessions facilitated</h4>${sessRows||'<span style="font-size:12px;color:#8a94a8">No sessions yet.</span>'}</div></div>`;
 }
 
 /* SUMMARY (front page) */
@@ -1017,24 +1013,36 @@ function importWorkbook(file){
   }catch(err){alert('Could not read workbook: '+err.message);}};
   fr.readAsArrayBuffer(file);
 }
+function reportBar(label,v){return v==null?'':`<div class="ritem"><div class="rn">${esc(label)}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(2)}</div></div>`;}
 function generateSessionReport(sid){
   const s=SESSIONS.find(x=>x.sid===sid);if(!s)return;
   const c=CMAP[s.cid]||{};const a=AGG[sid];const o=sessionOverall(sid);
   const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
-  const secRows=RUBRIC.map(sec=>{
-    const itemRows=sec.items.map(([code,label])=>{const v=sessItemAvg(sid,code);return v!=null?`<tr><td>${esc(label)}</td><td>${v.toFixed(2)}</td></tr>`:'';}).join('');
-    if(!itemRows.trim())return '';
+  const secBlocks=RUBRIC.map(sec=>{
+    const bars=sec.items.map(([code,label])=>reportBar(label,sessItemAvg(sid,code))).join('');
+    if(!bars.trim())return '';
     const sv=sessionSectionAvg(sid,sec);
-    return `<h2>${esc(sec.name)}${sv!=null?` — ${sv.toFixed(2)} / 4`:''}</h2><table><thead><tr><th>Question</th><th>Score</th></tr></thead><tbody>${itemRows}</tbody></table>`;
+    return `<div class="rgroup"><h4>${esc(sec.name)}<span>${sv!=null?sv.toFixed(2)+' / 4':'—'}</span></h4>${bars}</div>`;
   }).join('');
-  const facRows=s.facs.map(fid=>{const fs=facInSession(sid,fid);return `<tr><td>${esc(facFullName(fid))} <span style="color:#888">(${esc(fid)})</span></td><td>${fs!=null?fs.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('');
+  const facBlocks=s.facs.map(fid=>{const fs=facInSession(sid,fid);
+    const bars=D1.items.map(([code,label])=>reportBar(label,facItemAvg(sid,fid,code))).join('');
+    return `<div class="rgroup"><h4>${esc(facFullName(fid))} <span style="color:#888;font-weight:400">(${esc(fid)})</span><span>${fs!=null?fs.toFixed(2)+' / 4':'—'}</span></h4>${bars}</div>`;}).join('');
   document.getElementById('reportPrint').innerHTML=`
     <h1>CTLI Session Report — [${esc(sid)}]</h1>
     <div class="meta">Generated ${today} · ${esc(c.cid||'')} ${esc(c.plo||'')} · ${esc(c.sub||'—')} / ${esc(c.unit||'—')} · ${esc(c.mode||'—')} · ${fmtDate(s.date)}</div>
     <div class="headline"><b style="color:${o?'#000':'#888'}">${o!=null?o.toFixed(2)+' / 4':'—'}</b> overall · ${a.resp} response${a.resp!==1?'s':''}</div>
-    ${s.facs.length?`<h2>Facilitation</h2><table><thead><tr><th>Facilitator ID</th><th>Score</th></tr></thead><tbody>${facRows}</tbody></table>`:''}
-    ${secRows}`;
+    ${s.facs.length?`<h2>Facilitation</h2>${facBlocks}`:''}
+    ${secBlocks}`;
   window.print();
+}
+function facilitatorCourseBlock(fid,courseSessions){
+  const withFac=courseSessions.filter(s=>s.facs.includes(fid));
+  const items={};let sum=0,n=0;
+  withFac.forEach(s=>{const fi=AGG[s.sid]&&AGG[s.sid].facItems[fid];if(!fi)return;
+    Object.entries(fi).forEach(([code,it])=>{(items[code]=items[code]||{sum:0,n:0});items[code].sum+=it.sum;items[code].n+=it.n;sum+=it.sum;n+=it.n;});});
+  const overall=n?sum/n:null;
+  const bars=D1.items.map(([code,label])=>{const it=items[code];const v=it&&it.n?it.sum/it.n:null;return reportBar(label,v);}).join('');
+  return `<div class="rgroup"><h4>${esc(facFullName(fid))} <span style="color:#888;font-weight:400">(${esc(fid)})</span><span>${overall!=null?overall.toFixed(2)+' / 4':'—'} · ${withFac.length} session${withFac.length!==1?'s':''} on this course</span></h4>${bars||'<span style="font-size:12px;color:#888">No facilitation responses yet.</span>'}</div>`;
 }
 function generateCourseReport(cid){
   const c=CMAP[cid];if(!c)return;
@@ -1042,48 +1050,24 @@ function generateCourseReport(cid){
   const ss=ag.sessions.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
   const coord=coordForUnit(c.unit);
+  const spark=ss.map(s=>{const o=sessionOverall(s.sid);return `<i style="display:inline-block;width:${Math.max(1,Math.floor(300/Math.max(ss.length,1))-3)}px;height:${o?o/4*100:4}%;background:${scoreColor(o)};margin-right:3px;vertical-align:bottom;border-radius:2px 2px 0 0" title="${fmtDate(s.date)}: ${o?o.toFixed(2):'—'}"></i>`;}).join('');
   const sessRows=ss.map(s=>{const o=sessionOverall(s.sid);const resp=AGG[s.sid]?AGG[s.sid].resp:0;
     const facs=s.facs.map(fid=>facFullName(fid)).join(', ')||'—';
-    return `<tr><td>[${esc(s.sid)}]</td><td>${fmtDate(s.date)}</td><td>${esc(facs)}</td><td>${resp}</td><td>${o!=null?o.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('');
-  const secRows=RUBRIC.map(sec=>{
-    const v=sectionAvgForSessions(ss,sec);
-    return v!=null?`<tr><td>${esc(sec.name)}</td><td>${v.toFixed(2)} / 4</td></tr>`:'';
-  }).join('');
+    return `<tr><td>[${esc(s.sid)}]</td><td>${fmtDate(s.date)}</td><td>${esc(facs)}</td><td>${resp}</td><td style="color:${o?scoreColor(o):'#888'};font-weight:600">${o!=null?o.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('');
+  const secBars=RUBRIC.map(sec=>reportBar(sec.name,sectionAvgForSessions(ss,sec))).join('');
+  const allFacs=[...new Set(ss.flatMap(s=>s.facs))];
+  const facBlocks=allFacs.map(fid=>facilitatorCourseBlock(fid,ss)).join('');
   document.getElementById('reportPrint').innerHTML=`
     <h1>CTLI Course Report — ${esc(cid)}</h1>
     <div class="meta">Generated ${today} · ${esc(c.sub||'—')} / ${esc(c.unit||'—')} · ${esc(c.mode||'—')}${coord?` · ${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'}: ${esc(coord)}`:''}</div>
     <h1 style="font-size:16px;margin-top:0">${esc(c.plo)}</h1>
     <div class="headline"><b style="color:${ag.overall?'#000':'#888'}">${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'—'}</b> overall · ${ss.length} session${ss.length!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</div>
-    ${secRows?`<h2>By rubric section</h2><table><thead><tr><th>Section</th><th>Score</th></tr></thead><tbody>${secRows}</tbody></table>`:''}
+    ${ss.length>1?`<div class="rgroup"><h4>Score across deliveries<span>oldest → newest</span></h4><div style="height:40px">${spark}</div></div>`:''}
+    ${secBars?`<div class="rgroup"><h4>By rubric section</h4>${secBars}</div>`:''}
+    ${allFacs.length?`<h2>Facilitators on this course</h2>${facBlocks}`:''}
     <h2>Sessions</h2><table><thead><tr><th>Key</th><th>Date</th><th>Facilitator(s)</th><th>Responses</th><th>Score</th></tr></thead><tbody>${sessRows}</tbody></table>`;
   window.print();
 }
-function generateSingleFacilitatorReport(fid){
-  const f=FMAP[fid];if(!f)return;
-  const ag=facAgg(fid);
-  const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
-  const itemRows=D1.items.map(([code,label])=>{const it=ag.items[code];const v=it&&it.n?it.sum/it.n:null;return v!=null?`<tr><td>${esc(label)}</td><td>${v.toFixed(2)} / 4</td></tr>`:'';}).join('');
-  const sessRows=ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);const c=CMAP[s.cid]||{};const fs=facInSession(sk,fid);
-    return `<tr><td>[${esc(sk)}]</td><td>${esc(c.plo||'')}</td><td>${fmtDate(s.date)}</td><td>${fs!=null?fs.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('');
-  document.getElementById('reportPrint').innerHTML=`
-    <h1>CTLI Facilitator Report — ${esc(f.name||fid)}</h1>
-    <div class="meta">Generated ${today} · Facilitator ID ${esc(fid)} · For training coordinator use · Not for public distribution</div>
-    <div class="headline"><b style="color:${ag.overall?'#000':'#888'}">${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'—'}</b> overall facilitation score · ${ag.sessions.length} session${ag.sessions.length!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</div>
-    ${itemRows?`<h2>By facilitation item</h2><table><thead><tr><th>Question</th><th>Score</th></tr></thead><tbody>${itemRows}</tbody></table>`:''}
-    <h2>Sessions</h2><table><thead><tr><th>Key</th><th>Course</th><th>Date</th><th>Score</th></tr></thead><tbody>${sessRows||'<tr><td colspan="4">No sessions yet.</td></tr>'}</tbody></table>`;
-  window.print();
-}
-function generateFacilitatorSummary(){
-  const rows=FACS.map(f=>{const ag=facAgg(f.fid);return {f,ag};}).sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
-  const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
-  const trs=rows.map(({f,ag})=>`<tr><td>${esc(f.fid)}</td><td>${esc(f.name||'—')}</td><td>${ag.sessions.length}</td><td>${ag.resp}</td><td>${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'—'}</td></tr>`).join('');
-  document.getElementById('facSummaryPrint').innerHTML=`
-    <h1>CTLI Facilitator Summary</h1>
-    <div class="meta">Generated ${today} · For training coordinator use · Not for public distribution (contains facilitator names)</div>
-    <table><thead><tr><th>ID</th><th>Name</th><th>Sessions</th><th>Responses</th><th>Facilitation score</th></tr></thead><tbody>${trs}</tbody></table>`;
-  window.print();
-}
-document.getElementById('genFacSummary').onclick=generateFacilitatorSummary;
 document.getElementById('copySessions').onclick=copySessionOptions;
 document.getElementById('copyAll').onclick=copyFacilitatorRoster;
 document.getElementById('loadCsv').onclick=()=>{const url=document.getElementById('csvUrl').value.trim();const st=document.getElementById('csvStatus');
