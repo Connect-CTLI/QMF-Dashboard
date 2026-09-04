@@ -1028,13 +1028,23 @@ function reportBar(label,v){return v==null?'':`<div class="ritem"><div class="rn
 function reportGrid(barsHtml){return barsHtml?`<div class="rgrid">${barsHtml}</div>`:'';}
 function reportLetterhead(title){
   return `<div class="letterhead">
-    <img src="${WCED_LOGO}" alt="Western Cape Government">
+    <img src="${WCED_LOGO}" alt="Western Cape Government" decoding="sync">
     <div>
       <div class="lh-dept">WESTERN CAPE EDUCATION DEPARTMENT</div>
       <div class="lh-inst">Cape Teaching and Leadership Institute</div>
       <div class="lh-title">${esc(title)}</div>
     </div>
   </div>`;
+}
+function printReport(){
+  // wait for the letterhead logo to finish decoding before printing — otherwise some browsers
+  // capture the print preview before a freshly-inserted image has painted, and it comes out blank.
+  // A hard fallback timeout guarantees print() still fires even if the load/error events never do.
+  const img=document.querySelector('#reportPrint img');
+  let done=false;
+  const go=()=>{if(done)return;done=true;window.print();};
+  if(img&&!img.complete){img.addEventListener('load',go,{once:true});img.addEventListener('error',go,{once:true});}
+  setTimeout(go,img&&!img.complete?400:50);
 }
 function generateSessionReport(sid){
   const s=SESSIONS.find(x=>x.sid===sid);if(!s)return;
@@ -1057,7 +1067,7 @@ function generateSessionReport(sid){
     ${secBlocks}
     ${facOverview}
     ${s.facs.length?`<h2>Facilitator detail</h2>${facBlocks}`:''}`;
-  window.print();
+  printReport();
 }
 function facilitatorCourseBlock(fid,courseSessions){
   const withFac=courseSessions.filter(s=>s.facs.includes(fid));
@@ -1096,7 +1106,7 @@ function generateCourseReport(cid){
     ${facOverview}
     ${allFacs.length?`<h2>Facilitator detail</h2>${facBlocks}`:''}
     <h2>Sessions</h2><table><thead><tr><th>Key</th><th>Date</th><th>Facilitator(s)</th><th>Responses</th><th>Score</th></tr></thead><tbody>${sessRows}</tbody></table>`;
-  window.print();
+  printReport();
 }
 document.getElementById('copySessions').onclick=copySessionOptions;
 document.getElementById('copyAll').onclick=copyFacilitatorRoster;
