@@ -176,11 +176,17 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 #reportPrint h2{font-family:'Space Grotesk';font-size:15px;margin:20px 0 8px}
 #reportPrint .headline{font-size:13px;margin-bottom:14px}
 #reportPrint .headline b{font-family:'Space Grotesk';font-size:18px}
-#reportPrint .letterhead{display:flex;align-items:center;gap:16px;border-bottom:3px solid #001489;padding-bottom:14px;margin-bottom:18px}
-#reportPrint .letterhead img{height:56px}
-#reportPrint .lh-dept{font-family:'Space Grotesk';font-weight:700;font-size:14px;color:#001489;letter-spacing:.02em}
-#reportPrint .lh-inst{font-size:12px;color:#5b7f95;margin-top:1px}
-#reportPrint .lh-title{font-family:'Space Grotesk';font-weight:600;font-size:13px;color:#0E9285;margin-top:5px}
+#reportPrint .report-header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;border-bottom:3px solid #001489;padding-bottom:16px;margin-bottom:20px}
+#reportPrint .header-left{flex:1}
+#reportPrint .department{font-family:'Space Grotesk';font-weight:700;font-size:16px;color:#001489;letter-spacing:.01em;margin:0}
+#reportPrint .institute{font-size:12.5px;color:#5b7f95;margin:2px 0 0}
+#reportPrint .report-metadata{display:flex;flex-wrap:wrap;margin:14px 0 12px}
+#reportPrint .meta-item{display:flex;flex-direction:column;flex:0 0 auto;min-width:150px;max-width:260px;margin:0 24px 10px 0}
+#reportPrint .meta-label{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#8a94a8;line-height:1.4;white-space:nowrap}
+#reportPrint .meta-value{font-size:12.5px;color:#1A2340;font-weight:500;line-height:1.35;margin-top:2px}
+#reportPrint .report-type{font-family:'Space Grotesk';font-weight:600;font-size:13.5px;color:#0E9285;margin:0}
+#reportPrint .header-right{flex:0 0 auto;text-align:right}
+#reportPrint .header-right img{height:62px}
 #reportPrint .rgrid{display:flex;flex-wrap:wrap;column-gap:26px}
 #reportPrint .rgrid .ritem{flex:0 0 calc(50% - 13px);margin-bottom:8px}
 #reportPrint .fac-overview{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:18px}
@@ -417,7 +423,6 @@ const RUBRIC=[
 const ALL_ITEM_DEFS=RUBRIC.flatMap(s=>s.items.map(([code,label,kw])=>({code,kw:kw?norm(kw):null})));
 const D1=RUBRIC.find(s=>s.code==='D1');
 const SESSION_SECS=RUBRIC.filter(s=>s.kind==='session');
-const ALL_ITEMS=RUBRIC.flatMap(s=>s.items.map(i=>i[0]));
 
 let COURSES=window.__MODEL__.courses.map(c=>({...c}));
 let SESSIONS=window.__MODEL__.sessions.map(s=>({...s,facs:[...s.facs]}));
@@ -1026,13 +1031,18 @@ function importWorkbook(file){
 }
 function reportBar(label,v){return v==null?'':`<div class="ritem"><div class="rn">${esc(label)}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(2)}</div></div>`;}
 function reportGrid(barsHtml){return barsHtml?`<div class="rgrid">${barsHtml}</div>`:'';}
-function reportLetterhead(title){
-  return `<div class="letterhead">
-    <img src="${WCED_LOGO}" alt="Western Cape Government" decoding="sync">
-    <div>
-      <div class="lh-dept">WESTERN CAPE EDUCATION DEPARTMENT</div>
-      <div class="lh-inst">Cape Teaching and Leadership Institute</div>
-      <div class="lh-title">${esc(title)}</div>
+function reportLetterhead(reportType,metaItems){
+  const meta=(metaItems||[]).filter(m=>m&&m[1]).map(([label,value])=>
+    `<div class="meta-item"><span class="meta-label">${esc(label)}</span><span class="meta-value">${esc(value)}</span></div>`).join('');
+  return `<div class="report-header">
+    <div class="header-left">
+      <h1 class="department">Western Cape Education Department</h1>
+      <p class="institute">Cape Teaching and Leadership Institute</p>
+      ${meta?`<div class="report-metadata">${meta}</div>`:''}
+      <p class="report-type">${esc(reportType)}</p>
+    </div>
+    <div class="header-right">
+      <img src="${WCED_LOGO}" alt="Western Cape Government" decoding="sync">
     </div>
   </div>`;
 }
@@ -1061,8 +1071,16 @@ function generateSessionReport(sid){
     const bars=D1.items.map(([code,label])=>reportBar(label,facItemAvg(sid,fid,code))).join('');
     return `<div class="rgroup"><h4 style="text-transform:none">${esc(facFullName(fid))} <span style="color:#888;font-weight:400">(${esc(fid)})</span></h4>${reportGrid(bars)}</div>`;}).join('');
   document.getElementById('reportPrint').innerHTML=`
-    ${reportLetterhead('Session Report — ['+sid+']')}
-    <div class="meta">Generated ${today} · ${esc(c.cid||'')} ${esc(c.plo||'')} · ${esc(c.sub||'—')} / ${esc(c.unit||'—')} · ${esc(c.mode||'—')} · ${fmtDate(s.date)}</div>
+    ${reportLetterhead('Session Feedback Report',[
+      ['Session Key',sid],
+      ['Course',(c.cid?c.cid+' · ':'')+(c.plo||'')],
+      ['Facilitator',s.facs.length?s.facs.map(fid=>`${facFullName(fid)} (${fid})`).join(', '):null],
+      ['Date',fmtDate(s.date)],
+      ['Unit',(c.sub||'—')+' / '+(c.unit||'—')],
+      ['Coordinator',coordForUnit(c.unit)],
+      ['Mode',c.mode],
+      ['Generated',today]
+    ])}
     <div class="headline"><b style="color:${o?'#000':'#888'}">${o!=null?o.toFixed(2)+' / 4':'—'}</b> overall · ${a.resp} response${a.resp!==1?'s':''}</div>
     ${secBlocks}
     ${facOverview}
@@ -1097,9 +1115,16 @@ function generateCourseReport(cid){
     return `<tr><td>${esc(facFullName(fid))}</td><td>${esc(fid)}</td><td>${withFac.length}</td><td>${ov!=null?ov.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('')}</tbody></table>`:'';
   const facBlocks=allFacs.map(fid=>facilitatorCourseBlock(fid,ss)).join('');
   document.getElementById('reportPrint').innerHTML=`
-    ${reportLetterhead('Course Report — '+cid)}
-    <div class="meta">Generated ${today} · ${esc(c.sub||'—')} / ${esc(c.unit||'—')} · ${esc(c.mode||'—')}${coord?` · ${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'}: ${esc(coord)}`:''}</div>
-    <h1 style="font-size:16px;margin-top:0">${esc(c.plo)}</h1>
+    ${reportLetterhead('Course Feedback Report',[
+      ['Course Code',cid],
+      ['Course',c.plo],
+      ['Unit',(c.sub||'—')+' / '+(c.unit||'—')],
+      [(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator',coord],
+      ['Mode',c.mode],
+      ['Term',c.term?'Term '+c.term:null],
+      ['Sessions',String(ss.length)],
+      ['Generated',today]
+    ])}
     <div class="headline"><b style="color:${ag.overall?'#000':'#888'}">${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'—'}</b> overall · ${ss.length} session${ss.length!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</div>
     ${ss.length>1?`<div class="rgroup"><h4>Score across deliveries<span>oldest → newest</span></h4><div style="height:40px">${spark}</div></div>`:''}
     ${secBars?`<div class="rgroup"><h4>By rubric section</h4>${reportGrid(secBars)}</div>`:''}
