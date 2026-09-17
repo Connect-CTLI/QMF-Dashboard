@@ -212,6 +212,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
     <button class="tab" role="tab" data-view="courses" aria-selected="false">Courses</button>
 
     <button class="tab" role="tab" data-view="facilitators" aria-selected="false">Facilitators 🔒</button>
+    <button class="tab" role="tab" data-view="sois" aria-selected="false">SOIs</button>
     <button class="tab" role="tab" data-view="rubric" aria-selected="false">Rubric</button>
     <button class="tab" role="tab" data-view="catalogue" aria-selected="false">Catalogue 🔒</button>
     <button class="tab" role="tab" data-view="setup" aria-selected="false">Setup 🔒</button>
@@ -250,7 +251,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
     <div class="field"><label>Term</label><select id="fTerm"></select></div>
     <div class="field"><label>Sub-directorate</label><select id="fSub"></select></div>
     <div class="field"><label>Unit</label><select id="fUnit"></select></div>
-    <div class="field"><label>Mode</label><select id="fMode"></select></div>
+    <div class="field"><label>SOI</label><select id="fSoi"></select></div>
     <div class="field"><label>Facilitator</label><select id="fFac"></select></div>
     <div class="field searchwrap"><label>Search</label><input type="text" id="fSearch" placeholder="Course name or session key…"></div>
     <div class="field"><label>Sort</label><select id="fSort">
@@ -277,6 +278,12 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   </div>
 </section>
 <div id="reportPrint" class="hidden"></div>
+
+<section id="v-sois" class="view hidden">
+  <div class="explorer"><div class="cards" id="soiCards"></div>
+    <aside class="detail empty" id="soiDetail"><div>Select a Specific Outcomes Indicator to see its pooled rating, the PLOs it covers, and each instance underneath.</div></aside>
+  </div>
+</section>
 
 <section id="v-rubric" class="view hidden">
   <div class="panel"><h2>Rubric heatmap</h2>
@@ -325,10 +332,12 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
     </div>
     <div class="panel">
       <h2>Link the register (live)</h2>
-      <div class="psub">The Course &amp; Session Register has three core tabs, plus an optional Coordinators tab. Publish each one as CSV (File → Share → Publish to web → pick the tab → CSV) and paste its link below — same as the response sheet. A Coordinators tab needs three columns: <b>Unit</b>, <b>Coordinator ID</b> and <b>Name</b> — one row per unit, and every course in that unit picks it up automatically.</div>
-      <div class="field" style="margin-bottom:8px"><label>Courses tab</label><input type="url" id="regCoursesUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
+      <div class="psub">The PLO Register has five core tabs, plus an optional Coordinators tab. Publish each one as CSV (File → Share → Publish to web → pick the tab → CSV) and paste its link below — same as the response sheet. A Coordinators tab needs three columns: <b>Unit</b>, <b>Coordinator ID</b> and <b>Name</b> — one row per unit, and every course in that unit picks it up automatically.</div>
+      <div class="field" style="margin-bottom:8px"><label>PLOs tab</label><input type="url" id="regCoursesUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
+      <div class="field" style="margin-bottom:8px"><label>Instances tab</label><input type="url" id="regInstUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <div class="field" style="margin-bottom:8px"><label>Sessions tab</label><input type="url" id="regSessionsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <div class="field" style="margin-bottom:8px"><label>Facilitators tab</label><input type="url" id="regFacsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
+      <div class="field" style="margin-bottom:8px"><label>SOIs tab</label><input type="url" id="regSoisUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <div class="field" style="margin-bottom:8px"><label>Coordinators tab <span style="font-weight:400;text-transform:none;color:var(--ink-soft)">(optional)</span></label><input type="url" id="regCoordsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <button class="btn primary" id="loadRegister">Load register</button>
       <div id="regStatus" class="mono" style="font-size:12px;color:var(--ink-soft);margin-top:8px"></div>
@@ -336,7 +345,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
     </div>
     <div class="panel">
       <h2>Bookmark this setup</h2>
-      <div class="psub">This is the reliable way to keep all five links, immune to browser storage being cleared. Once everything above is loaded, click below and bookmark the resulting address (or save it somewhere safe) — opening that exact link always restores every sheet, on any device, with no browser memory involved.</div>
+      <div class="psub">This is the reliable way to keep every link, immune to browser storage being cleared. Once everything above is loaded, click below and bookmark the resulting address (or save it somewhere safe) — opening that exact link always restores every sheet, on any device, with no browser memory involved.</div>
       <button class="btn primary" id="copySetupLink">Copy setup link</button>
     </div>
     <div class="panel">
@@ -429,10 +438,11 @@ let SESSIONS=window.__MODEL__.sessions.map(s=>({...s,facs:[...s.facs]}));
 let FACS=window.__MODEL__.facilitators.map(f=>({...f}));
 let COORDS=(window.__MODEL__.coordinators||[]).map(c=>({...c}));
 let CMAP={},FMAP={},COORDMAP={};
-let RESPONSES_MAIN=[]; let RESPONSES_FAC=[]; let RESPONSES=[]; let LIVE=false;
+let RESPONSES_MAIN=[]; let RESPONSES_FAC=[]; let INSTANCES=[],SOIS=[];let IMAP={},SOIMAP={};
+let RESPONSES=[]; let LIVE=false;
 let AGG={}; // sessionKey -> {n, items{}, facItems:{fid:{code:{sum,n}}}, facN:{fid}}
-let sel={session:null,course:null,fac:null,catSub:'sessions'};
-const state={view:'summary',term:'',sub:'',unit:'',mode:'',fac:'',q:'',sort:'rating'};
+let sel={session:null,course:null,fac:null,soi:null,catSub:'sessions'};
+const state={view:'summary',term:'',sub:'',unit:'',soi:'',fac:'',q:'',sort:'rating'};
 
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDate(iso){if(!iso)return '—';const d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.getDate()+' '+MONTHS[d.getMonth()];}
@@ -441,7 +451,35 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','
 function mix(a,b,t){return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(',')})`;}
 function scoreColor(v){if(v==null||isNaN(v))return '#c8cfda';if(v<2.5){return mix([198,65,58],[224,160,48],Math.max(0,(v-1)/1.5));}return mix([224,160,48],[46,139,87],Math.max(0,Math.min(1,(v-2.5)/1.5)));}
 
-function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);COORDMAP={};COORDS.forEach(co=>{if(co.unit)(COORDMAP[co.unit]=COORDMAP[co.unit]||[]).push(co);});}
+function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);COORDMAP={};COORDS.forEach(co=>{if(co.unit)(COORDMAP[co.unit]=COORDMAP[co.unit]||[]).push(co);});
+  IMAP={};INSTANCES.forEach(i=>IMAP[i.iid]=i);SOIMAP={};SOIS.forEach(x=>SOIMAP[x.soi]=x);
+  // Term, mode and year live on the instance now. Push them onto each session so the filters and
+  // reports keep working, falling back to the PLO row when an older 3-tab register is loaded.
+  SESSIONS.forEach(sn=>{const inst=IMAP[sn.iid]||null,c=CMAP[sn.cid]||{};
+    sn.term=(inst&&inst.term)||c.term||null;
+    sn.mode=(inst&&inst.mode)||c.mode||null;
+    sn.year=(inst&&inst.year)||null;
+    sn.soi=c.soi||'';
+    sn.online=/online|blended/.test(String(sn.mode||'').toLowerCase());});}
+function soiName(id){return (SOIMAP[id]&&SOIMAP[id].name)||id;}
+function instLabel(iid){const i=IMAP[iid];if(!i)return iid||'';
+  return (i.year?i.year+' ':'')+(i.term?'Term '+i.term:'')+(i.date?' · '+fmtDate(i.date):'');}
+/* An SOI is judged as one collection across every instance of every PLO linked to it, for the audit
+   year. Session scores are weighted by response count, matching how a course rolls up, so the
+   numbers on this tab reconcile with the Courses tab rather than drifting from it. */
+function soiAgg(id){
+  const x=SOIMAP[id]||{};
+  const plos=COURSES.filter(c=>c.soi===id);
+  const pset=new Set(plos.map(c=>c.cid));
+  const ss=SESSIONS.filter(sn=>pset.has(sn.cid)&&(!x.year||!sn.year||String(sn.year)===String(x.year)));
+  let sum=0,n=0,resp=0;const insts=new Set();
+  for(const sn of ss){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;
+    if(o!=null&&rn){sum+=o*rn;n+=rn;}resp+=rn;if(sn.iid)insts.add(sn.iid);}
+  return {overall:n?sum/n:null,plos,sessions:ss,instances:[...insts],resp};}
+function soiSectionAvg(ss,sec){let sum=0,n=0;
+  for(const sn of ss){const v=sessionSectionAvg(sn.sid,sec),rn=(AGG[sn.sid]||{}).resp||0;
+    if(v!=null&&rn){sum+=v*rn;n+=rn;}}
+  return n?sum/n:null;}
 function coordForUnit(unit){const list=COORDMAP[unit];if(!list||!list.length)return null;return list.map(co=>co.name?`${co.name} (${co.coid})`:co.coid).join(', ');} // shown openly — coordinators aren't individually rated, unlike facilitators
 function facName(fid){return fid;} // public dashboard — ID only, never a real name (POPIA: avoid exposing facilitator identity on an openly-shared link)
 function facFullName(fid){return (FMAP[fid]&&FMAP[fid].name)||fid;} // protected use only — inside the PIN-gated Facilitators tab
@@ -530,10 +568,12 @@ function courseAgg(cid){const ss=SESSIONS.filter(s=>s.cid===cid);let sum=0,n=0,r
 /* filters */
 function filteredSessions(){
   let list=SESSIONS.filter(s=>{const c=CMAP[s.cid]||{};
-    if(state.term&&c.term!==state.term)return false;
+    if(state.term&&String(s.term||c.term||'')!==state.term)return false;
     if(state.sub&&c.sub!==state.sub)return false;
     if(state.unit&&c.unit!==state.unit)return false;
-    if(state.mode&&(c.mode||'').toLowerCase()!==state.mode.toLowerCase())return false;
+    if(state.soi==='__any'&&!s.soi)return false;
+    if(state.soi==='__none'&&s.soi)return false;
+    if(state.soi&&state.soi.indexOf('__')!==0&&s.soi!==state.soi)return false;
     if(state.fac&&!s.facs.includes(state.fac))return false;
     if(state.q){const q=state.q.toLowerCase();if(!((c.plo||'').toLowerCase().includes(q)||s.sid.includes(q)))return false;}
     return true;});
@@ -729,6 +769,55 @@ function renderSummary(){
     </ul>`;
 }
 
+/* SOIs — Specific Outcomes Indicators */
+function renderSoiCards(){
+  const el=document.getElementById('soiCards');if(!el)return;
+  const ids=[...new Set(COURSES.map(c=>c.soi).filter(Boolean).concat(SOIS.map(x=>x.soi)))].sort();
+  if(!ids.length){el.innerHTML='<div class="scard" style="grid-template-columns:1fr;cursor:default"><h3>No Specific Outcomes Indicators loaded</h3><div class="meta">Link the SOIs tab of the register on the Setup tab, and set an SOI ID on the PLOs tab.</div></div>';
+    document.getElementById('soiDetail').className='detail empty';return;}
+  const list=ids.map(id=>({id,ag:soiAgg(id)})).sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
+  el.innerHTML=list.map(({id,ag})=>{const x=SOIMAP[id]||{};
+    const units=[...new Set(ag.plos.map(p=>p.unit).filter(Boolean))];
+    return `<div class="scard" data-soi="${esc(id)}" aria-selected="${id===sel.soi}" tabindex="0" role="button">
+      <div class="meta"><span class="key">${esc(id)}</span>${x.year?`<span class="pill">${esc(x.year)}</span>`:''}<span class="pill">${ag.plos.length} PLO${ag.plos.length!==1?'s':''}</span><span class="pill mode">${ag.instances.length} instance${ag.instances.length!==1?'s':''}</span></div>
+      <h3>${esc(x.name||id)}</h3>
+      <div class="meta"><span>${units.length?esc(units.join(', ')):'no unit set'}</span></div>
+      <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aab'}">${ag.overall?ag.overall.toFixed(2):'—'}</div><div class="n2">${ag.resp} responses</div></div>
+    </div>`;}).join('');
+  el.querySelectorAll('.scard[data-soi]').forEach(c=>{const k=c.getAttribute('data-soi');
+    c.onclick=()=>{sel.soi=k;renderSoiCards();renderSoiDetail();};
+    c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();c.onclick();}};});
+}
+function renderSoiDetail(){
+  const el=document.getElementById('soiDetail');if(!el)return;
+  const id=sel.soi;const x=SOIMAP[id];
+  if(!id||(!x&&!COURSES.some(c=>c.soi===id))){el.className='detail empty';el.innerHTML='<div>Select a Specific Outcomes Indicator.</div>';return;}
+  el.className='detail';const ag=soiAgg(id);const meta=x||{};
+  const secRows=RUBRIC.map(sec=>{const v=soiSectionAvg(ag.sessions,sec);if(v==null)return '';
+    return `<div class="ritem"><div class="rn">${esc(sec.name)}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(2)}</div></div>`;}).join('');
+  const ploRows=ag.plos.map(p=>{const ps=ag.sessions.filter(sn=>sn.cid===p.cid);
+    let sum=0,n=0;for(const sn of ps){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;if(o!=null&&rn){sum+=o*rn;n+=rn;}}
+    const v=n?sum/n:null;const ni=new Set(ps.map(sn=>sn.iid).filter(Boolean)).size;
+    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">${esc(p.cid)}</span> ${esc(p.plo)} <span style="color:#8a94a8">· ${ni||ps.length} instance${(ni||ps.length)!==1?'s':''}</span></div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(1):'—'}</div></div>`;}).join('');
+  const instRows=ag.instances.map(iid=>{const is=ag.sessions.filter(sn=>sn.iid===iid);
+    let sum=0,n=0;for(const sn of is){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;if(o!=null&&rn){sum+=o*rn;n+=rn;}}
+    const v=n?sum/n:null;const inst=IMAP[iid]||{};const c=CMAP[inst.cid]||{};
+    return {iid,v,n,html:`<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">${esc(iid)}</span> ${esc(c.plo||'')} <span style="color:#8a94a8">· ${esc(instLabel(iid))}</span></div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(1):'—'}</div></div>`};})
+    .sort((a,b)=>(a.v==null?99:a.v)-(b.v==null?99:b.v)).map(o=>o.html).join('');
+  const units=[...new Set(ag.plos.map(p=>p.unit).filter(Boolean))];
+  const subs=[...new Set(ag.plos.map(p=>p.sub).filter(Boolean))];
+  el.innerHTML=`<div class="detail-head"><div class="key">${esc(id)} · Specific Outcomes Indicator</div>
+    <h2>${esc(meta.name||id)}</h2>
+    ${meta.focus?`<div class="sub"><span>${esc(meta.focus)}</span></div>`:''}
+    <div class="sub">${subs.map(v=>`<span class="pill">${esc(v)}</span>`).join('')}${units.map(v=>`<span class="pill">${esc(v)}</span>`).join('')}${meta.year?`<span>Audit year ${esc(meta.year)}</span>`:''}</div>
+    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${ag.plos.length} PLOs · ${ag.instances.length} instances · ${ag.resp} responses</span></div></div>
+    <div class="detail-body">
+      ${secRows?`<div class="rgroup"><h4>Rating by rubric section<span>whole indicator, pooled</span></h4>${secRows}</div>`:'<div class="rgroup"><h4>No responses yet</h4></div>'}
+      <div class="rgroup"><h4>By PLO<span>${ag.plos.length}</span></h4>${ploRows||'<span style="font-size:12px;color:#8a94a8">No PLOs linked to this indicator yet.</span>'}</div>
+      <div class="rgroup"><h4>By instance<span>weakest first</span></h4>${instRows||'<span style="font-size:12px;color:#8a94a8">No instances recorded yet.</span>'}</div>
+    </div>`;
+}
+
 /* RUBRIC HEATMAP */
 function renderHeat(){
   const units=[...new Set(COURSES.map(c=>c.unit).filter(isValidUnit))].sort();
@@ -805,14 +894,17 @@ function currentLinkFields(){
     c:document.getElementById('regCoursesUrl').value.trim(),
     s:document.getElementById('regSessionsUrl').value.trim(),
     fa:document.getElementById('regFacsUrl').value.trim(),
-    co:document.getElementById('regCoordsUrl').value.trim()
+    co:document.getElementById('regCoordsUrl').value.trim(),
+    i:document.getElementById('regInstUrl').value.trim(),
+    so:document.getElementById('regSoisUrl').value.trim()
   };
 }
 // Google's "publish to web" CSV links are almost entirely a repeated template around one long ID —
 // several links (e.g. the register's three tabs) often share that same ID, differing only in gid.
 // Storing {id, gid} instead of the full URL, and each unique id only once, keeps the bookmark short.
 const GSHEET_PUB_RE=/^https:\/\/docs\.google\.com\/spreadsheets\/d\/e\/([^/]+)\/pub\?gid=(\d+)&single=true&output=csv$/;
-const LINK_ORDER=['r','f','c','s','fa','co'];
+// 'i' and 'so' are appended, never inserted — older bookmarked #s= links stay valid.
+const LINK_ORDER=['r','f','c','s','fa','co','i','so'];
 function compactEncodeLinks(fields){
   const ids=[];
   const slots=LINK_ORDER.map(k=>{
@@ -934,11 +1026,20 @@ function copyFacilitatorRoster(){const lines=FACS.map(f=>`${f.fid} ${f.name||''}
 
 /* filters UI */
 function refreshFilters(){
-  fillSel('fTerm','All terms',[...new Set(COURSES.map(c=>c.term).filter(Boolean))].sort(),state.term);
+  fillSel('fTerm','All terms',[...new Set(SESSIONS.map(x=>x.term).concat(COURSES.map(c=>c.term)).filter(Boolean))].sort(),state.term);
   fillSel('fSub','All sub-directorates',[...new Set(COURSES.map(c=>c.sub).filter(Boolean))].sort(),state.sub);
   fillSel('fUnit','All units',[...new Set(COURSES.map(c=>c.unit).filter(isValidUnit))].sort(),state.unit);
-  fillSel('fMode','All modes',[...new Set(COURSES.map(c=>c.mode).filter(Boolean))].sort(),state.mode);
+  fillSoi();
   fillSel('fFac','All facilitators',FACS.map(f=>f.fid),state.fac,fid=>facName(fid));
+}
+function fillSoi(){
+  const el=document.getElementById('fSoi');if(!el)return;
+  const ids=[...new Set(COURSES.map(c=>c.soi).filter(Boolean))].sort();
+  const o=v=>v===state.soi?' selected':'';
+  el.innerHTML=`<option value=""${o('')}>All PLOs</option>`
+    +`<option value="__any"${o('__any')}>Audited only</option>`
+    +`<option value="__none"${o('__none')}>Not audited</option>`
+    +ids.map(v=>`<option value="${esc(v)}"${o(v)}>${esc(v)}${SOIMAP[v]&&SOIMAP[v].name?' · '+esc(SOIMAP[v].name):''}</option>`).join('');
 }
 function fillSel(id,allLabel,arr,selv,label){const el=document.getElementById(id);
   el.innerHTML=`<option value="">${allLabel}</option>`+arr.map(v=>`<option value="${v}"${v===selv?' selected':''}>${label?esc(label(v)):v}</option>`).join('');}
@@ -949,6 +1050,7 @@ function renderActive(){
   else if(state.view==='sessions'){renderHero();renderSessionCards();renderSessionDetail();}
   else if(state.view==='courses'){renderCourseCards();renderCourseDetail();}
   else if(state.view==='facilitators'){renderFacCards();renderFacDetail();}
+  else if(state.view==='sois'){renderSoiCards();renderSoiDetail();}
   else if(state.view==='rubric'){renderHeat();}
   else if(state.view==='catalogue'){renderCat();}}
 function setView(v){state.view=v;document.querySelectorAll('#tabs .tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===v));
@@ -987,7 +1089,7 @@ document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>{
   else setView(v);
 });
 document.querySelectorAll('#catSub .subtab').forEach(t=>t.onclick=()=>{sel.catSub=t.dataset.sub;renderCat();});
-[['fTerm','term'],['fSub','sub'],['fUnit','unit'],['fMode','mode'],['fFac','fac'],['fSort','sort']].forEach(([id,k])=>document.getElementById(id).addEventListener('change',e=>{state[k]=e.target.value;renderSessionCards();}));
+[['fTerm','term'],['fSub','sub'],['fUnit','unit'],['fSoi','soi'],['fFac','fac'],['fSort','sort']].forEach(([id,k])=>document.getElementById(id).addEventListener('change',e=>{state[k]=e.target.value;renderSessionCards();}));
 document.getElementById('fSearch').addEventListener('input',e=>{state.q=e.target.value;renderSessionCards();});
 document.getElementById('addRow').onclick=()=>{
   if(sel.catSub==='courses'){const n=COURSES.length+1;COURSES.push({cid:'C'+String(n).padStart(3,'0'),plo:'New course',sub:'TPI',unit:'',days:'',hours:'',term:'1',mode:'Face-to-Face',seed:null});}
@@ -1007,15 +1109,58 @@ function fmtRegDate(v){if(v==null||v==='')return null;if(v instanceof Date){cons
   let s=String(v).trim();const m=s.match(/^(\d{4}-\d{2}-\d{2})/);if(m)return m[1];return s||null;}
 function csvRowsToObjects(text){const rows=parseCSV(text);if(rows.length<2)return[];const head=rows[0].map(h=>h.trim());
   return rows.slice(1).map(r=>{const o={};head.forEach((h,i)=>o[h]=r[i]!==undefined?r[i]:null);return o;});}
-function applyRegisterRows(cRows,sRows,fRows,coRows){
-  if(cRows&&cRows.length)COURSES=cRows.filter(r=>pickField(r,['course id'])).map(r=>({cid:String(pickField(r,['course id'])).trim(),plo:pickField(r,['professional learning','plo'])||'',sub:pickField(r,['sub'])||null,unit:pickUnitField(r)||null,days:pickField(r,['day'])!=null&&pickField(r,['day'])!==''?String(pickField(r,['day'])):null,hours:pickField(r,['hour'])!=null&&pickField(r,['hour'])!==''?String(pickField(r,['hour'])):null,term:pickField(r,['term'])!=null&&pickField(r,['term'])!==''?String(pickField(r,['term'])).replace(/\.0$/,''):null,mode:pickField(r,['mode'])||null}));
-  if(sRows&&sRows.length)SESSIONS=sRows.filter(r=>pickField(r,['session id'])).map(r=>{const f=pickField(r,['facilitator id','facilitator'])||'';return {sid:String(pickField(r,['session id'])).replace(/\.0$/,'').trim(),cid:String(pickField(r,['course id'])||'').trim(),date:fmtRegDate(pickField(r,['date'])),facs:String(f).split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),online:false};});
+function applyRegisterRows(R){
+  const {c:cRows,s:sRows,f:fRows,co:coRows,i:iRows,so:soRows}=R||{};
+  if(soRows&&soRows.length)SOIS=soRows.filter(r=>pickField(r,['soi id'])).map(r=>({
+    soi:String(pickField(r,['soi id'])).trim(),
+    name:pickField(r,['indicator name','soi name','name'])||'',
+    focus:pickField(r,['audit looks','focus','description'])||'',
+    year:pickField(r,['year'])!=null&&pickField(r,['year'])!==''?String(pickField(r,['year'])).replace(/\.0$/,''):null}));
+  // A PLOs tab and a legacy Courses tab both land here: "PLO ID" or "Course ID", whichever is present.
+  if(cRows&&cRows.length)COURSES=cRows.filter(r=>pickField(r,['plo id','course id'])).map(r=>{
+    const soi=pickField(r,['soi id','soi']);
+    return {cid:String(pickField(r,['plo id','course id'])).trim(),
+      plo:pickField(r,['professional learning','plo name','course name'])||'',
+      sub:pickField(r,['sub'])||null,unit:pickUnitField(r)||null,
+      soi:soi?String(soi).trim():'',
+      days:pickField(r,['day'])!=null&&pickField(r,['day'])!==''?String(pickField(r,['day'])):null,
+      hours:pickField(r,['hour'])!=null&&pickField(r,['hour'])!==''?String(pickField(r,['hour'])):null,
+      term:pickField(r,['term'])!=null&&pickField(r,['term'])!==''?String(pickField(r,['term'])).replace(/\.0$/,''):null,
+      mode:pickField(r,['mode'])||null};});
+  if(iRows&&iRows.length)INSTANCES=iRows.filter(r=>pickField(r,['instance id'])).map(r=>({
+    iid:String(pickField(r,['instance id'])).trim(),
+    cid:String(pickField(r,['plo id','course id'])||'').trim(),
+    year:pickField(r,['year'])!=null&&pickField(r,['year'])!==''?String(pickField(r,['year'])).replace(/\.0$/,''):null,
+    term:pickField(r,['term'])!=null&&pickField(r,['term'])!==''?String(pickField(r,['term'])).replace(/\.0$/,''):null,
+    date:fmtRegDate(pickField(r,['date'])),mode:pickField(r,['mode'])||null,
+    days:pickField(r,['day'])!=null&&pickField(r,['day'])!==''?String(pickField(r,['day'])):null,
+    hours:pickField(r,['hour'])!=null&&pickField(r,['hour'])!==''?String(pickField(r,['hour'])):null}));
+  // "Session key" is the frozen form key and must win over the structural "Session ID (auto)".
+  // If a row has no frozen key yet, fall back to the suggested one so the register is usable while
+  // keys are still being assigned — provisionalKeys reports how many, since an unfrozen key can move.
+  let provisionalKeys=0;
+  const sessKey=r=>{const k=pickField(r,['session key']);
+    if(k!=null&&String(k).trim()!=='')return String(k);
+    const sug=pickField(r,['suggested key']);
+    if(sug!=null&&String(sug).trim()!==''){provisionalKeys++;return String(sug);}
+    const legacy=pickField(r,['session id']);
+    return legacy!=null&&String(legacy).trim()!==''?String(legacy):'';};
+  if(sRows&&sRows.length)SESSIONS=sRows.map(r=>{
+    const f=pickField(r,['facilitator id','facilitator'])||'';
+    const iid=pickField(r,['instance id']);
+    let cid=String(pickField(r,['plo id','course id'])||'').trim();
+    if(!cid&&iid){const m=INSTANCES.find(x=>x.iid===String(iid).trim());if(m)cid=m.cid;}
+    return {sid:sessKey(r).replace(/\.0$/,'').trim(),
+      cid,iid:iid?String(iid).trim():'',
+      name:pickField(r,['breakaway','session name'])||'',
+      date:fmtRegDate(pickField(r,['date'])),
+      facs:String(f).split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),online:false};}).filter(x=>x.sid);
   if(fRows&&fRows.length)FACS=fRows.filter(r=>pickField(r,['facilitator id'])).map(r=>({fid:String(pickField(r,['facilitator id'])).trim(),name:pickField(r,['name'])||''}));
   if(coRows&&coRows.length)COORDS=coRows.filter(r=>pickUnitField(r)).map(r=>({unit:pickUnitField(r),coid:pickField(r,['coordinator id'])?String(pickField(r,['coordinator id'])).trim().toUpperCase():'',name:pickField(r,['name'])||''}));
-  const cm={};COURSES.forEach(c=>cm[c.cid]=(c.mode||'').toLowerCase());SESSIONS.forEach(s=>{s.online=/online|blended/.test(cm[s.cid]||'');});
   rebuild();refreshFilters();renderCat();renderActive();
   const unitsFound=new Set(COURSES.map(c=>c.unit).filter(Boolean)).size;
-  return {courses:COURSES.length,sessions:SESSIONS.length,facs:FACS.length,coords:COORDS.length,assigned:SESSIONS.filter(s=>s.facs.length).length,unitsFound};
+  return {sois:SOIS.length,courses:COURSES.length,instances:INSTANCES.length,sessions:SESSIONS.length,
+    facs:FACS.length,coords:COORDS.length,assigned:SESSIONS.filter(x=>x.facs.length).length,unitsFound,provisionalKeys};
 }
 function importWorkbook(file){
   if(typeof XLSX==='undefined'){alert('Spreadsheet reader is still loading — try again in a moment.');return;}
@@ -1023,9 +1168,9 @@ function importWorkbook(file){
   fr.onload=()=>{try{
     const wb=XLSX.read(new Uint8Array(fr.result),{type:'array',cellDates:true});
     const grab=names=>{for(const n of wb.SheetNames){if(names.some(x=>n.toLowerCase().includes(x)))return XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:null});}return null;};
-    const cRows=grab(['course']),sRows=grab(['session']),fRows=grab(['facilit']),coRows=grab(['coordinat']);
-    const r=applyRegisterRows(cRows,sRows,fRows,coRows);
-    alert(`Loaded from register: ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:'')+(r.courses&&!r.unitsFound?`\n⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab. Every unit row will be blank until this is fixed.`:''));
+    const r=applyRegisterRows({so:grab(['soi']),c:grab(['plo','course']),i:grab(['instance']),
+                               s:grab(['session']),f:grab(['facilit']),co:grab(['coordinat'])});
+    alert(`Loaded from register: ${r.sois} SOIs, ${r.courses} PLOs, ${r.instances} instances, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`+(r.provisionalKeys?`\n⚠ ${r.provisionalKeys} sessions are using a suggested key rather than a frozen one. Freeze them on the register before the form goes out.`:'')+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:'')+(r.courses&&!r.unitsFound?`\n⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab. Every unit row will be blank until this is fixed.`:''));
   }catch(err){alert('Could not read workbook: '+err.message);}};
   fr.readAsArrayBuffer(file);
 }
@@ -1143,25 +1288,22 @@ document.getElementById('loadFacCsv').onclick=()=>{const url=document.getElement
   fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses.`;saveLink('link_responses_fac',url);syncSetupHash();}).catch(e=>{st.textContent='Could not load: '+e.message;});};
 
 function loadRegisterFromLinks(silent){
-  const cUrl=document.getElementById('regCoursesUrl').value.trim();
-  const sUrl=document.getElementById('regSessionsUrl').value.trim();
-  const fUrl=document.getElementById('regFacsUrl').value.trim();
-  const coUrl=document.getElementById('regCoordsUrl').value.trim();
+  const U={c:'regCoursesUrl',i:'regInstUrl',s:'regSessionsUrl',f:'regFacsUrl',so:'regSoisUrl',co:'regCoordsUrl'};
+  const urls={};Object.keys(U).forEach(k=>urls[k]=document.getElementById(U[k]).value.trim());
+  const keys=Object.keys(U);
   const st=document.getElementById('regStatus');
-  if(!cUrl&&!sUrl&&!fUrl&&!coUrl){if(!silent)st.textContent='Paste at least one sheet link first.';return Promise.resolve();}
+  if(!keys.some(k=>urls[k])){if(!silent)st.textContent='Paste at least one sheet link first.';return Promise.resolve();}
   if(!silent)st.textContent='Loading…';
-  return Promise.all([cUrl,sUrl,fUrl,coUrl].map(u=>u?fetch(u).then(r=>r.text()):Promise.resolve(null)))
-    .then(([cText,sText,fText,coText])=>{
-      const cRows=cText?csvRowsToObjects(cText):null;
-      const sRows=sText?csvRowsToObjects(sText):null;
-      const fRows=fText?csvRowsToObjects(fText):null;
-      const coRows=coText?csvRowsToObjects(coText):null;
-      const r=applyRegisterRows(cRows,sRows,fRows,coRows);
-      st.textContent=`✓ Loaded ${r.courses} courses, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`+(r.courses&&!r.unitsFound?' ⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab.':'');
-      if(cUrl)saveLink('link_reg_courses',cUrl);
-      if(sUrl)saveLink('link_reg_sessions',sUrl);
-      if(fUrl)saveLink('link_reg_facs',fUrl);
-      if(coUrl)saveLink('link_reg_coords',coUrl);
+  return Promise.all(keys.map(k=>urls[k]?fetch(urls[k]).then(r=>r.text()):Promise.resolve(null)))
+    .then(texts=>{
+      const R={};keys.forEach((k,idx)=>{R[k]=texts[idx]?csvRowsToObjects(texts[idx]):null;});
+      const r=applyRegisterRows(R);
+      st.textContent=`✓ Loaded ${r.sois} SOIs, ${r.courses} PLOs, ${r.instances} instances, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`
+        +(r.courses&&!r.unitsFound?' ⚠ No hosting units detected — check the Hosting unit column header on the PLOs tab.':'')
+        +(r.sessions&&!r.instances?' ⚠ No instances loaded — link the Instances tab, or term and mode will stay blank.':'')
+        +(r.provisionalKeys?` ⚠ ${r.provisionalKeys} session${r.provisionalKeys!==1?'s are':' is'} using a suggested key, not a frozen one — freeze them on the register before the form goes out.`:'');
+      const SAVE={c:'link_reg_courses',i:'link_reg_instances',s:'link_reg_sessions',f:'link_reg_facs',so:'link_reg_sois',co:'link_reg_coords'};
+      keys.forEach(k=>{if(urls[k])saveLink(SAVE[k],urls[k]);});
       syncSetupHash();
     })
     .catch(e=>{st.textContent='Could not load: '+e.message;});
@@ -1178,14 +1320,12 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
 (function(){
   const hashLinks=decodeSetupHash()||{};
   const savedResp=hashLinks.r||loadLink('link_responses'),savedFacResp=hashLinks.f||loadLink('link_responses_fac');
-  const savedC=hashLinks.c||loadLink('link_reg_courses'),savedS=hashLinks.s||loadLink('link_reg_sessions'),savedF=hashLinks.fa||loadLink('link_reg_facs'),savedCo=hashLinks.co||loadLink('link_reg_coords');
-  if(savedResp)document.getElementById('csvUrl').value=savedResp;
-  if(savedFacResp)document.getElementById('facCsvUrl').value=savedFacResp;
-  if(savedC)document.getElementById('regCoursesUrl').value=savedC;
-  if(savedS)document.getElementById('regSessionsUrl').value=savedS;
-  if(savedF)document.getElementById('regFacsUrl').value=savedF;
-  if(savedCo)document.getElementById('regCoordsUrl').value=savedCo;
-  const registerLoad=(savedC||savedS||savedF||savedCo)?loadRegisterFromLinks(true):Promise.resolve();
+  const REG=[['c','regCoursesUrl','link_reg_courses'],['i','regInstUrl','link_reg_instances'],
+             ['s','regSessionsUrl','link_reg_sessions'],['fa','regFacsUrl','link_reg_facs'],
+             ['so','regSoisUrl','link_reg_sois'],['co','regCoordsUrl','link_reg_coords']];
+  let anyReg=false;
+  REG.forEach(([k,id,ls])=>{const v=hashLinks[k]||loadLink(ls);if(v){document.getElementById(id).value=v;anyReg=true;}});
+  const registerLoad=anyReg?loadRegisterFromLinks(true):Promise.resolve();
   registerLoad.then(()=>{
     if(savedResp){const st=document.getElementById('csvStatus');st.textContent='Loading…';
       fetch(savedResp).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses.`;}).catch(e=>{st.textContent='Could not reload saved link: '+e.message;});}
