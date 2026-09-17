@@ -209,9 +209,8 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   <nav class="tabs" role="tablist" id="tabs">
     <button class="tab" role="tab" data-view="summary" aria-selected="true">Summary</button>
     <button class="tab" role="tab" data-view="sessions" aria-selected="false">Sessions</button>
-    <button class="tab" role="tab" data-view="courses" aria-selected="false">Courses</button>
+    <button class="tab" role="tab" data-view="courses" aria-selected="false">PLOs</button>
 
-    <button class="tab" role="tab" data-view="facilitators" aria-selected="false">Facilitators 🔒</button>
     <button class="tab" role="tab" data-view="sois" aria-selected="false">SOIs</button>
     <button class="tab" role="tab" data-view="rubric" aria-selected="false">Rubric</button>
     <button class="tab" role="tab" data-view="catalogue" aria-selected="false">Catalogue 🔒</button>
@@ -265,18 +264,13 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 
 <section id="v-courses" class="view hidden">
   <div class="explorer"><div class="cards" id="courseCards"></div>
-    <aside class="detail empty" id="courseDetail"><div>Select a course to see its sessions rolled up, with a trend across deliveries.</div></aside>
+    <aside class="detail empty" id="courseDetail"><div>Select a PLO to see every instance it ran, with each instance's sessions underneath.</div></aside>
   </div>
 </section>
 
-<section id="v-facilitators" class="view hidden">
-  <div class="fac-toolbar">
-    <div class="fac-toolbar-note">🔒 Facilitator names are only shown here, inside this PIN-gated tab. Everywhere else on the dashboard (Sessions, Courses, Summary), facilitators appear by ID only. For scores and detailed performance, generate a report from the relevant course.</div>
-  </div>
-  <div class="explorer"><div class="cards" id="facCards"></div>
-    <aside class="detail empty" id="facDetail"><div>Select a facilitator to see the courses and sessions they've facilitated.</div></aside>
-  </div>
-</section>
+<!-- Facilitators tab temporarily removed. Its renderers, PIN gating and the facilitator
+     filter are all intact, so restoring it means putting the tab button and this section back. -->
+
 <div id="reportPrint" class="hidden"></div>
 
 <section id="v-sois" class="view hidden">
@@ -364,7 +358,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 <div class="pin-overlay hidden" id="pinOverlay">
   <div class="pin-box">
     <h3>Admin access</h3>
-    <p>Enter the 4-digit PIN to open Setup, Catalogue, or Facilitators.</p>
+    <p>Enter the 4-digit PIN to open Setup or Catalogue.</p>
     <input type="password" id="pinInput" maxlength="4" inputmode="numeric" pattern="\d*" placeholder="****" autocomplete="off">
     <div class="pin-actions">
       <button class="btn" id="pinCancel">Cancel</button>
@@ -650,33 +644,48 @@ function renderSessionDetail(){
 
 /* COURSES */
 function renderCourseCards(){
-  const el=document.getElementById('courseCards');
+  const el=document.getElementById('courseCards');if(!el)return;
   const list=COURSES.map(c=>({c,ag:courseAgg(c.cid)})).sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
-  el.innerHTML=list.map(({c,ag})=>`<div class="scard" data-cid="${c.cid}" aria-selected="${c.cid===sel.course}" tabindex="0" role="button">
-    <div class="meta"><span class="cidcell mono" style="padding:1px 7px">${c.cid}</span><span class="pill"><span${subTitle(c.sub)}>${c.sub||'—'}</span>·<span${unitTitle(c.unit)}>${c.unit||'—'}</span></span><span class="pill mode">${c.mode||'—'}</span><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''} · Term ${c.term||'—'}</span></div>
+  el.innerHTML=list.map(({c,ag})=>{
+    const ni=new Set(ag.sessions.map(x=>x.iid).filter(Boolean)).size;
+    const modes=[...new Set(ag.sessions.map(x=>x.mode).filter(Boolean))];
+    return `<div class="scard" data-cid="${c.cid}" aria-selected="${c.cid===sel.course}" tabindex="0" role="button">
+    <div class="meta"><span class="cidcell mono" style="padding:1px 7px">${c.cid}</span><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}·${c.unit||'—'}</span>${c.soi?`<span class="key">${esc(c.soi)}</span>`:''}<span class="pill mode">${ni||ag.sessions.length} instance${(ni||ag.sessions.length)!==1?'s':''}</span><span>${modes.join(' / ')||'—'}</span></div>
     <h3>${esc(c.plo)}</h3>
     <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aab'}">${ag.overall?ag.overall.toFixed(2):'—'}</div><div class="n2">${ag.resp} responses</div></div>
-   </div>`).join('');
+   </div>`;}).join('');
   el.querySelectorAll('.scard[data-cid]').forEach(c=>{const k=c.getAttribute('data-cid');
     c.onclick=()=>{sel.course=k;renderCourseCards();renderCourseDetail();};c.onkeydown=e=>{if(e.key==='Enter'){c.onclick();}};});
 }
 function renderCourseDetail(){
-  const el=document.getElementById('courseDetail');const c=CMAP[sel.course];
-  if(!c){el.className='detail empty';el.innerHTML='<div>Select a course.</div>';return;}
+  const el=document.getElementById('courseDetail');if(!el)return;const c=CMAP[sel.course];
+  if(!c){el.className='detail empty';el.innerHTML='<div>Select a PLO.</div>';return;}
   el.className='detail';const ag=courseAgg(c.cid);
   const ss=ag.sessions.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-  const spark=ss.map(s=>{const o=sessionOverall(s.sid);return `<i style="height:${o?o/4*100:4}%;background:${scoreColor(o)}" title="${fmtDate(s.date)}: ${o?o.toFixed(2):'—'}"></i>`;}).join('');
-  const rows=ss.map(s=>{const o=sessionOverall(s.sid);return `<div class="ritem" style="grid-template-columns:1fr 80px 34px"><div class="rn"><span class="key mono">[${s.sid}]</span> ${fmtDate(s.date)} · ${s.facs.map(facName).join(', ')}</div><div class="rt"><div class="rf" style="width:${o?o/4*100:0}%;background:${scoreColor(o)}"></div></div><div class="rv" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(1):'—'}</div></div>`;}).join('');
-  el.innerHTML=`<div class="detail-head"><div class="key">${c.cid} · course</div><h2>${esc(c.plo)}</h2>
-    <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span><span class="pill mode">${c.mode||'—'}</span><span>Term ${c.term||'—'}</span>${coordForUnit(c.unit)?`<span class="pill" style="background:#e9f6f3;color:#0b6b57">${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'} ${esc(coordForUnit(c.unit))}</span>`:''}</div>
-    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${ss.length} sessions · ${ag.resp} responses</span><button class="btn" style="margin-left:auto" onclick="generateCourseReport('${c.cid}')">Generate report</button></div></div>
-    <div class="detail-body"><div class="rgroup"><h4>Score across deliveries<span>oldest → newest</span></h4><div class="spark">${spark}</div></div>
-    <div class="rgroup"><h4>Sessions</h4>${rows}</div></div>`;
+  // Group the deliveries by instance. Older registers carry no instance, so those sessions fall
+  // into a single unlabelled group and the view behaves exactly as it did before.
+  const groups=[];const seen={};
+  for(const sn of ss){const k=sn.iid||'';if(!(k in seen)){seen[k]=groups.length;groups.push({iid:k,items:[]});}groups[seen[k]].items.push(sn);}
+  const instScore=items=>{let sum=0,n=0;for(const sn of items){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;if(o!=null&&rn){sum+=o*rn;n+=rn;}}return n?sum/n:null;};
+  const spark=groups.map(g=>{const o=instScore(g.items);
+    return `<i style="height:${o?o/4*100:4}%;background:${scoreColor(o)}" title="${esc(g.iid||'ungrouped')}: ${o?o.toFixed(2):'—'}"></i>`;}).join('');
+  const body=groups.map(g=>{const inst=IMAP[g.iid]||{};const o=instScore(g.items);
+    const head=g.iid?`<div class="fh"><b>${esc(g.iid)} <span class="mono" style="color:#8a94a8;font-weight:500">${esc(instLabel(g.iid))}</span></b><span class="fs" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(2):'—'}</span></div>`
+      :`<div class="fh"><b>Deliveries</b><span class="fs" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(2):'—'}</span></div>`;
+    const rows=g.items.map(sn=>{const v=sessionOverall(sn.sid);
+      return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sn.sid}]</span> ${esc(sn.name||fmtDate(sn.date))}${sn.facs.length?' · '+sn.facs.map(facName).join(', '):''}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(1):'—'}</div></div>`;}).join('');
+    const meta=inst.mode||inst.days||inst.hours?`<div style="font-size:11px;color:#8a94a8;margin-bottom:6px">${[inst.mode,inst.days,inst.hours].filter(Boolean).map(esc).join(' · ')}</div>`:'';
+    return `<div class="facblock" style="background:#f7f9fc">${head}${meta}${rows}</div>`;}).join('');
+  el.innerHTML=`<div class="detail-head"><div class="key">${c.cid} · professional learning opportunity</div><h2>${esc(c.plo)}</h2>
+    <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span>${c.soi?`<span class="key">${esc(c.soi)}${SOIMAP[c.soi]&&SOIMAP[c.soi].name?' · '+esc(SOIMAP[c.soi].name):''}</span>`:'<span class="pill">not audited</span>'}${coordForUnit(c.unit)?`<span class="pill" style="background:#e9f6f3;color:#0b6b57">${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'} ${esc(coordForUnit(c.unit))}</span>`:''}</div>
+    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${groups.filter(g=>g.iid).length||groups.length} instance${(groups.filter(g=>g.iid).length||groups.length)!==1?'s':''} · ${ss.length} sessions · ${ag.resp} responses</span><button class="btn" style="margin-left:auto" onclick="generateCourseReport('${c.cid}')">Generate report</button></div></div>
+    <div class="detail-body"><div class="rgroup"><h4>Score across instances<span>oldest → newest</span></h4><div class="spark">${spark}</div></div>
+    <div class="rgroup"><h4>By instance</h4>${body||'<span style="font-size:12px;color:#8a94a8">No deliveries recorded yet.</span>'}</div></div>`;
 }
 
 /* FACILITATORS */
 function renderFacCards(){
-  const el=document.getElementById('facCards');
+  const el=document.getElementById('facCards');if(!el)return;
   const list=FACS.map(f=>({f,ag:facAgg(f.fid)})).sort((a,b)=>esc(a.f.name).localeCompare(esc(b.f.name)));
   el.innerHTML=list.map(({f,ag})=>`<div class="scard" data-fid="${f.fid}" aria-selected="${f.fid===sel.fac}" tabindex="0" role="button">
     <div class="meta"><span class="pill fac mono">${f.fid}</span></div>
@@ -686,7 +695,7 @@ function renderFacCards(){
     c.onclick=()=>{sel.fac=k;renderFacCards();renderFacDetail();};c.onkeydown=e=>{if(e.key==='Enter'){c.onclick();}};});
 }
 function renderFacDetail(){
-  const el=document.getElementById('facDetail');const f=FMAP[sel.fac];
+  const el=document.getElementById('facDetail');if(!el)return;const f=FMAP[sel.fac];
   if(!f){el.className='detail empty';el.innerHTML='<div>Select a facilitator.</div>';return;}
   el.className='detail';const ag=facAgg(f.fid);
   const sessRows=ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);const c=CMAP[s.cid]||{};
@@ -1049,7 +1058,6 @@ function renderActive(){
   if(state.view==='summary'){renderSummary();}
   else if(state.view==='sessions'){renderHero();renderSessionCards();renderSessionDetail();}
   else if(state.view==='courses'){renderCourseCards();renderCourseDetail();}
-  else if(state.view==='facilitators'){renderFacCards();renderFacDetail();}
   else if(state.view==='sois'){renderSoiCards();renderSoiDetail();}
   else if(state.view==='rubric'){renderHeat();}
   else if(state.view==='catalogue'){renderCat();}}
@@ -1085,7 +1093,7 @@ document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='E
 
 document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>{
   const v=t.dataset.view;
-  if(v==='setup'||v==='catalogue'||v==='facilitators')requestAdminView(v);
+  if(v==='setup'||v==='catalogue')requestAdminView(v);
   else setView(v);
 });
 document.querySelectorAll('#catSub .subtab').forEach(t=>t.onclick=()=>{sel.catSub=t.dataset.sub;renderCat();});
