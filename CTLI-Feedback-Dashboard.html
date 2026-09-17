@@ -974,44 +974,62 @@ function scoreFromCell(raw){
   return NaN; // unrecognised plain-text label
 }
 function parseResponseCSV(text){const rows=parseCSV(text);if(rows.length<2)throw new Error('empty');const head=rows[0];
-  let keyCol=-1;const codeCols={};
-  const keyPattern=/\[(\d{3,4})\]/;
-  head.forEach((h,idx)=>{const H=norm(h);
-    if(keyCol<0&&(/session/.test(H)||/professional learning opportunity that you are evaluating/.test(H)))keyCol=idx;
-    let best=null;
-    for(const item of ALL_ITEM_DEFS){if(item.kw&&H.includes(item.kw)){if(!best||item.kw.length>best.kw.length)best=item;}}
-    if(best)codeCols[idx]=best.code;});
-  if(keyCol<0)for(let c=0;c<head.length;c++){if(rows.slice(1).some(r=>keyPattern.test(r[c]||''))){keyCol=c;break;}}
-  const out=[];for(const r of rows.slice(1)){const m=(r[keyCol]||'').match(keyPattern);if(!m)continue;
+  const body=rows.slice(1);
+  const codeCols=rubricCols(head);
+  const keyCol=findKeyCol(head,body,[]);
+  const out=[];let keyed=0;
+  if(keyCol>=0)for(const r of body){const m=(r[keyCol]||'').match(KEY_PATTERN);if(!m)continue;keyed++;
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
     if(Object.keys(scores).length)out.push({sk:m[1],fid:null,scores});}
-  if(!out.length)throw new Error('no rows matched — check the [key] column and rubric wording');
+  if(!out.length)throw new Error(ingestFailure('Main feedback form',head,keyCol,codeCols,keyed,body.length));
   return out;}
+const KEY_PATTERN=/\[(\d{3,4})\]/;
+/* Find the column holding the [key]. Header wording is only a hint: the winner must actually
+   contain a [key] in the data. This stops a question like "Select your facilitator for this
+   session" being claimed as the key column just because it says "session". */
+function findKeyCol(head,rows,skipCols){
+  const skip=new Set(skipCols||[]);
+  const hasKey=c=>rows.some(r=>KEY_PATTERN.test(r[c]||''));
+  const hinted=[];
+  head.forEach((h,idx)=>{if(skip.has(idx))return;const H=norm(h);
+    if(/session/.test(H)||/professional learning opportunity that you are evaluating/.test(H)||/which (session|course|plo)/.test(H))hinted.push(idx);});
+  for(const c of hinted)if(hasKey(c))return c;
+  for(let c=0;c<head.length;c++)if(!skip.has(c)&&hasKey(c))return c;
+  return -1;}
+function rubricCols(head){const codeCols={};
+  head.forEach((h,idx)=>{const H=norm(h);let best=null;
+    for(const item of ALL_ITEM_DEFS){if(item.kw&&H.includes(item.kw)){if(!best||item.kw.length>best.kw.length)best=item;}}
+    if(best)codeCols[idx]=best.code;});
+  return codeCols;}
+/* Say which of the three things actually failed, rather than listing all three. */
+function ingestFailure(which,head,keyCol,codeCols,keyed,scored){
+  const n=Object.keys(codeCols).length;
+  if(keyCol<0)return `${which}: no [key] found. No column contains a key like [2701]. Check that the session question's options still end in the key, e.g. "20 Feb · Science of Reading [3001]".`;
+  if(!keyed)return `${which}: found the key column ("${String(head[keyCol]||'').slice(0,60)}") but none of the ${rowsWord(scored)} rows carry a [key] in it.`;
+  if(!n)return `${which}: read ${keyed} keys but matched 0 rubric questions. The Likert question wording no longer matches the rubric — check the Rubric tab for the expected wording.`;
+  return `${which}: read ${keyed} keys and matched ${n} rubric questions, but no row had a usable rating. Check that answers are on the 4-point scale.`;}
+function rowsWord(n){return n;}
 function findFacilitatorCol(head){
   for(let i=0;i<head.length;i++){const H=norm(head[i]);if(H.includes('select your facilitator')||(H.includes('facilitator')&&H.includes('select')))return i;}
   return -1;}
 function extractFacIds(cell){if(!cell)return[];const m=String(cell).match(/F\d{1,3}/gi)||[];return[...new Set(m.map(x=>x.toUpperCase()))];}
 function parseFacilitatorCSV(text){const rows=parseCSV(text);if(rows.length<2)throw new Error('empty');const head=rows[0];
-  let keyCol=-1;const codeCols={};
-  const keyPattern=/\[(\d{3,4})\]/;
-  head.forEach((h,idx)=>{const H=norm(h);
-    if(keyCol<0&&/session/.test(H))keyCol=idx;
-    let best=null;
-    for(const item of ALL_ITEM_DEFS){if(item.kw&&H.includes(item.kw)){if(!best||item.kw.length>best.kw.length)best=item;}}
-    if(best)codeCols[idx]=best.code;});
-  if(keyCol<0)for(let c=0;c<head.length;c++){if(rows.slice(1).some(r=>keyPattern.test(r[c]||''))){keyCol=c;break;}}
+  const body=rows.slice(1);
   const facCol=findFacilitatorCol(head);
-  const out=[];
-  for(const r of rows.slice(1)){
-    const m=(r[keyCol]||'').match(keyPattern);if(!m)continue;const sk=m[1];
+  const codeCols=rubricCols(head);
+  // Exclude the facilitator column from key detection — its wording usually mentions "session" too.
+  const keyCol=findKeyCol(head,body,facCol>=0?[facCol]:[]);
+  const out=[];let keyed=0;
+  if(keyCol>=0)for(const r of body){
+    const m=(r[keyCol]||'').match(KEY_PATTERN);if(!m)continue;const sk=m[1];keyed++;
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
     if(!Object.keys(scores).length)continue;
     let fids=facCol>=0?extractFacIds(r[facCol]):[];
-    if(!fids.length){const s=SESSIONS.find(x=>x.sid===sk);fids=s?s.facs:[];} // no facilitator ticked — fall back to whoever the register has assigned
+    if(!fids.length){const sn=SESSIONS.find(x=>x.sid===sk);fids=sn?sn.facs:[];} // nobody ticked — fall back to the register
     if(!fids.length){out.push({sk,fid:null,scores});continue;}
     for(const fid of fids)out.push({sk,fid,scores});
   }
-  if(!out.length)throw new Error('no rows matched — check the [key] column, the "Select your facilitator" column, and rubric wording');
+  if(!out.length)throw new Error(ingestFailure('Facilitator form',head,keyCol,codeCols,keyed,body.length));
   return out;}
 function mergeResponses(){RESPONSES=[...RESPONSES_MAIN,...RESPONSES_FAC];LIVE=RESPONSES.length>0;
   aggregate();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
