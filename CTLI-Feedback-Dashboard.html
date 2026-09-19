@@ -3363,8 +3363,8 @@ const PDD_UNIT='PDD';
 const SHARED_UNITS=[CORPORATE_UNIT,PDD_UNIT];
 // Fixed master list of official CTLI units, by sub-directorate — Summary always shows every one of these,
 // even with zero courses currently loaded for it, rather than only whatever happens to be in the register.
-const UNIT_MASTER={LA:['SLMC','SLMP'],PD:['PD'],TPI:['FP','IP','SP','FET','IE','NTI']};
-const UNIT_FULLNAME={SLMC:'School Leadership and Management Courses',SLMP:'School Leadership and Management Programme',PD:'Professional Development',FP:'Foundation Phase',IP:'Intermediate Phase',SP:'Senior Phase',FET:'Further Education and Training',IE:'Inclusive Education',NTI:'New Teacher Induction'};
+const UNIT_MASTER={LA:['SLMC','SLMP'],PD:['PD'],TPI:['FP','IP','SP','ISP','FET','IE','NTI']};
+const UNIT_FULLNAME={SLMC:'School Leadership and Management Courses',SLMP:'School Leadership and Management Programme',PD:'Professional Development',FP:'Foundation Phase',IP:'Intermediate Phase',SP:'Senior Phase',ISP:'Intermediate and Senior Phase',FET:'Further Education and Training',IE:'Inclusive Education',NTI:'New Teacher Induction'};
 function unitTitle(u){return UNIT_FULLNAME[u]?` title="${esc(UNIT_FULLNAME[u])}"`:'';}
 const SUB_FULLNAME={LA:'Leadership Academy',PD:'Professional Development',TPI:'Teacher Practice Improvement'};
 function subTitle(s){return SUB_FULLNAME[s]?` title="${esc(SUB_FULLNAME[s])}"`:'';}
