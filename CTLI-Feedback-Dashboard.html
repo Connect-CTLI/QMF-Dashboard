@@ -3353,11 +3353,22 @@ function facItemAvg(sk,fid,code){const it=AGG[sk].facItems[fid]&&AGG[sk].facItem
 function sessItemAvg(sk,code){const it=AGG[sk].items[code];return it&&it.n?it.sum/it.n:null;}
 
 // facilitator-wide
-function facAgg(fid){let items={},resp=0,sessions=new Set();
-  for(const r of RESPONSES){if(r.fid!==fid)continue;resp++;sessions.add(r.sk);
+/* Union of two sources: who the register assigned, and who responses were actually attributed to.
+   Register-only shows the person ran it with no feedback yet; response-only catches a facilitator
+   ticked on the form but never recorded on the Sessions tab. Either alone loses real cases. */
+function facAgg(fid){
+  const sids=new Set(),fromReg=new Set(),fromResp=new Set();
+  for(const sn of SESSIONS)if(sn.facs.includes(fid)){sids.add(sn.sid);fromReg.add(sn.sid);}
+  let items={},resp=0;
+  for(const r of RESPONSES){if(r.fid!==fid)continue;resp++;sids.add(r.sk);fromResp.add(r.sk);
     for(const[code,val]of Object.entries(r.scores)){if(/^D1/.test(code)&&val!=null){(items[code]=items[code]||{sum:0,n:0});items[code].sum+=+val;items[code].n++;}}}
   let sum=0,n=0;for(const c in items){sum+=items[c].sum;n+=items[c].n;}
-  return {overall:n?sum/n:null,items,resp,sessions:[...sessions]};}
+  const instances=instanceGroups().filter(g=>g.items.some(sn=>sids.has(sn.sid)))
+    .sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
+  return {overall:n?sum/n:null,items,resp,sessions:[...sids],instances,
+    unassigned:[...fromResp].filter(x=>!fromReg.has(x)).length};}
+/* This person's facilitation score within one instance, pooled across its breakaways. */
+function facInInstance(g,fid){return instFacOverall(g.items.filter(sn=>sn.facs.includes(fid)||true),fid);}
 function courseAgg(cid){const ss=SESSIONS.filter(s=>s.cid===cid);let sum=0,n=0,resp=0;
   for(const s of ss){const o=sessionOverall(s.sid);const rn=AGG[s.sid].resp;if(o!=null){sum+=o*rn;n+=rn;}resp+=rn;}
   return {overall:n?sum/n:null,sessions:ss,resp};}
@@ -3536,10 +3547,12 @@ function renderCourseDetail(){
 /* FACILITATORS */
 function renderFacCards(){
   const el=document.getElementById('facCards');if(!el)return;
-  const list=FACS.map(f=>({f,ag:facAgg(f.fid)})).sort((a,b)=>esc(a.f.name).localeCompare(esc(b.f.name)));
+  const list=FACS.map(f=>({f,ag:facAgg(f.fid)}))
+    .sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
   el.innerHTML=list.map(({f,ag})=>`<div class="scard" data-fid="${f.fid}" aria-selected="${f.fid===sel.fac}" tabindex="0" role="button">
-    <div class="meta"><span class="pill fac mono">${f.fid}</span></div>
-    <h3>${esc(f.name)}</h3><div class="meta"><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''}</span></div>
+    <div class="meta"><span class="pill fac mono">${f.fid}</span><span class="pill">${ag.instances.length} instance${ag.instances.length!==1?'s':''}</span>${ag.resp?`<span>${ag.resp} response${ag.resp!==1?'s':''}</span>`:'<span style="color:#b48a2a">no facilitation feedback yet</span>'}</div>
+    <h3>${esc(f.name)}</h3><div class="meta"><span>Facilitation score</span></div>
+    <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aab'}">${ag.overall?ag.overall.toFixed(2):'—'}</div><div class="n2">D1 mean</div></div>
    </div>`).join('');
   el.querySelectorAll('.scard[data-fid]').forEach(c=>{const k=c.getAttribute('data-fid');
     c.onclick=()=>{sel.fac=k;renderFacCards();renderFacDetail();};c.onkeydown=e=>{if(e.key==='Enter'){c.onclick();}};});
@@ -3547,12 +3560,22 @@ function renderFacCards(){
 function renderFacDetail(){
   const el=document.getElementById('facDetail');if(!el)return;const f=FMAP[sel.fac];
   if(!f){el.className='detail empty';el.innerHTML='<div>Select a facilitator.</div>';return;}
-  el.className='detail';const ag=facAgg(f.fid);
-  const sessRows=ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);const c=CMAP[s.cid]||{};
-    return `<div class="ritem" style="grid-template-columns:1fr"><div class="rn"><span class="key mono">[${sk}]</span> ${esc(c.plo||'')} <span style="color:#8a94a8">· ${c.cid||''} · ${fmtDate(s.date)}</span></div></div>`;}).join('');
+  el.className='detail';const ag=facAgg(f.fid);const norm=ag.overall;
+  const itemRows=D1.items.map(([code,label])=>{const it=ag.items[code];const v=it&&it.n?it.sum/it.n:null;
+    if(v==null)return '';
+    return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+  const instRows=ag.instances.map(g=>{const c=CMAP[g.cid]||{};
+    const fs=instFacOverall(g.items,f.fid);
+    const flag=(fs!=null&&norm!=null&&fs<norm-0.4)?` <span class="pill" style="background:#fdeceb;color:#a3352f">below norm</span>`:'';
+    const none=fs==null?` <span class="pill" style="background:#fdf3dd;color:#8a5b00">awaiting feedback</span>`:'';
+    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn">${g.code?`<span class="key mono">${esc(g.code)}</span> `:''}${esc(c.plo||'')} <span style="color:#8a94a8">· ${esc(g.iid||'')} · ${fmtDate(g.date)}</span>${flag}${none}</div><div class="rt"><div class="rf" style="width:${fs?fs/4*100:0}%;background:${scoreColor(fs)}"></div></div><div class="rv" style="color:${fs?scoreColor(fs):'#aab'}">${fs?fs.toFixed(1):'—'}</div></div>`;}).join('');
+  const plos=new Set(ag.instances.map(g=>g.cid));
   el.innerHTML=`<div class="detail-head"><div class="key">${f.fid} · facilitator</div><h2>${esc(f.name)}</h2>
-    <div class="sub"><span>${ag.sessions.length} session${ag.sessions.length!==1?'s':''} across ${new Set(ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);return s?s.cid:null;})).size} course${new Set(ag.sessions.map(sk=>{const s=SESSIONS.find(x=>x.sid===sk);return s?s.cid:null;})).size!==1?'s':''}</span></div></div>
-    <div class="detail-body"><div class="rgroup"><h4>Courses &amp; sessions facilitated</h4>${sessRows||'<span style="font-size:12px;color:#8a94a8">No sessions yet.</span>'}</div></div>`;
+    <div class="sub"><b style="color:${norm?scoreColor(norm):'#aab'};font-size:15px;font-family:Space Grotesk">${norm?norm.toFixed(2):'—'}/4</b><span>facilitation · ${ag.instances.length} instance${ag.instances.length!==1?'s':''} across ${plos.size} PLO${plos.size!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</span><button class="btn" style="margin-left:auto" onclick="generateFacilitatorReport('${f.fid}')">Generate report</button></div>
+    ${ag.unassigned?`<div class="sub"><span style="color:#8a5b00;font-size:12px">${ag.unassigned} instance${ag.unassigned!==1?'s':''} picked up from the facilitator form but not recorded against this person on the register.</span></div>`:''}</div>
+    <div class="detail-body">
+      <div class="rgroup fac"><h4>Facilitation items<span>all instances</span></h4>${itemRows||'<span style="font-size:12px;color:#8a94a8">No facilitation feedback has come in for this person yet. Instances they ran are listed below.</span>'}</div>
+      <div class="rgroup"><h4>Per instance<span>flagged if more than 0.4 below their norm</span></h4>${instRows||'<span style="font-size:12px;color:#8a94a8">No instances recorded against this facilitator. Add their ID to the Facilitator ID(s) column on the register Sessions tab.</span>'}</div></div>`;
 }
 
 /* SUMMARY (front page) */
@@ -4156,6 +4179,32 @@ function generateSessionReport(sid){
 }
 /* Instance report. Pools every breakaway under the instance so the figures match the Instances
    tab exactly, rather than reporting one breakaway and calling it the delivery. */
+/* Facilitator report. Same pooling rule as everywhere else: every response attributed to this
+   person is counted once, so a busy instance carries more weight than a quiet one. */
+function generateFacilitatorReport(fid){
+  const f=FMAP[fid];if(!f)return;
+  const ag=facAgg(fid);const norm=ag.overall;
+  const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
+  const bars=D1.items.map(([code,label])=>{const it=ag.items[code];return reportBar(label,it&&it.n?it.sum/it.n:null);}).join('');
+  const plos=[...new Set(ag.instances.map(g=>g.cid))];
+  const rows=ag.instances.map(g=>{const c=CMAP[g.cid]||{};const fs=instFacOverall(g.items,fid);
+    const below=(fs!=null&&norm!=null&&fs<norm-0.4)?' (below norm)':'';
+    return `<tr><td>${esc(g.code||g.iid||'—')}</td><td>${esc(c.plo||'')}</td><td>${fmtDate(g.date)}</td><td>${g.term||'—'}</td><td>${g.resp}</td><td>${fs!=null?fs.toFixed(2)+' / 4'+below:'awaiting feedback'}</td></tr>`;}).join('');
+  document.getElementById('reportPrint').innerHTML=`
+    ${reportLetterhead('Facilitator Feedback Report',[
+      ['Facilitator',facFullName(fid)+' ('+fid+')'],
+      ['Instances facilitated',String(ag.instances.length)],
+      ['Learning opportunities',String(plos.length)],
+      ['Responses',String(ag.resp)],
+      ['Basis','Section D1 of the CTLI rubric, pooled across every instance'],
+      ['Generated',today]
+    ])}
+    <div class="headline"><b style="color:${norm?'#000':'#888'}">${norm!=null?norm.toFixed(2)+' / 4':'—'}</b> facilitation · ${ag.resp} response${ag.resp!==1?'s':''} across ${ag.instances.length} instance${ag.instances.length!==1?'s':''}</div>
+    ${bars.trim()?`<div class="rgroup"><h4>Facilitation items</h4>${reportGrid(bars)}</div>`:'<p style="font-size:13px;color:#888">No facilitation feedback has been received for this person yet.</p>'}
+    ${rows?`<h2>By instance</h2><table class="fac-overview"><thead><tr><th>Instance</th><th>Learning opportunity</th><th>Date</th><th>Term</th><th>Responses</th><th>Facilitation score</th></tr></thead><tbody>${rows}</tbody></table>`:''}
+    <p style="font-size:11.5px;color:#888;margin-top:18px">An instance is flagged as below norm when it falls more than 0.4 beneath this facilitator's own average, so the comparison is against their own record rather than against colleagues.</p>`;
+  printReport();
+}
 function generateInstanceReport(key){
   const g=instanceGroups().find(x=>x.key===key);if(!g)return;
   const c=CMAP[g.cid]||{};
