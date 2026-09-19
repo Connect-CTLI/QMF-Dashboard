@@ -3234,6 +3234,7 @@ function instanceGroups(){
       if(o!=null&&rn){sum+=o*rn;n+=rn;}resp+=rn;}
     return {...g,inst,facs,resp,overall:n?sum/n:null,
       date:inst.date||dates[0]||null,end:inst.end||null,
+      agName:(inst.codeName&&inst.codeName.indexOf('_')>=0)?inst.codeName.split('_').slice(1).join('_').trim():'',
       term:inst.term||g.items[0].term||null,year:inst.year||g.items[0].year||null,
       mode:inst.mode||g.items[0].mode||null,code:inst.code||'',codeName:inst.codeName||'',
       soi:(CMAP[g.cid]||{}).soi||''};});
@@ -3421,6 +3422,7 @@ function renderSessionCards(){
     return `<div class="scard" data-sk="${esc(g.key)}" aria-selected="${g.key===sel.session}" tabindex="0" role="button">
       <div class="meta">${g.code?`<span class="key">${esc(g.code)}</span>`:''}<span class="pill">${esc(g.iid||c.cid||'')}</span>${g.soi?`<span class="pill fac">${esc(g.soi)}</span>`:''}<span class="pill mode">${esc(g.mode||'—')}</span><span>${when} · Term ${g.term||'—'}</span></div>
       <h3>${esc(c.plo||g.cid)}</h3>
+      ${g.agName&&g.agName!==c.plo?`<div class="meta"><span style="color:#8a5b00;font-size:11.5px">Reported as: ${esc(g.agName)}</span></div>`:''}
       <div class="meta"><span class="pill fac">${g.facs.length>1?g.facs.length+' facilitators':g.facs.length===1?'1 facilitator':'Unassigned'}</span><span>${esc(fnames)}</span>${nb>1?`<span class="pill">${nb} breakaways</span>`:''}</div>
       <div class="rate"><div class="num" style="color:${g.overall?scoreColor(g.overall):'#aab'}">${g.overall?g.overall.toFixed(2):'—'}</div><div class="n2">${g.resp} responses</div></div>
     </div>`;}).join('');
@@ -3449,7 +3451,8 @@ function renderSessionDetail(){
   const when=fmtDate(g.date)+(g.end&&g.end!==g.date?' to '+fmtDate(g.end):'');
   el.innerHTML=`<div class="detail-head"><div class="key">${esc(g.iid||g.cid)} · instance${g.code?' · '+esc(g.code):''}</div>
     <h2>${esc(c.plo||g.cid)}</h2>
-    ${g.codeName?`<div class="sub"><span class="mono" style="font-size:11px;color:#8a94a8">${esc(g.codeName)}</span></div>`:''}
+    ${g.agName&&g.agName!==c.plo?`<div class="sub"><span style="color:#8a5b00;font-size:12px">Reported to the AG as: ${esc(g.agName)}</span></div>`:''}
+    ${g.codeName?`<div class="sub"><span class="mono" style="font-size:10.5px;color:#8a94a8">${esc(g.codeName)}</span></div>`:''}
     <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span><span class="pill mode">${esc(g.mode||'—')}</span><span>Term ${g.term||'—'}</span><span>${when}</span>${g.soi?`<span class="key">${esc(g.soi)}</span>`:''}</div>
     <div class="sub"><b style="color:${g.overall?scoreColor(g.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${g.overall?g.overall.toFixed(2):'—'}/4</b><span>${g.resp} responses${g.items.length>1?' · '+g.items.length+' breakaways':''}</span><button class="btn" style="margin-left:auto" onclick="generateInstanceReport('${esc(g.key)}')">Generate report</button></div></div>
     <div class="detail-body">
