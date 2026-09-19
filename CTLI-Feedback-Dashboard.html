@@ -163,39 +163,88 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .pin-error{color:var(--poor);font-size:12px;margin-top:9px;min-height:15px}
 .fac-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
 .fac-toolbar-note{font-size:12.5px;color:var(--ink-soft);background:#fdf3dd;border:1px solid #f0dcae;border-radius:9px;padding:8px 12px;flex:1;min-width:280px}
-#reportPrint{padding:30px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#reportPrint{padding:30px;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+  font-family:'Inter',system-ui,sans-serif;color:#1A2340;line-height:1.45}
 #reportPrint *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-#reportPrint .ritem{margin-bottom:6px}
-#reportPrint .rgroup{margin-bottom:16px}
-#reportPrint .rgroup h4{font-family:'Space Grotesk';font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--brand);margin-bottom:8px;display:flex;justify-content:space-between}
-#reportPrint h1{font-family:'Space Grotesk';font-size:20px;margin-bottom:2px}
-#reportPrint .meta{font-size:12px;color:var(--ink-soft);margin-bottom:18px}
-#reportPrint table{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:16px}
-#reportPrint th,#reportPrint td{border:1px solid #ccc;padding:6px 9px;text-align:left}
-#reportPrint th{background:#eef2f9}
-#reportPrint h2{font-family:'Space Grotesk';font-size:15px;margin:20px 0 8px}
-#reportPrint .headline{font-size:13px;margin-bottom:14px}
-#reportPrint .headline b{font-family:'Space Grotesk';font-size:18px}
-#reportPrint .report-header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;border-bottom:3px solid #001489;padding-bottom:16px;margin-bottom:20px}
-#reportPrint .header-left{flex:1}
-#reportPrint .department{font-family:'Space Grotesk';font-weight:700;font-size:16px;color:#001489;letter-spacing:.01em;margin:0}
-#reportPrint .institute{font-size:12.5px;color:#5b7f95;margin:2px 0 0}
-#reportPrint .report-metadata{display:flex;flex-wrap:wrap;margin:14px 0 12px}
-#reportPrint .meta-item{display:flex;flex-direction:column;flex:0 0 auto;min-width:150px;max-width:260px;margin:0 24px 10px 0}
-#reportPrint .meta-label{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#8a94a8;line-height:1.4;white-space:nowrap}
-#reportPrint .meta-value{font-size:12.5px;color:#1A2340;font-weight:500;line-height:1.35;margin-top:2px}
-#reportPrint .report-type{font-family:'Space Grotesk';font-weight:600;font-size:13.5px;color:#0E9285;margin:0}
+
+/* letterhead */
+#reportPrint .report-header{display:flex;justify-content:space-between;align-items:flex-start;gap:26px;
+  padding-bottom:14px;margin-bottom:0;border-bottom:2px solid #001489}
+#reportPrint .header-left{flex:1;min-width:0}
+#reportPrint .department{font-family:'Space Grotesk';font-weight:700;font-size:17px;color:#001489;margin:0;letter-spacing:-.01em}
+#reportPrint .institute{font-size:12px;color:#5b7f95;margin:3px 0 0;letter-spacing:.02em}
+#reportPrint .report-type{font-family:'Space Grotesk';font-weight:600;font-size:19px;color:#1A2340;margin:14px 0 0;letter-spacing:-.01em}
 #reportPrint .header-right{flex:0 0 auto;text-align:right}
-#reportPrint .header-right img{height:62px}
+#reportPrint .header-right img{height:54px;width:auto;display:block}
+#reportPrint .brandrule{height:4px;margin:0 0 16px;
+  background:linear-gradient(90deg,#f5c608 0 34%,#92ad12 34% 67%,#0E9285 67% 100%)}
+
+/* metadata block: a real grid, so long values cannot shunt the layout */
+#reportPrint .report-metadata{display:grid;grid-template-columns:repeat(3,1fr);gap:9px 22px;
+  margin:16px 0 18px;padding:14px 16px;background:#f5f7fb;border:1px solid #e2e8f2;border-radius:6px}
+#reportPrint .meta-item{display:block;min-width:0;margin:0}
+#reportPrint .meta-label{display:block;font-size:8.5px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:#8a94a8;line-height:1.3}
+#reportPrint .meta-value{display:block;font-size:11.5px;color:#1A2340;font-weight:500;
+  line-height:1.35;margin-top:2px;word-break:break-word}
+#reportPrint .meta-item.wide{grid-column:1 / -1}
+
+/* headline figure */
+#reportPrint .headline{font-size:12.5px;color:#5b7f95;margin:0 0 18px;padding:12px 16px;
+  background:#001489;color:#fff;border-radius:6px}
+#reportPrint .headline b{font-family:'Space Grotesk';font-size:24px;color:#fff;margin-right:8px;letter-spacing:-.02em}
+
+/* sections */
+#reportPrint h2{font-family:'Space Grotesk';font-size:13px;font-weight:600;color:#001489;
+  text-transform:uppercase;letter-spacing:.07em;margin:22px 0 9px;padding-bottom:5px;border-bottom:1px solid #dbe2ee}
+#reportPrint .rgroup{margin-bottom:16px}
+#reportPrint .rgroup h4{font-family:'Space Grotesk';font-size:11.5px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.06em;color:#001489;margin:0 0 8px;padding-bottom:4px;border-bottom:1px solid #e6ebf4;
+  display:flex;justify-content:space-between;align-items:baseline}
+#reportPrint .rgroup h4 span{color:#5b7f95;font-weight:500;letter-spacing:0;text-transform:none;font-size:11px}
+
+/* rating bars */
 #reportPrint .rgrid{display:flex;flex-wrap:wrap;column-gap:26px}
-#reportPrint .rgrid .ritem{flex:0 0 calc(50% - 13px);margin-bottom:8px}
-#reportPrint .fac-overview{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:18px}
-#reportPrint .fac-overview th,#reportPrint .fac-overview td{border:1px solid #ccc;padding:6px 9px;text-align:left}
-#reportPrint .fac-overview th{background:#eef2f9}
+#reportPrint .rgrid .ritem{flex:0 0 calc(50% - 13px)}
+#reportPrint .ritem{display:grid;grid-template-columns:1fr 74px 34px;align-items:center;gap:9px;
+  margin-bottom:5px;font-size:11px}
+#reportPrint .ritem .rn{color:#3d4a63;line-height:1.3}
+#reportPrint .ritem .rt{height:7px;border-radius:4px;background:#e7ebf2;overflow:hidden}
+#reportPrint .ritem .rf{height:100%;border-radius:4px}
+#reportPrint .ritem .rv{font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;text-align:right}
+
+/* tables */
+#reportPrint table,#reportPrint .fac-overview{border-collapse:collapse;width:100%;font-size:11px;margin-bottom:16px}
+#reportPrint th,#reportPrint td,#reportPrint .fac-overview th,#reportPrint .fac-overview td{
+  border:0;border-bottom:1px solid #e6ebf4;padding:6px 9px;text-align:left;vertical-align:top}
+#reportPrint th,#reportPrint .fac-overview th{background:#001489;color:#fff;font-weight:600;
+  font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;border-bottom:0}
+#reportPrint tbody tr:nth-child(even) td{background:#f7f9fc}
+#reportPrint .footnote{font-size:9.5px;color:#8a94a8;margin-top:14px;padding-top:9px;border-top:1px solid #e6ebf4}
+
+/* ---- print ----
+   The old rule used visibility:hidden on the rest of the page. Hidden elements still occupy
+   layout, so the whole dashboard kept generating blank pages underneath an absolutely
+   positioned report. display:none removes them from the flow entirely. */
 @media print{
-  body *{visibility:hidden}
-  #reportPrint,#reportPrint *{visibility:visible}
-  #reportPrint{position:absolute;top:0;left:0;width:100%;display:block!important}
+  @page{size:A4 portrait;margin:13mm 12mm 14mm}
+  html,body{background:#fff!important;margin:0!important;padding:0!important;height:auto!important;overflow:visible!important}
+  body>*{display:none!important}
+  #reportPrint{display:block!important;position:static!important;visibility:visible!important;
+    width:auto!important;max-width:none!important;padding:0!important;margin:0!important;font-size:11px}
+  #reportPrint *{visibility:visible!important}
+  #reportPrint .report-header{page-break-after:avoid;break-after:avoid}
+  #reportPrint .report-metadata{page-break-inside:avoid;break-inside:avoid}
+  #reportPrint .headline{page-break-inside:avoid;break-inside:avoid;page-break-after:avoid;break-after:avoid}
+  #reportPrint h2{page-break-after:avoid;break-after:avoid;page-break-inside:avoid}
+  #reportPrint .rgroup{page-break-inside:avoid;break-inside:avoid}
+  #reportPrint .rgroup h4{page-break-after:avoid;break-after:avoid}
+  #reportPrint .ritem{page-break-inside:avoid;break-inside:avoid}
+  #reportPrint thead{display:table-header-group}
+  #reportPrint tr{page-break-inside:avoid;break-inside:avoid}
+  #reportPrint table{page-break-inside:auto}
+  /* a trailing margin on the last block is enough to spill one empty page */
+  #reportPrint>*:last-child{margin-bottom:0!important;padding-bottom:0!important}
 }
 @media(max-width:1000px){.explorer{grid-template-columns:1fr}.detail{position:static;max-height:none}.pulse{grid-template-columns:1fr}.setup-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -243,6 +292,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <p>Feedback across every instance, scored on the CTLI rubric. Facilitation is reported per facilitator, so select an instance to see each person's delivery.</p></div>
       <span class="badge-live" id="dataBadge"><span class="dot"></span><span id="dataBadgeTxt">No responses connected yet</span></span>
     </div>
+    <div class="note" id="dataWarn" style="display:none;border-left-color:#d73828;margin-bottom:14px"></div>
     <div class="pulse"><div class="gauge" id="gauge"></div><div class="sectbars" id="sectbars"></div></div>
     <div class="stats" id="stats"></div>
   </div>
@@ -287,7 +337,6 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   </div>
 </section>
 
-<div id="reportPrint" class="hidden"></div>
 
 <section id="v-sois" class="view hidden">
   <div class="explorer"><div class="cards" id="soiCards"></div>
@@ -3234,7 +3283,10 @@ function instanceGroups(){
       if(o!=null&&rn){sum+=o*rn;n+=rn;}resp+=rn;}
     return {...g,inst,facs,resp,overall:n?sum/n:null,
       date:inst.date||dates[0]||null,end:inst.end||null,
-      agName:(inst.codeName&&inst.codeName.indexOf('_')>=0)?inst.codeName.split('_').slice(1).join('_').trim():'',
+      // Full identifier is CODE_SOI_unit_name, so the delivery name is everything after the third
+      // underscore. An older register storing only unit_name still resolves via the fallback.
+      agName:(function(cn){if(!cn)return '';const p=cn.split('_');
+        return (p.length>=4?p.slice(3):p.slice(1)).join('_').trim();})(inst.codeName),
       term:inst.term||g.items[0].term||null,year:inst.year||g.items[0].year||null,
       mode:inst.mode||g.items[0].mode||null,code:inst.code||'',codeName:inst.codeName||'',
       soi:(CMAP[g.cid]||{}).soi||''};});
@@ -3433,7 +3485,7 @@ function renderSessionCards(){
     return `<div class="scard" data-sk="${esc(g.key)}" aria-selected="${g.key===sel.session}" tabindex="0" role="button">
       <div class="meta">${g.code?`<span class="key">${esc(g.code)}</span>`:''}<span class="pill">${esc(g.iid||c.cid||'')}</span>${g.soi?`<span class="pill fac">${esc(g.soi)}</span>`:''}<span class="pill mode">${esc(g.mode||'—')}</span><span>${when} · Term ${g.term||'—'}</span></div>
       <h3>${esc(c.plo||g.cid)}</h3>
-      ${g.agName&&g.agName!==c.plo?`<div class="meta"><span style="color:#8a5b00;font-size:11.5px">Reported as: ${esc(g.agName)}</span></div>`:''}
+      ${g.codeName?`<div class="meta"><span class="mono" style="color:#8a5b00;font-size:11px;word-break:break-word">${esc(g.codeName)}</span></div>`:''}
       <div class="meta"><span class="pill fac">${g.facs.length>1?g.facs.length+' facilitators':g.facs.length===1?'1 facilitator':'Unassigned'}</span><span>${esc(fnames)}</span>${nb>1?`<span class="pill">${nb} breakaways</span>`:''}</div>
       <div class="rate"><div class="num" style="color:${g.overall?scoreColor(g.overall):'#aab'}">${g.overall?g.overall.toFixed(2):'—'}</div><div class="n2">${g.resp} responses</div></div>
     </div>`;}).join('');
@@ -3462,12 +3514,12 @@ function renderSessionDetail(){
   const when=fmtDate(g.date)+(g.end&&g.end!==g.date?' to '+fmtDate(g.end):'');
   el.innerHTML=`<div class="detail-head"><div class="key">${esc(g.iid||g.cid)} · instance${g.code?' · '+esc(g.code):''}</div>
     <h2>${esc(c.plo||g.cid)}</h2>
-    ${g.agName&&g.agName!==c.plo?`<div class="sub"><span style="color:#8a5b00;font-size:12px">Reported to the AG as: ${esc(g.agName)}</span></div>`:''}
-    ${g.codeName?`<div class="sub"><span class="mono" style="font-size:10.5px;color:#8a94a8">${esc(g.codeName)}</span></div>`:''}
+    ${g.codeName?`<div class="sub" style="display:block"><span style="color:#8a5b00;font-size:11px;letter-spacing:.06em;text-transform:uppercase">AG report identifier</span><br><span class="mono" style="font-size:12px;color:#8a5b00;word-break:break-word">${esc(g.codeName)}</span></div>`:''}
+    ${g.agName&&g.agName!==c.plo?`<div class="sub"><span style="font-size:12px;color:var(--ink-soft)">Reported as: ${esc(g.agName)}</span></div>`:''}
     <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span><span class="pill mode">${esc(g.mode||'—')}</span><span>Term ${g.term||'—'}</span><span>${when}</span>${g.soi?`<span class="key">${esc(g.soi)}</span>`:''}</div>
     <div class="sub"><b style="color:${g.overall?scoreColor(g.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${g.overall?g.overall.toFixed(2):'—'}/4</b><span>${g.resp} responses${g.items.length>1?' · '+g.items.length+' breakaways':''}</span><button class="btn" style="margin-left:auto" onclick="generateInstanceReport('${esc(g.key)}')">Generate report</button></div></div>
     <div class="detail-body">
-      <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${g.facs.length} rated separately</span></h4>${facBlocks||'<span style="font-size:12px;color:#8a94a8">No facilitator assigned to this instance yet — add one on the Sessions tab of the register.</span>'}</div>
+      <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${g.facs.length} rated separately</span></h4>${facBlocks||`<span style="font-size:12px;color:#8a94a8">No facilitation score yet. Facilitation comes from the facilitator form only, not the main feedback form, and each response has to name a facilitator or find one in the Facilitator ID(s) column of the register.</span>`}</div>
       ${breakaways}${sessGroups}</div>`;
 }
 
@@ -3684,7 +3736,7 @@ function renderSoiDetail(){
   const instRows=ag.instances.map(iid=>{const is=ag.sessions.filter(sn=>sn.iid===iid);
     let sum=0,n=0;for(const sn of is){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;if(o!=null&&rn){sum+=o*rn;n+=rn;}}
     const v=n?sum/n:null;const inst=IMAP[iid]||{};const c=CMAP[inst.cid]||{};
-    return {iid,v,n,html:`<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">${esc(iid)}</span> ${esc(c.plo||'')} <span style="color:#8a94a8">· ${esc(instLabel(iid))}</span></div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(1):'—'}</div></div>`};})
+    return {iid,v,n,html:`<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn">${inst.code?`<span class="key mono">${esc(inst.code)}</span> `:''}${esc(c.plo||'')} <span style="color:#8a94a8">· ${esc(iid)} · ${esc(instLabel(iid))}</span>${inst.codeName?`<br><span class="mono" style="font-size:10px;color:#8a5b00">${esc(inst.codeName)}</span>`:''}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(1):'—'}</div></div>`};})
     .sort((a,b)=>(a.v==null?99:a.v)-(b.v==null?99:b.v)).map(o=>o.html).join('');
   const units=[...new Set(ag.plos.map(p=>p.unit).filter(Boolean))];
   const subs=[...new Set(ag.plos.map(p=>p.sub).filter(Boolean))];
@@ -3915,14 +3967,39 @@ function parseFacilitatorCSV(text){const rows=parseCSV(text);if(rows.length<2)th
   }
   if(!out.length)throw new Error(ingestFailure('Facilitator form',head,keyCol,codeCols,keyed,body.length));
   return out;}
+let DIAG={orphanMain:0,orphanFac:0,orphanKeys:[],unattributed:0};
+/* aggregate() drops any response whose key is not in the register, and any facilitation response
+   with nobody attached. Both used to happen in silence, which made an empty facilitation panel
+   impossible to explain. Count them and surface it. */
+function diagnose(){
+  const known=new Set(SESSIONS.map(x=>String(x.sid)));
+  const bad=new Set();
+  DIAG={orphanMain:0,orphanFac:0,orphanKeys:[],unattributed:0};
+  for(const r of RESPONSES_MAIN)if(!known.has(String(r.sk))){DIAG.orphanMain++;bad.add(String(r.sk));}
+  for(const r of RESPONSES_FAC){
+    if(!known.has(String(r.sk))){DIAG.orphanFac++;bad.add(String(r.sk));}
+    else if(!r.fid)DIAG.unattributed++;}
+  DIAG.orphanKeys=[...bad].sort().slice(0,12);
+  return DIAG;}
+function diagnosticText(){
+  const d=DIAG;const out=[];
+  if(d.orphanMain||d.orphanFac){
+    out.push(`⚠ ${d.orphanMain+d.orphanFac} response${(d.orphanMain+d.orphanFac)!==1?'s':''} carry a session key that is not in the register and are being ignored (keys ${d.orphanKeys.join(', ')}${d.orphanKeys.length>=12?' …':''}). The form options were built from a different set of keys than the register now holds.`);}
+  if(d.unattributed){
+    out.push(`⚠ ${d.unattributed} facilitator-form response${d.unattributed!==1?'s':''} could not be attributed to anyone, so they produce no facilitation score. Either the "Select your facilitator" question was left blank, or the Facilitator ID(s) column on the register Sessions tab is empty for those instances.`);}
+  return out.join(' ');}
 function mergeResponses(){RESPONSES=[...RESPONSES_MAIN,...RESPONSES_FAC];LIVE=RESPONSES.length>0;
-  aggregate();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
+  aggregate();diagnose();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
 function ingestCSV(text){RESPONSES_MAIN=parseResponseCSV(text);mergeResponses();return RESPONSES_MAIN.length;}
 function ingestFacCSV(text){RESPONSES_FAC=parseFacilitatorCSV(text);mergeResponses();return RESPONSES_FAC.length;}
 function setBadge(mainN,facN){const b=document.getElementById('dataBadge'),t=document.getElementById('dataBadgeTxt');const on=(mainN+facN)>0;b.classList.toggle('on',on);
   if(!on){t.textContent='No responses connected yet';return;}
   const parts=[];if(mainN)parts.push(`${mainN} main form`);if(facN)parts.push(`${facN} facilitator form`);
-  t.textContent=`Live · ${parts.join(' + ')} response${(mainN+facN)!==1?'s':''}`;}
+  const d=DIAG,drop=d.orphanMain+d.orphanFac;
+  t.textContent=`Live · ${parts.join(' + ')} response${(mainN+facN)!==1?'s':''}`+(drop?` · ${drop} ignored`:'');
+  b.title=diagnosticText()||'';
+  const w=document.getElementById('dataWarn');
+  if(w){const msg=diagnosticText();w.textContent=msg;w.style.display=msg?'block':'none';}}
 
 /* export/import */
 function download(name,text,type){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
@@ -4077,7 +4154,7 @@ function applyRegisterRows(R){
     term:pickField(r,['term'])!=null&&pickField(r,['term'])!==''?String(pickField(r,['term'])).replace(/\.0$/,''):null,
     date:fmtRegDate(pickField(r,['date'])),end:fmtRegDate(pickField(r,['end date'])),mode:pickField(r,['mode'])||null,
     code:(pickField(r,['soi instance code'])||'').toString().trim(),
-    codeName:(pickField(r,['soi instance name'])||'').toString().trim(),
+    codeName:(pickField(r,['ag report identifier','soi instance name'])||'').toString().trim(),
     days:pickField(r,['day'])!=null&&pickField(r,['day'])!==''?String(pickField(r,['day'])):null,
     hours:pickField(r,['hour'])!=null&&pickField(r,['hour'])!==''?String(pickField(r,['hour'])):null}));
   // "Session key" is the frozen form key and must win over the structural "Session ID (auto)".
@@ -4122,19 +4199,23 @@ function importWorkbook(file){
 function reportBar(label,v){return v==null?'':`<div class="ritem"><div class="rn">${esc(label)}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(2)}</div></div>`;}
 function reportGrid(barsHtml){return barsHtml?`<div class="rgrid">${barsHtml}</div>`:'';}
 function reportLetterhead(reportType,metaItems){
-  const meta=(metaItems||[]).filter(m=>m&&m[1]).map(([label,value])=>
-    `<div class="meta-item"><span class="meta-label">${esc(label)}</span><span class="meta-value">${esc(value)}</span></div>`).join('');
+  // Long values (an AG identifier, a list of keys) get the full width so they cannot stretch a
+  // grid column and leave the other two looking starved.
+  const meta=(metaItems||[]).filter(m=>m&&m[1]).map(([label,value])=>{
+    const wide=String(value).length>46?' wide':'';
+    return `<div class="meta-item${wide}"><span class="meta-label">${esc(label)}</span><span class="meta-value">${esc(value)}</span></div>`;}).join('');
   return `<div class="report-header">
     <div class="header-left">
       <h1 class="department">Western Cape Education Department</h1>
       <p class="institute">Cape Teaching and Leadership Institute</p>
-      ${meta?`<div class="report-metadata">${meta}</div>`:''}
       <p class="report-type">${esc(reportType)}</p>
     </div>
     <div class="header-right">
       <img src="${WCED_LOGO}" alt="Western Cape Government" decoding="sync">
     </div>
-  </div>`;
+  </div>
+  <div class="brandrule"></div>
+  ${meta?`<div class="report-metadata">${meta}</div>`:''}`;
 }
 function printReport(){
   // wait for the letterhead logo to finish decoding before printing — otherwise some browsers
@@ -4200,9 +4281,9 @@ function generateFacilitatorReport(fid){
       ['Generated',today]
     ])}
     <div class="headline"><b style="color:${norm?'#000':'#888'}">${norm!=null?norm.toFixed(2)+' / 4':'—'}</b> facilitation · ${ag.resp} response${ag.resp!==1?'s':''} across ${ag.instances.length} instance${ag.instances.length!==1?'s':''}</div>
-    ${bars.trim()?`<div class="rgroup"><h4>Facilitation items</h4>${reportGrid(bars)}</div>`:'<p style="font-size:13px;color:#888">No facilitation feedback has been received for this person yet.</p>'}
+    ${bars.trim()?`<div class="rgroup"><h4>Facilitation items</h4>${reportGrid(bars)}</div>`:'<p class="footnote">No facilitation feedback has been received for this person yet.</p>'}
     ${rows?`<h2>By instance</h2><table class="fac-overview"><thead><tr><th>Instance</th><th>Learning opportunity</th><th>Date</th><th>Term</th><th>Responses</th><th>Facilitation score</th></tr></thead><tbody>${rows}</tbody></table>`:''}
-    <p style="font-size:11.5px;color:#888;margin-top:18px">An instance is flagged as below norm when it falls more than 0.4 beneath this facilitator's own average, so the comparison is against their own record rather than against colleagues.</p>`;
+    <p class="footnote">An instance is flagged as below norm when it falls more than 0.4 beneath this facilitator's own average, so the comparison is against their own record rather than against colleagues.</p>`;
   printReport();
 }
 function generateInstanceReport(key){
@@ -4263,8 +4344,8 @@ function generateCourseReport(cid){
   const instRows=instanceGroups().filter(g=>g.cid===cid)
     .sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
   const spark=instRows.map(g=>`<i style="display:inline-block;width:${Math.max(1,Math.floor(300/Math.max(instRows.length,1))-3)}px;height:${g.overall?g.overall/4*100:4}%;background:${scoreColor(g.overall)};margin-right:3px;vertical-align:bottom;border-radius:2px 2px 0 0" title="${fmtDate(g.date)}: ${g.overall?g.overall.toFixed(2):'—'}"></i>`).join('');
-  const instTable=instRows.length?`<h2>By instance</h2><table class="fac-overview"><thead><tr><th>Instance</th><th>SOI code</th><th>Dates</th><th>Term</th><th>Facilitator</th><th>Responses</th><th>Score</th></tr></thead><tbody>${instRows.map(g=>
-    `<tr><td>${esc(g.iid||'—')}</td><td>${esc(g.code||'—')}</td><td>${fmtDate(g.date)}${g.end&&g.end!==g.date?' to '+fmtDate(g.end):''}</td><td>${g.term||'—'}</td><td>${g.facs.map(facFullName).join(', ')||'—'}</td><td>${g.resp}</td><td>${g.overall!=null?g.overall.toFixed(2)+' / 4':'—'}</td></tr>`).join('')}</tbody></table>`:'';
+  const instTable=instRows.length?`<h2>By instance</h2><table class="fac-overview"><thead><tr><th>Instance</th><th>SOI code</th><th>AG report identifier</th><th>Dates</th><th>Term</th><th>Responses</th><th>Score</th></tr></thead><tbody>${instRows.map(g=>
+    `<tr><td>${esc(g.iid||'—')}</td><td>${esc(g.code||'—')}</td><td style="font-size:10.5px">${esc(g.codeName||'—')}</td><td>${fmtDate(g.date)}${g.end&&g.end!==g.date?' to '+fmtDate(g.end):''}</td><td>${g.term||'—'}</td><td>${g.resp}</td><td>${g.overall!=null?g.overall.toFixed(2)+' / 4':'—'}</td></tr>`).join('')}</tbody></table>`:'';
   const sessRows=ss.map(s=>{const o=sessionOverall(s.sid);const resp=AGG[s.sid]?AGG[s.sid].resp:0;
     const facs=s.facs.map(fid=>facFullName(fid)).join(', ')||'—';
     return `<tr><td>[${esc(s.sid)}]</td><td>${fmtDate(s.date)}</td><td>${esc(facs)}</td><td>${resp}</td><td style="color:${o?scoreColor(o):'#888'};font-weight:600">${o!=null?o.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('');
@@ -4286,6 +4367,7 @@ function generateCourseReport(cid){
       [(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator',coord],
       ['Instances',String(instRows.length)],
       ['SOI instance codes',instRows.map(g=>g.code).filter(Boolean).join(', ')||null],
+      ['AG report identifiers',instRows.map(g=>g.codeName).filter(Boolean).join('  |  ')||null],
       ['Generated',today]
     ])}
     <div class="headline"><b style="color:${ag.overall?'#000':'#888'}">${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'—'}</b> overall · ${instRows.length} instance${instRows.length!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</div>
@@ -4301,10 +4383,10 @@ document.getElementById('copySessions').onclick=copySessionOptions;
 document.getElementById('copyAll').onclick=copyFacilitatorRoster;
 document.getElementById('loadCsv').onclick=()=>{const url=document.getElementById('csvUrl').value.trim();const st=document.getElementById('csvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
-  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses.`;saveLink('link_responses',url);syncSetupHash();}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses. `+diagnosticText();saveLink('link_responses',url);syncSetupHash();}).catch(e=>{st.textContent='Could not load: '+e.message;});};
 document.getElementById('loadFacCsv').onclick=()=>{const url=document.getElementById('facCsvUrl').value.trim();const st=document.getElementById('facCsvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
-  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses.`;saveLink('link_responses_fac',url);syncSetupHash();}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses. `+diagnosticText();saveLink('link_responses_fac',url);syncSetupHash();}).catch(e=>{st.textContent='Could not load: '+e.message;});};
 
 function loadRegisterFromLinks(silent){
   const U={c:'regCoursesUrl',i:'regInstUrl',s:'regSessionsUrl',f:'regFacsUrl',so:'regSoisUrl',co:'regCoordsUrl'};
@@ -4359,5 +4441,9 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
   if(Object.keys(hashLinks).length)syncSetupHash(); // normalise the hash once fields are populated
 })();
 </script>
+
+<!-- Lives outside <main> on purpose: the print rule hides every direct child of body,
+     and a display:none ancestor would take the report down with it. -->
+<div id="reportPrint" class="hidden"></div>
 </body>
 </html>
