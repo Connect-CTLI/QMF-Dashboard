@@ -3990,6 +3990,13 @@ function diagnosticText(){
   return out.join(' ');}
 function mergeResponses(){RESPONSES=[...RESPONSES_MAIN,...RESPONSES_FAC];LIVE=RESPONSES.length>0;
   aggregate();diagnose();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
+/* Boot fetches the links the URL carries. If someone reaches Setup and loads a different sheet
+   before that fetch resolves, the slower boot response used to land last and quietly overwrite the
+   newer data — the counts looked right for a moment, then old responses reappeared. Each load takes
+   a token; a fetch that is no longer the newest for its slot is discarded on arrival. */
+let RESP_GEN={r:0,f:0};
+function claimResponseLoad(slot){return ++RESP_GEN[slot];}
+function loadIsCurrent(slot,token){return RESP_GEN[slot]===token;}
 function ingestCSV(text){RESPONSES_MAIN=parseResponseCSV(text);mergeResponses();return RESPONSES_MAIN.length;}
 function ingestFacCSV(text){RESPONSES_FAC=parseFacilitatorCSV(text);mergeResponses();return RESPONSES_FAC.length;}
 function setBadge(mainN,facN){const b=document.getElementById('dataBadge'),t=document.getElementById('dataBadgeTxt');const on=(mainN+facN)>0;b.classList.toggle('on',on);
@@ -4383,10 +4390,14 @@ document.getElementById('copySessions').onclick=copySessionOptions;
 document.getElementById('copyAll').onclick=copyFacilitatorRoster;
 document.getElementById('loadCsv').onclick=()=>{const url=document.getElementById('csvUrl').value.trim();const st=document.getElementById('csvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
-  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses. `+diagnosticText();saveLink('link_responses',url);syncSetupHash();}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+  const tok=claimResponseLoad('r');
+  fetch(url).then(r=>r.text()).then(t=>{if(!loadIsCurrent('r',tok))return;
+    st.textContent=`✓ Loaded ${ingestCSV(t)} responses. `+diagnosticText();saveLink('link_responses',url);syncSetupHash();}).catch(e=>{if(loadIsCurrent('r',tok))st.textContent='Could not load: '+e.message;});};
 document.getElementById('loadFacCsv').onclick=()=>{const url=document.getElementById('facCsvUrl').value.trim();const st=document.getElementById('facCsvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
-  fetch(url).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses. `+diagnosticText();saveLink('link_responses_fac',url);syncSetupHash();}).catch(e=>{st.textContent='Could not load: '+e.message;});};
+  const tok=claimResponseLoad('f');
+  fetch(url).then(r=>r.text()).then(t=>{if(!loadIsCurrent('f',tok))return;
+    st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses. `+diagnosticText();saveLink('link_responses_fac',url);syncSetupHash();}).catch(e=>{if(loadIsCurrent('f',tok))st.textContent='Could not load: '+e.message;});};
 
 function loadRegisterFromLinks(silent){
   const U={c:'regCoursesUrl',i:'regInstUrl',s:'regSessionsUrl',f:'regFacsUrl',so:'regSoisUrl',co:'regCoordsUrl'};
@@ -4469,9 +4480,13 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
   const registerLoad=anyReg?loadRegisterFromLinks(true):Promise.resolve();
   registerLoad.then(()=>{
     if(savedResp){const st=document.getElementById('csvStatus');st.textContent='Loading…';
-      fetch(savedResp).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestCSV(t)} responses.`;}).catch(e=>{st.textContent='Could not reload saved link: '+e.message;});}
+      const tok=claimResponseLoad('r');
+      fetch(savedResp).then(r=>r.text()).then(t=>{if(!loadIsCurrent('r',tok))return;
+        st.textContent=`✓ Loaded ${ingestCSV(t)} responses. `+diagnosticText();}).catch(e=>{if(loadIsCurrent('r',tok))st.textContent='Could not reload saved link: '+e.message;});}
     if(savedFacResp){const st=document.getElementById('facCsvStatus');st.textContent='Loading…';
-      fetch(savedFacResp).then(r=>r.text()).then(t=>{st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses.`;}).catch(e=>{st.textContent='Could not reload saved link: '+e.message;});}
+      const tok=claimResponseLoad('f');
+      fetch(savedFacResp).then(r=>r.text()).then(t=>{if(!loadIsCurrent('f',tok))return;
+        st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses. `+diagnosticText();}).catch(e=>{if(loadIsCurrent('f',tok))st.textContent='Could not reload saved link: '+e.message;});}
   });
   if(Object.keys(hashLinks).length)syncSetupHash(); // normalise the hash once fields are populated
 })();
