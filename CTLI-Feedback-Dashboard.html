@@ -4420,6 +4420,41 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
    The URL hash (bookmarkable, storage-independent) takes priority over localStorage, since managed devices can clear browser storage at any time. */
 (function(){
   const hashLinks=decodeSetupHash()||{};
+  /* The hash wins so a shared link works on a machine with no stored settings. The cost is that an
+     old bookmark silently reinstates old sheets over links you just set up here. Say so out loud. */
+  const STORE={r:'link_responses',f:'link_responses_fac',c:'link_reg_courses',i:'link_reg_instances',
+               s:'link_reg_sessions',fa:'link_reg_facs',so:'link_reg_sois',co:'link_reg_coords'};
+  const LABEL={r:'main feedback responses',f:'facilitator responses',c:'PLOs',i:'Instances',
+               s:'Sessions',fa:'Facilitators',so:'SOIs',co:'Coordinators'};
+  const clashes=Object.keys(STORE).filter(k=>{const h=hashLinks[k],l=loadLink(STORE[k]);
+    return h&&l&&h!==l;});
+  if(clashes.length){
+    window.__LINK_CLASH__={keys:clashes,saved:{},hash:{}};
+    clashes.forEach(k=>{window.__LINK_CLASH__.saved[k]=loadLink(STORE[k]);window.__LINK_CLASH__.hash[k]=hashLinks[k];});
+    setTimeout(function(){
+      const w=document.getElementById('dataWarn');if(!w)return;
+      w.innerHTML=`<b>This link is carrying older sheet connections.</b> The address you opened the dashboard with overrode the links saved on this device for: `
+        +clashes.map(k=>LABEL[k]).join(', ')
+        +`. The figures below come from the link, not from what you last set up here. `
+        +`<button class="btn" id="useSaved" style="margin-left:8px">Use this device's links instead</button>`;
+      w.style.display='block';
+      const b=document.getElementById('useSaved');
+      if(b)b.onclick=function(){
+        const F={r:'csvUrl',f:'facCsvUrl',c:'regCoursesUrl',i:'regInstUrl',s:'regSessionsUrl',
+                 fa:'regFacsUrl',so:'regSoisUrl',co:'regCoordsUrl'};
+        clashes.forEach(k=>{const el=document.getElementById(F[k]);if(el)el.value=window.__LINK_CLASH__.saved[k];});
+        syncSetupHash();
+        w.innerHTML='Reloading with this device\'s links…';
+        loadRegisterFromLinks(true).then(()=>{
+          const r=document.getElementById('csvUrl').value.trim(),f=document.getElementById('facCsvUrl').value.trim();
+          const jobs=[];
+          if(r)jobs.push(fetch(r).then(x=>x.text()).then(t=>ingestCSV(t)));
+          if(f)jobs.push(fetch(f).then(x=>x.text()).then(t=>ingestFacCSV(t)));
+          return Promise.all(jobs);
+        }).then(()=>{w.style.display='none';}).catch(e=>{w.textContent='Could not reload: '+e.message;});
+      };
+    },0);
+  }
   const savedResp=hashLinks.r||loadLink('link_responses'),savedFacResp=hashLinks.f||loadLink('link_responses_fac');
   // Put the response links back into their fields BEFORE syncSetupHash runs. syncSetupHash rebuilds
   // the hash from the fields, so leaving these blank silently strips both response sheets out of a
