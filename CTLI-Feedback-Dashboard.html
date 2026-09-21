@@ -3185,7 +3185,7 @@ const WCED_LOGO="data:image/png;base64,"+[
 "E4xrBkCZmSx+rsfUjW50oxu/JP4fbpZWpJB/KZ0AAAAASUVORK5CYII="
 ].join('');
 const RUBRIC=[
- {code:'C',name:'Course & Content',kind:'session',group:'design',items:[
+ {code:'C',name:'PLO & Content',kind:'session',group:'design',items:[
    ['C1','Structure and flow','structured and easy to navigate'],
    ['C2','Content depth','pitched at the right level of depth'],
    ['C4','Variety of learning experiences','good mix of activities and resources'],
@@ -3353,6 +3353,7 @@ function aggregate(){
 // courses/sessions/facilitators that actually have feedback — used for headline counts so the catalogue's unrated entries don't inflate them
 function feedbackSessions(){return SESSIONS.filter(s=>AGG[s.sid]&&AGG[s.sid].resp>0);}
 function feedbackCourseIds(){return new Set(feedbackSessions().map(s=>s.cid));}
+function feedbackInstances(){return instanceGroups().filter(g=>g.resp>0);}
 function feedbackFacIds(){return new Set(RESPONSES.map(r=>r.fid).filter(Boolean));}
 function sessionSectionAvg(sk,sec){const a=AGG[sk];let sum=0,n=0;
   if(sec.code==='D1'){for(const fid of Object.keys(a.facItems))for(const[code]of sec.items){const it=a.facItems[fid][code];if(it){sum+=it.sum;n+=it.n;}}}
@@ -3463,15 +3464,15 @@ function renderHero(){
     <text x="90" y="106" text-anchor="middle" style="font-family:Inter;font-size:12px;fill:#3a4a67">out of 4.0</text></svg><div class="lab">Overall satisfaction</div>`;
   document.getElementById('sectbars').innerHTML=RUBRIC.map(sec=>{const v=secN[sec.code]?secSum[sec.code]/secN[sec.code]:null;
     return `<div class="sbar"><div class="nm">${sec.name}</div><div class="track"><div class="fill" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="sc" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(2):'—'}</div></div>`;}).join('');
-  const low=SESSIONS.filter(s=>{const o=sessionOverall(s.sid);return o!=null&&o<3.5;}).length;
-  const fbCourses=feedbackCourseIds().size,fbSessions=feedbackSessions().length,fbFacs=feedbackFacIds().size;
+  const low=instanceGroups().filter(g=>g.overall!=null&&g.overall<3.5).length;
+  const fbCourses=feedbackCourseIds().size,fbSessions=feedbackInstances().length,fbFacs=feedbackFacIds().size;
   document.getElementById('stats').innerHTML=`
-   <div class="stat"><div class="n">${fbCourses}<span style="font-size:14px;color:var(--ink-soft);font-weight:500"> / ${COURSES.length}</span></div><div class="l">Courses with feedback</div></div>
-   <div class="stat"><div class="n">${fbSessions}<span style="font-size:14px;color:var(--ink-soft);font-weight:500"> / ${SESSIONS.length}</span></div><div class="l">Sessions with feedback</div></div>
+   <div class="stat"><div class="n">${fbCourses}<span style="font-size:14px;color:var(--ink-soft);font-weight:500"> / ${COURSES.length}</span></div><div class="l">PLOs with feedback</div></div>
+   <div class="stat"><div class="n">${fbSessions}<span style="font-size:14px;color:var(--ink-soft);font-weight:500"> / ${instanceGroups().length}</span></div><div class="l">Instances with feedback</div></div>
    <div class="stat"><div class="n">${fbFacs}<span style="font-size:14px;color:var(--ink-soft);font-weight:500"> / ${FACS.length}</span></div><div class="l">Facilitators rated</div></div>
    <div class="stat"><div class="n">${resp.toLocaleString()}</div><div class="l">Responses</div></div>
    <div class="stat"><div class="n" style="color:${scoreColor(overall)}">${overall!=null?overall.toFixed(2):'—'}</div><div class="l">Mean score</div></div>
-   <div class="stat"><div class="n" style="color:${low?'var(--poor)':'var(--good)'}">${low}</div><div class="l">Sessions below 3.5</div></div>`;
+   <div class="stat"><div class="n" style="color:${low?'var(--poor)':'var(--good)'}">${low}</div><div class="l">Instances below 3.5</div></div>`;
 }
 
 /* SESSION CARDS + DETAIL */
@@ -3643,11 +3644,11 @@ function renderSummary(){
   const banner=document.getElementById('ctliBanner');
   if(banner&&!banner.style.backgroundImage)banner.style.backgroundImage=`url(${BANNER_IMG})`;
   const overall=programmeFinalRating();
-  const fbCourses=feedbackCourseIds().size,fbSessions=feedbackSessions().length,fbFacs=feedbackFacIds().size;
+  const fbCourses=feedbackCourseIds().size,fbSessions=feedbackInstances().length,fbFacs=feedbackFacIds().size;
   document.getElementById('sumChips').innerHTML=`
     <div class="qr-chip"><div class="n" style="color:${overall?scoreColor(overall):'#fff'}">${overall?overall.toFixed(2):'—'}/4</div><div class="l">Final quality rating</div></div>
-    <div class="qr-chip"><div class="n">${fbCourses}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${COURSES.length}</span></div><div class="l">Courses with feedback</div></div>
-    <div class="qr-chip"><div class="n">${fbSessions}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${SESSIONS.length}</span></div><div class="l">Sessions with feedback</div></div>
+    <div class="qr-chip"><div class="n">${fbCourses}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${COURSES.length}</span></div><div class="l">PLOs with feedback</div></div>
+    <div class="qr-chip"><div class="n">${fbSessions}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${instanceGroups().length}</span></div><div class="l">Instances with feedback</div></div>
     <div class="qr-chip"><div class="n">${fbFacs}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${FACS.length}</span></div><div class="l">Facilitators rated</div></div>`;
 
   const units=unitList().filter(u=>!SHARED_UNITS.includes(u));
@@ -3682,22 +3683,22 @@ function renderSummary(){
     });
   }
   // PDD row — owns Programme Design & Development (Content), pooled across every session
-  body+=`<tr class="pdd-row"><td class="rowlab" style="border-left:4px solid #00A1A3"><span class="unit-chip" style="background:#00A1A3"></span>PDD</td><td class="rowlab">Content design<span class="sub">all sessions</span></td>`;
+  body+=`<tr class="pdd-row"><td class="rowlab" style="border-left:4px solid #00A1A3"><span class="unit-chip" style="background:#00A1A3"></span>PDD</td><td class="rowlab">Content design<span class="sub">all instances</span></td>`;
   body+=rowCells(PDD_UNIT);
   body+='</tr>';
   // Corporate Services row — owns Venue, Catering, Accommodation, pooled across every session
-  body+=`<tr class="corp-row"><td class="rowlab" style="border-left:4px solid #5b3a99"><span class="unit-chip" style="background:#5b3a99"></span>Corporate Services</td><td class="rowlab">Shared services<span class="sub">all sessions</span></td>`;
+  body+=`<tr class="corp-row"><td class="rowlab" style="border-left:4px solid #5b3a99"><span class="unit-chip" style="background:#5b3a99"></span>Corporate Services</td><td class="rowlab">Shared services<span class="sub">all instances</span></td>`;
   body+=rowCells(CORPORATE_UNIT);
   body+='</tr>';
   body+='</tbody>';
-  const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.length}" style="text-align:right">Weighted mean across every rubric code, every session</td><td class="score" style="background:${overall?scoreColor(overall):'#c8cfda'};font-size:14px">${overall?overall.toFixed(2):'—'}</td></tr></tfoot>`;
+  const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.length}" style="text-align:right">Weighted mean across every rubric code, every instance</td><td class="score" style="background:${overall?scoreColor(overall):'#c8cfda'};font-size:14px">${overall?overall.toFixed(2):'—'}</td></tr></tfoot>`;
   document.getElementById('sumTable').innerHTML=head+body+foot;
   document.getElementById('sumMethodNote').innerHTML=`<b>How ratings are calculated</b>
     <ul style="margin:8px 0 0;padding-left:18px">
-      <li><b>Within a section</b> (e.g. Course &amp; Content), every response to every question in it is pooled together and divided by the total number of responses — this is fully <b>response-weighted</b>: a question answered by 100 people counts proportionally more than one answered by 10, with no distortion from uneven response counts between questions.</li>
+      <li><b>Within a section</b> (e.g. PLO &amp; Content), every response to every question in it is pooled together and divided by the total number of responses — this is fully <b>response-weighted</b>: a question answered by 100 people counts proportionally more than one answered by 10, with no distortion from uneven response counts between questions.</li>
       <li><b>Between sections</b> — combining sections into the four columns below, into a unit's Final Quality Rating, and into the Programme overall figure — each section counts as <b>one equal vote</b>, regardless of how many responses or questions sit behind it. This is a deliberate choice so a heavily-answered section can't dominate a score purely by volume.</li>
-      <li>The four columns are <b>Content</b> (Course &amp; Content), <b>Delivery</b> (Facilitation, Logistics, Digital experience), <b>Support Services</b> (Venue, Catering, Accommodation), and <b>Library Services</b> (EDULIS) — each is the equal-weighted average of its underlying sections, per the rule above.</li>
-      <li><b>Delivery's</b> Facilitation figure is cumulative — the response-weighted average across every facilitation question and every facilitator on sessions hosted by that unit.</li>
+      <li>The four columns are <b>Content</b> (PLO &amp; Content), <b>Delivery</b> (Facilitation, Logistics, Digital experience), <b>Support Services</b> (Venue, Catering, Accommodation), and <b>Library Services</b> (EDULIS) — each is the equal-weighted average of its underlying sections, per the rule above.</li>
+      <li><b>Delivery's</b> Facilitation figure is cumulative — the response-weighted average across every facilitation question and every facilitator on instances hosted by that unit.</li>
       <li><b>Content</b> is reported per unit like every other column, plus pooled once more under <b>PDD</b> as a programme-wide summary.</li>
       <li><b>Support Services</b> is reported per unit like every other column, plus pooled once more under <b>Corporate Services</b> as a programme-wide summary.</li>
       <li><b>Final Quality Rating</b> is the equal-weighted average of every underlying rubric section's score for that row (not the four displayed columns), so it stays accurate regardless of how columns are grouped for display.</li>
