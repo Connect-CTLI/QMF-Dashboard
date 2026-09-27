@@ -161,15 +161,49 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .pin-box input:focus{outline:2px solid var(--brand);outline-offset:1px}
 .pin-actions{display:flex;gap:8px;justify-content:center}
 .pin-error{color:var(--poor);font-size:12px;margin-top:9px;min-height:15px}
-.com-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px}
-.com-count{font-size:12.5px;color:var(--ink-soft);margin:10px 0 14px}
-.com-group{margin-bottom:18px}
-.com-group h3{font-size:14.5px;margin-bottom:2px}
-.com-group .gsub{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
-.com-item{border:1px solid var(--line-soft);border-left:3px solid var(--brand);border-radius:8px;padding:10px 12px;margin-bottom:7px;background:#fff}
-.com-item.facf{border-left-color:#5b7f95}
-.com-item p{margin:0 0 5px;font-size:13.5px;white-space:pre-wrap}
-.com-item .cm{font-size:11px;color:var(--ink-soft);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* comments */
+.btn:disabled{opacity:.5;cursor:default;pointer-events:none}
+.com-layout{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+.com-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.com-head h1{font-size:23px}
+.com-head p{margin:4px 0 0;color:var(--ink-soft);font-size:13.5px;max-width:60ch}
+.com-filters{display:flex;gap:10px;flex-wrap:wrap}
+.com-filters select{min-width:220px;max-width:340px}
+.cgroup{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+.cgroup>header{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,#f4f7f9,#fff)}
+.cgroup h3{font-size:15px;line-height:1.25}
+.cgroup .csub{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:5px;font-size:12px;color:var(--ink-soft)}
+.cgroup .csub .key{font-family:'IBM Plex Mono';font-weight:600;font-size:11.5px;color:#001489;background:#fef6cf;border:1px solid #f9e27a;border-radius:6px;padding:1px 7px}
+.cgroup .ccount{flex:none;text-align:right;line-height:1}
+.cgroup .ccount b{display:block;font-family:'Space Grotesk';font-weight:700;font-size:22px;color:var(--brand)}
+.cgroup .ccount span{font-size:10.5px;color:var(--ink-soft)}
+.clist{list-style:none;margin:0;padding:4px 18px}
+.cmt{display:grid;grid-template-columns:10px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.cmt:last-child{border-bottom:0}
+.cmt .dot{width:8px;height:8px;border-radius:50%;margin-top:7px;background:var(--brand)}
+.cmt .dot.fac{background:var(--gold)}
+.cmt p{margin:0;font-size:14px;line-height:1.55;color:var(--ink);white-space:pre-wrap;max-width:78ch}
+.cmt .cmeta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px;font-size:11.5px;color:var(--ink-soft)}
+.cmt .cmeta .q{color:#5b7f95}
+.tag-contact{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:#fef6cf;color:#001489}
+.com-side{position:sticky;top:78px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.com-side .sh{padding:16px 18px;background:var(--brand);color:#fff}
+.com-side .sh .scope{font-size:12px;color:#dbe3f2;line-height:1.35}
+.com-side .sh .big{font-family:'Space Grotesk';font-weight:700;font-size:34px;line-height:1;margin-top:8px}
+.com-side .sh .big small{font-family:'Inter';font-weight:450;font-size:12.5px;color:#dbe3f2;margin-left:6px}
+.com-side .sb{padding:14px 18px}
+.com-side .row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+.com-side .row:last-of-type{border-bottom:0}
+.com-side .row b{font-family:'IBM Plex Mono';font-weight:600}
+.com-side .row .lg{display:inline-flex;align-items:center;gap:8px}
+.com-side .row .lg i{width:8px;height:8px;border-radius:50%;background:var(--brand)}
+.com-side .row .lg i.fac{background:var(--gold)}
+.com-side .actions{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.com-side .actions .btn{justify-content:center;padding:10px 13px}
+.com-side .fine{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.45}
+.com-empty{background:var(--card);border:1px dashed var(--line);border-radius:var(--r);padding:40px 26px;text-align:center;color:var(--ink-soft)}
+.com-empty h3{color:var(--ink);font-size:16px;margin-bottom:4px}
+@media(max-width:1000px){.com-layout{grid-template-columns:1fr}.com-side{position:static;order:-1}}
 .fac-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
 .fac-toolbar-note{font-size:12.5px;color:var(--ink-soft);background:#fef6cf;border:1px solid #f9e27a;border-radius:9px;padding:8px 12px;flex:1;min-width:280px}
 #reportPrint{padding:30px;-webkit-print-color-adjust:exact;print-color-adjust:exact;
@@ -351,17 +385,27 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 
 
 <section id="v-comments" class="view hidden">
-  <div class="panel">
-    <h2>Participant comments</h2>
-    <div class="psub">Open-ended comments and suggestions from both feedback forms. Pick a PLO and, if you like, one instance. Facilitators are shown by code only.</div>
-    <div class="com-tools">
+  <div class="com-head">
+    <div><h1>Participant comments</h1>
+      <p>What participants wrote in the open questions on both feedback forms. Choose a PLO, then an instance to narrow it down.</p></div>
+    <div class="com-filters">
       <div class="field"><label>PLO</label><select id="cPlo"></select></div>
       <div class="field"><label>Instance</label><select id="cInst"></select></div>
-      <button class="btn primary" id="cCopyAI">Copy AI analysis prompt</button>
-      <button class="btn" id="cDownload">Download comments (CSV)</button>
     </div>
-    <div class="com-count" id="cCount"></div>
+  </div>
+  <div class="com-layout">
     <div id="cList"></div>
+    <aside class="com-side">
+      <div class="sh"><div class="scope" id="cScope">All PLOs</div><div class="big" id="cBig">0<small>comments</small></div></div>
+      <div class="sb">
+        <div id="cStats"></div>
+        <div class="actions">
+          <button class="btn primary" id="cCopyAI">Copy AI analysis prompt</button>
+          <button class="btn" id="cDownload">Download comments (CSV)</button>
+        </div>
+        <div class="fine">The prompt is ready to paste into Claude. Facilitators appear by code only. Contact emails are in the CSV download and nowhere else on this page.</div>
+      </div>
+    </aside>
   </div>
 </section>
 
@@ -4077,23 +4121,42 @@ function renderComments(){
   const all=allComments().map(c=>({...c,...commentPlace(c)}));
   const cids=[...new Set(all.map(c=>c.cid).filter(Boolean))].sort();
   if(cstate.cid&&!cids.includes(cstate.cid))cstate.cid='';
-  const pl=document.getElementById('cPlo');
-  pl.innerHTML=`<option value="">All PLOs</option>`+cids.map(id=>`<option value="${esc(id)}"${id===cstate.cid?' selected':''}>${esc(id)} · ${esc(((CMAP[id]||{}).plo||'').slice(0,60))}</option>`).join('');
-  const groups=instanceGroups().filter(g=>(!cstate.cid||g.cid===cstate.cid)&&all.some(c=>c.iid===g.key));
+  document.getElementById('cPlo').innerHTML=`<option value="">All PLOs</option>`+cids.map(id=>`<option value="${esc(id)}"${id===cstate.cid?' selected':''}>${esc(id)} · ${esc(((CMAP[id]||{}).plo||'').slice(0,60))}</option>`).join('');
+  const gmap={};const groupsAll=instanceGroups();groupsAll.forEach(g=>gmap[g.key]=g);
+  const groups=groupsAll.filter(g=>(!cstate.cid||g.cid===cstate.cid)&&all.some(c=>c.iid===g.key));
   if(cstate.iid&&!groups.some(g=>g.key===cstate.iid))cstate.iid='';
-  const il=document.getElementById('cInst');
+  const il=document.getElementById('cInst');il.disabled=!groups.length;
   il.innerHTML=`<option value="">All instances</option>`+groups.map(g=>`<option value="${esc(g.key)}"${g.key===cstate.iid?' selected':''}>${esc(instOptionLabel(g))}</option>`).join('');
   const list=filteredComments();
-  document.getElementById('cCount').textContent=list.length?`${list.length} comment${list.length!==1?'s':''}`:'';
+  const contacts=[...CONTACTS_MAIN,...CONTACTS_FAC].map(c=>({...c,...commentPlace(c)})).filter(c=>(!cstate.cid||c.cid===cstate.cid)&&(!cstate.iid||c.iid===cstate.iid));
+  const nMain=list.filter(c=>c.form!=='Facilitator form').length,nFac=list.length-nMain;
+  const nContact=list.filter(c=>c.contact&&c.contact.answer==='Yes').length+contacts.length;
+  const nInst=new Set(list.map(c=>c.iid||('?'+c.sk))).size;
+  // side panel
+  let scope='All PLOs';if(cstate.cid){scope=esc((CMAP[cstate.cid]||{}).plo||cstate.cid);if(cstate.iid&&gmap[cstate.iid])scope+=' · '+esc(instOptionLabel(gmap[cstate.iid]));}
+  document.getElementById('cScope').innerHTML=scope;
+  document.getElementById('cBig').innerHTML=`${list.length}<small>comment${list.length!==1?'s':''}</small>`;
+  document.getElementById('cStats').innerHTML=`
+    <div class="row"><span class="lg"><i></i>General feedback form</span><b>${nMain}</b></div>
+    <div class="row"><span class="lg"><i class="fac"></i>Facilitation feedback form</span><b>${nFac}</b></div>
+    <div class="row"><span>Instances with comments</span><b>${nInst}</b></div>
+    <div class="row"><span>Asked for coordinator contact</span><b>${nContact}</b></div>`;
+  document.getElementById('cCopyAI').disabled=!list.length;
+  document.getElementById('cDownload').disabled=!(list.length||contacts.length);
   const el=document.getElementById('cList');
-  if(!all.length){el.innerHTML='<div class="note">No comments yet. They load from both feedback forms once the response sheets are linked on the Setup tab.</div>';return;}
-  if(!list.length){el.innerHTML='<div class="note">No comments for this selection.</div>';return;}
+  if(!all.length){el.innerHTML='<div class="com-empty"><h3>No comments yet</h3>Comments appear here once the two feedback response sheets are linked on the Setup tab.</div>';return;}
+  if(!list.length){el.innerHTML='<div class="com-empty"><h3>Nothing for this selection</h3>No participant left a comment for this PLO or instance.</div>';return;}
+  const showQ=new Set(all.map(c=>c.q)).size>1;
   const by={},order=[];list.forEach(c=>{const k=c.iid||('?'+c.sk);if(!by[k]){by[k]=[];order.push(k);}by[k].push(c);});
-  const gmap={};instanceGroups().forEach(g=>gmap[g.key]=g);
-  el.innerHTML=order.map(k=>{const cs=by[k];const g=gmap[k];const c0=cs[0];const plo=(CMAP[c0.cid]||{}).plo||'Key not in register';
-    const sub=g?`${esc(c0.cid)} · ${esc(instOptionLabel(g))}`:`Session key [${esc(c0.sk)}]`;
-    return `<div class="com-group"><h3>${esc(plo)}</h3><div class="gsub">${sub} · ${cs.length} comment${cs.length!==1?'s':''}</div>${cs.map(c=>
-      `<div class="com-item${c.form==='Facilitator form'?' facf':''}"><p>${esc(maskNames(c.text))}</p><div class="cm"><span>${esc(c.form)}</span><span>[${esc(c.sk)}]</span>${c.fids.length?`<span class="pill fac">${esc(c.fids.join(', '))}</span>`:''}${c.contact&&c.contact.answer==='Yes'?'<span class="pill" style="background:#fef6cf;color:#001489">Wants coordinator contact</span>':''}<span title="${esc(c.q)}">${esc(c.q.length>70?c.q.slice(0,70)+'…':c.q)}</span></div></div>`).join('')}</div>`;}).join('');
+  el.innerHTML=order.map(k=>{const cs=by[k];const g=gmap[k];const c0=cs[0];
+    const plo=(CMAP[c0.cid]||{}).plo||'Session key not in the register';
+    const sub=g?`<span class="key">${esc(c0.cid)}</span><span>${esc(instOptionLabel(g))}</span>${g.mode?`<span class="pill mode">${esc(g.mode)}</span>`:''}`:`<span class="key">[${esc(c0.sk)}]</span>`;
+    return `<article class="cgroup"><header><div><h3>${esc(plo)}</h3><div class="csub">${sub}</div></div>
+      <div class="ccount"><b>${cs.length}</b><span>comment${cs.length!==1?'s':''}</span></div></header>
+      <ul class="clist">${cs.map(c=>{const fac=c.form==='Facilitator form';
+        const meta=[fac?'Facilitation form':'General form'];
+        return `<li class="cmt"><span class="dot${fac?' fac':''}"></span><div><p>${esc(maskNames(c.text))}</p>
+          <div class="cmeta"><span>${meta.join('')}</span>${c.fids.length?`<span class="pill fac">${esc(c.fids.join(', '))}</span>`:''}${c.contact&&c.contact.answer==='Yes'?'<span class="tag-contact">Wants coordinator contact</span>':''}${showQ?`<span class="q" title="${esc(c.q)}">· ${esc(c.q.length>60?c.q.slice(0,60)+'…':c.q)}</span>`:''}</div></div></li>`;}).join('')}</ul></article>`;}).join('');
 }
 function commentScopeText(){const c=CMAP[cstate.cid];
   if(!cstate.cid)return 'all CTLI professional learning opportunities (PLOs) with feedback';
