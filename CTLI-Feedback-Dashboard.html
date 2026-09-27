@@ -185,8 +185,11 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .qhead .dot.fac{background:var(--gold)}
 .qhead h4{font-family:'Space Grotesk';font-size:14.5px;font-weight:600;color:var(--brand);line-height:1.35}
 .qhead .qf{display:block;font-family:'Inter';font-weight:450;font-size:11px;color:var(--ink-soft);margin-top:2px}
+.qhead .qf .fu{font-weight:600;color:var(--ink)}
+.cmt .ans{font-size:11.5px;color:var(--ink-soft);margin-bottom:3px}
+.cmt .ans b{color:var(--brand);font-weight:600}
 .qblock .clist{list-style:none;margin:0 0 0 18px;padding:0}
-.qblock .cmt{grid-template-columns:1fr;padding:9px 0 9px 12px;border-bottom:0;border-left:2px solid var(--line-soft);margin-bottom:6px}
+.qblock .cmt{grid-template-columns:1fr;gap:3px;padding:9px 0 9px 12px;border-bottom:0;border-left:2px solid var(--line-soft);margin-bottom:6px}
 .cmt{display:grid;grid-template-columns:10px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
 .cmt:last-child{border-bottom:0}
 .cmt .dot{width:8px;height:8px;border-radius:50%;margin-top:7px;background:var(--brand)}
@@ -4088,12 +4091,12 @@ const COMMENT_SKIP=/timestamp|e-?mail|\bname\b|surname|persal|id number|identity
 const COMMENT_HINT=/comment|suggest|recommend|additional|improve|anything else|feedback|remark|share|explain|describe|why|what (did|would|could)/;
 const COMMENT_JUNK=/^(n\/?a|none|nil|no|nope|nothing|no comments?|not applicable|ok|okay|-+|\.+|x)$/i;
 function commentCols(head,body,skip){const sk=new Set(skip.filter(x=>x!=null&&x>=0));const cols=[];
-  head.forEach((h,idx)=>{if(sk.has(idx))return;const H=norm(h);if(!H||(COMMENT_SKIP.test(H)&&!COMMENT_HINT.test(H)))return;
+  head.forEach((h,idx)=>{if(sk.has(idx))return;const H=norm(h);if(!H||(COMMENT_SKIP.test(H)&&!COMMENT_HINT.test(H)&&!FOLLOW_UP.test(H)))return;
     const vals=body.map(r=>String(r[idx]||'').trim()).filter(Boolean);if(!vals.length)return;
     if(vals.every(v=>!isNaN(scoreFromCell(v))))return; // a rating column the rubric does not know
     const free=vals.filter(v=>v.length>=20&&/\s/.test(v)).length/vals.length;
     const distinct=new Set(vals.map(norm)).size/vals.length;
-    if(COMMENT_HINT.test(H)||(vals.length>=3&&free>=0.4&&distinct>=0.6))cols.push(idx);});
+    if(COMMENT_HINT.test(H)||FOLLOW_UP.test(H)||(vals.length>=3&&free>=0.4&&distinct>=0.6))cols.push(idx);});
   return cols;}
 /* The "would you like a coordinator to contact you" question and the email address that goes
    with it. The email is kept only when the participant said yes, and it never shows on screen
@@ -4107,9 +4110,15 @@ function contactCols(head){let consent=-1,email=-1;const H=head.map(norm);
 function contactOf(row,cc){if(cc.consent<0)return null;const a=String(row[cc.consent]||'').trim();
   const wants=/^(yes|y|ja|ewe)\b/i.test(a);
   return {answer:a?(wants?'Yes':(/^(no|n|nee|hayi)\b/i.test(a)?'No':a)):'',email:wants&&cc.email>=0?String(row[cc.email]||'').trim():''};}
+/* A question like "Clarify your answer above" only makes sense next to the question before it,
+   so it is linked to the column immediately to its left, along with how this person answered it. */
+const FOLLOW_UP=/(answer|response|rating|choice) above|clarify|elaborate|explain (your|why)|please explain|if (yes|no|not|so)\b|please specify|motivate/;
+function parentCol(head,idx){return idx>0&&FOLLOW_UP.test(norm(head[idx]))?idx-1:-1;}
 function collectComments(arr,contacts,row,head,cols,cc,sk,form,fids){const contact=contactOf(row,cc);let added=0;
   for(const idx of cols){const v=String(row[idx]||'').trim();if(v.length<3||COMMENT_JUNK.test(v))continue;
-    arr.push({sk,form,q:String(head[idx]||'').trim(),text:v,fids:fids||[],contact});added++;}
+    const pc=parentCol(head,idx);
+    arr.push({sk,form,col:idx,q:String(head[idx]||'').trim(),parentQ:pc>=0?String(head[pc]||'').trim():'',parentA:pc>=0?String(row[pc]||'').trim():'',
+      text:v,fids:fids||[],contact});added++;}
   if(!added&&contact&&contact.answer==='Yes')contacts.push({sk,form,q:'',text:'',fids:fids||[],contact});}
 function allComments(){return [...COMMENTS_MAIN,...COMMENTS_FAC];}
 /* Facilitator names in comments become their code (full name first, then a first name or
@@ -4161,10 +4170,10 @@ function renderComments(){
     const sub=g?`<span class="key">${esc(c0.cid)}</span><span>${esc(instOptionLabel(g))}</span>${g.mode?`<span class="pill mode">${esc(g.mode)}</span>`:''}`:`<span class="key">[${esc(c0.sk)}]</span>`;
     return `<article class="cgroup"><header><div><h3>${esc(plo)}</h3><div class="csub">${sub}</div></div>
       <div class="ccount"><b>${cs.length}</b><span>comment${cs.length!==1?'s':''}</span></div></header>
-      <div class="cbody">${(function(){const qb={},qo=[];cs.forEach(c=>{const qk=c.form+'|'+c.q;if(!qb[qk]){qb[qk]=[];qo.push(qk);}qb[qk].push(c);});
+      <div class="cbody">${(function(){const qb={},qo=[];cs.forEach(c=>{const qk=c.form+'|'+c.col+'|'+c.q;if(!qb[qk]){qb[qk]=[];qo.push(qk);}qb[qk].push(c);});
         return qo.map(qk=>{const items=qb[qk];const fac=items[0].form==='Facilitator form';
-          return `<section class="qblock"><div class="qhead"><span class="dot${fac?' fac':''}"></span><h4>${esc(items[0].q||'Comment')}<span class="qf">${fac?'Facilitation feedback form':'General feedback form'} · ${items.length} response${items.length!==1?'s':''}</span></h4></div>
-            <ul class="clist">${items.map(c=>`<li class="cmt"><p>${esc(maskNames(c.text))}</p>${(c.fids.length||(c.contact&&c.contact.answer==='Yes'))?`<div class="cmeta">${c.fids.length?`<span class="pill fac">${esc(c.fids.join(', '))}</span>`:''}${c.contact&&c.contact.answer==='Yes'?'<span class="tag-contact">Wants coordinator contact</span>':''}</div>`:''}</li>`).join('')}</ul></section>`;}).join('');})()}</div></article>`;}).join('');
+          return `<section class="qblock"><div class="qhead"><span class="dot${fac?' fac':''}"></span><h4>${esc(items[0].parentQ||items[0].q||'Comment')}<span class="qf">${items[0].parentQ?`<b class="fu">Follow-up: ${esc(items[0].q)}</b> · `:''}${fac?'Facilitation feedback form':'General feedback form'} · ${items.length} response${items.length!==1?'s':''}</span></h4></div>
+            <ul class="clist">${items.map(c=>`<li class="cmt">${c.parentA?`<div class="ans">Answered: <b>${esc(c.parentA)}</b></div>`:''}<p>${esc(maskNames(c.text))}</p>${(c.fids.length||(c.contact&&c.contact.answer==='Yes'))?`<div class="cmeta">${c.fids.length?`<span class="pill fac">${esc(c.fids.join(', '))}</span>`:''}${c.contact&&c.contact.answer==='Yes'?'<span class="tag-contact">Wants coordinator contact</span>':''}</div>`:''}</li>`).join('')}</ul></section>`;}).join('');})()}</div></article>`;}).join('');
 }
 function commentScopeText(){const c=CMAP[cstate.cid];
   if(!cstate.cid)return 'all CTLI professional learning opportunities (PLOs) with feedback';
@@ -4172,13 +4181,13 @@ function commentScopeText(){const c=CMAP[cstate.cid];
   if(cstate.iid){const g=instanceGroups().find(x=>x.key===cstate.iid);if(g)s+=`, instance ${instOptionLabel(g)}`;}
   return s;}
 function buildAIPrompt(){const raw=filteredComments();const gk=c=>c.iid||('?'+c.sk);const ord={};raw.forEach(c=>{if(!(gk(c) in ord))ord[gk(c)]=Object.keys(ord).length;});
-  const list=raw.map((c,i)=>({c,i})).sort((x,y)=>(ord[gk(x.c)]-ord[gk(y.c)])||(x.c.form===y.c.form?0:(x.c.form==='Main form'?-1:1))||(x.i-y.i)).map(x=>x.c);
+  const list=raw.map((c,i)=>({c,i})).sort((x,y)=>(ord[gk(x.c)]-ord[gk(y.c)])||(x.c.form===y.c.form?0:(x.c.form==='Main form'?-1:1))||((x.c.col||0)-(y.c.col||0))||(x.i-y.i)).map(x=>x.c);
   const lines=[];let last='',lastQ='';
   list.forEach(c=>{const g=c.iid?instanceGroups().find(x=>x.key===c.iid):null;
     const head=g?`${(CMAP[c.cid]||{}).plo||c.cid} | ${instOptionLabel(g)}`:`Session key [${c.sk}]`;
     if(head!==last){lines.push('',`## ${head}`);last=head;lastQ='';}
-    const qh=`${c.form==='Facilitator form'?'Facilitation feedback form':'General feedback form'}: ${c.q||'Comment'}`;if(qh!==lastQ){lines.push(`### ${qh}`);lastQ=qh;}
-    lines.push(`- ${maskNames(c.text).replace(/\s+/g,' ')}${c.fids.length?' (about '+c.fids.join(', ')+')':''}`);});
+    const qh=`${c.form==='Facilitator form'?'Facilitation feedback form':'General feedback form'}: ${c.parentQ?c.parentQ+' (follow-up question: '+c.q+')':(c.q||'Comment')}`;if(qh!==lastQ){lines.push(`### ${qh}`);lastQ=qh;}
+    lines.push(`- ${c.parentA?'[Answered: '+c.parentA+'] ':''}${maskNames(c.text).replace(/\s+/g,' ')}${c.fids.length?' (about '+c.fids.join(', ')+')':''}`);});
   return `You are helping the Cape Teaching and Leadership Institute (CTLI), part of the Western Cape Education Department in South Africa, analyse participant feedback on professional learning for teachers and school leaders.
 
 Below are ${list.length} open-ended comments from participants' feedback forms for ${commentScopeText()}. Facilitators are referred to by code (for example F03). Keep them as codes and do not guess who they are.
@@ -4204,9 +4213,9 @@ function csvCell(v){const s=String(v==null?'':v);return /[",\n]/.test(s)?'"'+s.r
 function downloadComments(){const extra=[...CONTACTS_MAIN,...CONTACTS_FAC].map(c=>({...c,...commentPlace(c)}))
     .filter(c=>(!cstate.cid||c.cid===cstate.cid)&&(!cstate.iid||c.iid===cstate.iid));
   const list=[...filteredComments(),...extra];if(!list.length)return;
-  const rows=[['PLO ID','PLO','Instance','Date','Session key','Form','Facilitator codes','Question','Comment','Wants coordinator contact','Email','Theme']];
+  const rows=[['PLO ID','PLO','Instance','Date','Session key','Form','Facilitator codes','Question','Follow-up to','Their answer to that question','Comment','Wants coordinator contact','Email','Theme']];
   const gmap={};instanceGroups().forEach(g=>gmap[g.key]=g);
-  list.forEach(c=>{const g=gmap[c.iid];rows.push([c.cid,(CMAP[c.cid]||{}).plo||'',g?(g.iid||''):'',g&&g.date?g.date:'',c.sk,c.form,c.fids.join(', '),c.q,maskNames(c.text),c.contact?c.contact.answer:'',c.contact?c.contact.email:'','']);});
+  list.forEach(c=>{const g=gmap[c.iid];rows.push([c.cid,(CMAP[c.cid]||{}).plo||'',g?(g.iid||''):'',g&&g.date?g.date:'',c.sk,c.form,c.fids.join(', '),c.q,c.parentQ||'',c.parentA||'',maskNames(c.text),c.contact?c.contact.answer:'',c.contact?c.contact.email:'','']);});
   download(`ctli-comments${cstate.cid?'-'+cstate.cid:''}.csv`,'\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv');}
 function mergeResponses(){RESPONSES=[...RESPONSES_MAIN,...RESPONSES_FAC];LIVE=RESPONSES.length>0;
   aggregate();diagnose();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
