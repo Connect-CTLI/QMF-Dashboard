@@ -186,6 +186,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .qhead h4{font-family:'Space Grotesk';font-size:14.5px;font-weight:600;color:var(--brand);line-height:1.35}
 .qhead .qf{display:block;font-family:'Inter';font-weight:450;font-size:11px;color:var(--ink-soft);margin-top:2px}
 .qhead .qf .fu{font-weight:600;color:var(--ink)}
+.qblock .syn{margin:2px 0 8px 18px;padding:7px 11px;background:#eef2f5;border-radius:8px;font-size:12.5px;color:var(--ink)}
 .cmt .ans{font-size:11.5px;color:var(--ink-soft);margin-bottom:3px}
 .cmt .ans b{color:var(--brand);font-weight:600}
 .qblock .clist{list-style:none;margin:0 0 0 18px;padding:0}
@@ -3327,7 +3328,7 @@ let COORDS=(window.__MODEL__.coordinators||[]).map(c=>({...c}));
 let CMAP={},FMAP={},COORDMAP={};
 let RESPONSES_MAIN=[]; let RESPONSES_FAC=[]; let INSTANCES=[],SOIS=[];let IMAP={},SOIMAP={};
 let RESPONSES=[]; let LIVE=false;
-let COMMENTS_MAIN=[],COMMENTS_FAC=[],CONTACTS_MAIN=[],CONTACTS_FAC=[];const cstate={cid:'',iid:''};
+let COMMENTS_MAIN=[],COMMENTS_FAC=[],CONTACTS_MAIN=[],CONTACTS_FAC=[],PARENTS_MAIN=[],PARENTS_FAC=[];const cstate={cid:'',iid:''};
 let AGG={}; // sessionKey -> {n, items{}, facItems:{fid:{code:{sum,n}}}, facN:{fid}}
 let sel={session:null,course:null,fac:null,soi:null,catSub:'sessions'};
 const state={view:'summary',term:'',sub:'',unit:'',soi:'',month:'',fac:'',q:'',sort:'rating'};
@@ -4005,7 +4006,7 @@ function parseResponseCSV(text){const rows=parseCSV(text);if(rows.length<2)throw
   const keyCol=findKeyCol(head,body,[]);
   const out=[];let keyed=0;
   const cc=contactCols(head);
-  const cCols=commentCols(head,body,[keyCol,cc.consent,cc.email,...Object.keys(codeCols).map(Number)]);COMMENTS_MAIN=[];CONTACTS_MAIN=[];
+  const cCols=commentCols(head,body,[keyCol,cc.consent,cc.email,...Object.keys(codeCols).map(Number)]);COMMENTS_MAIN=[];CONTACTS_MAIN=[];PARENTS_MAIN=[];
   if(keyCol>=0)for(const r of body){const m=(r[keyCol]||'').match(KEY_PATTERN);if(!m)continue;keyed++;
     collectComments(COMMENTS_MAIN,CONTACTS_MAIN,r,head,cCols,cc,m[1],'Main form',[]);
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
@@ -4050,7 +4051,7 @@ function parseFacilitatorCSV(text){const rows=parseCSV(text);if(rows.length<2)th
   const keyCol=findKeyCol(head,body,facCol>=0?[facCol]:[]);
   const out=[];let keyed=0;
   const cc=contactCols(head);
-  const cCols=commentCols(head,body,[keyCol,facCol,cc.consent,cc.email,...Object.keys(codeCols).map(Number)]);COMMENTS_FAC=[];CONTACTS_FAC=[];
+  const cCols=commentCols(head,body,[keyCol,facCol,cc.consent,cc.email,...Object.keys(codeCols).map(Number)]);COMMENTS_FAC=[];CONTACTS_FAC=[];PARENTS_FAC=[];
   if(keyCol>=0)for(const r of body){
     const m=(r[keyCol]||'').match(KEY_PATTERN);if(!m)continue;const sk=m[1];keyed++;
     collectComments(COMMENTS_FAC,CONTACTS_FAC,r,head,cCols,cc,sk,'Facilitator form',facCol>=0?extractFacIds(r[facCol]):[]);
@@ -4115,11 +4116,22 @@ function contactOf(row,cc){if(cc.consent<0)return null;const a=String(row[cc.con
 const FOLLOW_UP=/(answer|response|rating|choice) above|clarify|elaborate|explain (your|why)|please explain|if (yes|no|not|so)\b|please specify|motivate/;
 function parentCol(head,idx){return idx>0&&FOLLOW_UP.test(norm(head[idx]))?idx-1:-1;}
 function collectComments(arr,contacts,row,head,cols,cc,sk,form,fids){const contact=contactOf(row,cc);let added=0;
+  const parents=form==='Main form'?PARENTS_MAIN:PARENTS_FAC;
+  for(const idx of cols){const pc0=parentCol(head,idx);if(pc0>=0){const a=String(row[pc0]||'').trim();if(a)parents.push({sk,form,col:idx,answer:a});}}
   for(const idx of cols){const v=String(row[idx]||'').trim();if(v.length<3||COMMENT_JUNK.test(v))continue;
     const pc=parentCol(head,idx);
     arr.push({sk,form,col:idx,q:String(head[idx]||'').trim(),parentQ:pc>=0?String(head[pc]||'').trim():'',parentA:pc>=0?String(row[pc]||'').trim():'',
       text:v,fids:fids||[],contact});added++;}
   if(!added&&contact&&contact.answer==='Yes')contacts.push({sk,form,q:'',text:'',fids:fids||[],contact});}
+/* "Of 5 responses, 2 indicated Yes and 3 indicated No" for the question a follow-up refers to,
+   counted across everyone in that instance who answered it. */
+function followSynopsis(form,col,groupKey){const counts={};let n=0;
+  [...PARENTS_MAIN,...PARENTS_FAC].forEach(r=>{if(r.form!==form||r.col!==col)return;const pl=commentPlace(r);
+    if((pl.iid||('?'+r.sk))!==groupKey)return;counts[r.answer]=(counts[r.answer]||0)+1;n++;});
+  if(!n)return '';
+  const parts=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([a,c])=>`${c} indicated ${a}`);
+  const list=parts.length>1?parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1]:parts[0];
+  return `Of ${n} response${n!==1?'s':''}, ${list}.`;}
 function allComments(){return [...COMMENTS_MAIN,...COMMENTS_FAC];}
 /* Facilitator names in comments become their code (full name first, then a first name or
    surname on its own when no other facilitator shares it). */
@@ -4172,8 +4184,8 @@ function renderComments(){
       <div class="ccount"><b>${cs.length}</b><span>comment${cs.length!==1?'s':''}</span></div></header>
       <div class="cbody">${(function(){const qb={},qo=[];cs.forEach(c=>{const qk=c.form+'|'+c.col+'|'+c.q;if(!qb[qk]){qb[qk]=[];qo.push(qk);}qb[qk].push(c);});
         return qo.map(qk=>{const items=qb[qk];const fac=items[0].form==='Facilitator form';
-          return `<section class="qblock"><div class="qhead"><span class="dot${fac?' fac':''}"></span><h4>${esc(items[0].parentQ||items[0].q||'Comment')}<span class="qf">${items[0].parentQ?`<b class="fu">Follow-up: ${esc(items[0].q)}</b> · `:''}${fac?'Facilitation feedback form':'General feedback form'} · ${items.length} response${items.length!==1?'s':''}</span></h4></div>
-            <ul class="clist">${items.map(c=>`<li class="cmt">${c.parentA?`<div class="ans">Answered: <b>${esc(c.parentA)}</b></div>`:''}<p>${esc(maskNames(c.text))}</p>${(c.fids.length||(c.contact&&c.contact.answer==='Yes'))?`<div class="cmeta">${c.fids.length?`<span class="pill fac">${esc(c.fids.join(', '))}</span>`:''}${c.contact&&c.contact.answer==='Yes'?'<span class="tag-contact">Wants coordinator contact</span>':''}</div>`:''}</li>`).join('')}</ul></section>`;}).join('');})()}</div></article>`;}).join('');
+          return `<section class="qblock"><div class="qhead"><span class="dot${fac?' fac':''}"></span><h4>${esc(items[0].parentQ||items[0].q||'Comment')}<span class="qf">${items[0].parentQ?`<b class="fu">Follow-up: ${esc(items[0].q)}</b> · `:''}${fac?'Facilitation feedback form':'General feedback form'} · ${items.length} comment${items.length!==1?'s':''}</span></h4></div>${items[0].parentQ?(function(){const s=followSynopsis(items[0].form,items[0].col,k);return s?`<div class="syn">${esc(s)}</div>`:'';})():''}
+            <ul class="clist">${items.map(c=>`<li class="cmt"><p>${esc(maskNames(c.text))}</p>${(c.fids.length||(c.contact&&c.contact.answer==='Yes'))?`<div class="cmeta">${c.fids.length?`<span class="pill fac">${esc(c.fids.join(', '))}</span>`:''}${c.contact&&c.contact.answer==='Yes'?'<span class="tag-contact">Wants coordinator contact</span>':''}</div>`:''}</li>`).join('')}</ul></section>`;}).join('');})()}</div></article>`;}).join('');
 }
 function commentScopeText(){const c=CMAP[cstate.cid];
   if(!cstate.cid)return 'all CTLI professional learning opportunities (PLOs) with feedback';
@@ -4186,8 +4198,8 @@ function buildAIPrompt(){const raw=filteredComments();const gk=c=>c.iid||('?'+c.
   list.forEach(c=>{const g=c.iid?instanceGroups().find(x=>x.key===c.iid):null;
     const head=g?`${(CMAP[c.cid]||{}).plo||c.cid} | ${instOptionLabel(g)}`:`Session key [${c.sk}]`;
     if(head!==last){lines.push('',`## ${head}`);last=head;lastQ='';}
-    const qh=`${c.form==='Facilitator form'?'Facilitation feedback form':'General feedback form'}: ${c.parentQ?c.parentQ+' (follow-up question: '+c.q+')':(c.q||'Comment')}`;if(qh!==lastQ){lines.push(`### ${qh}`);lastQ=qh;}
-    lines.push(`- ${c.parentA?'[Answered: '+c.parentA+'] ':''}${maskNames(c.text).replace(/\s+/g,' ')}${c.fids.length?' (about '+c.fids.join(', ')+')':''}`);});
+    const qh=`${c.form==='Facilitator form'?'Facilitation feedback form':'General feedback form'}: ${c.parentQ?c.parentQ+' (follow-up question: '+c.q+')':(c.q||'Comment')}`;if(qh!==lastQ){lines.push(`### ${qh}`);lastQ=qh;if(c.parentQ){const s=followSynopsis(c.form,c.col,c.iid||('?'+c.sk));if(s)lines.push(s);}}
+    lines.push(`- ${maskNames(c.text).replace(/\s+/g,' ')}${c.fids.length?' (about '+c.fids.join(', ')+')':''}`);});
   return `You are helping the Cape Teaching and Leadership Institute (CTLI), part of the Western Cape Education Department in South Africa, analyse participant feedback on professional learning for teachers and school leaders.
 
 Below are ${list.length} open-ended comments from participants' feedback forms for ${commentScopeText()}. Facilitators are referred to by code (for example F03). Keep them as codes and do not guess who they are.
