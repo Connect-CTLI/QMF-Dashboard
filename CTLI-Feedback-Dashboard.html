@@ -146,6 +146,39 @@ table.sum td.rowlab .sub{display:block;font-size:10.5px;color:var(--ink-soft);fo
 table.sum td.na{color:#aabbc8}
 table.sum td.score{font-family:'IBM Plex Mono';font-weight:600;color:#fff;border-radius:6px}
 table.sum tr.corp-row td{background:#f4f7f9}
+table.sum tr.urow{cursor:pointer}
+table.sum tr.urow:hover td.rowlab.ucell{color:var(--brand)}
+table.sum tr.urow.open td.ucell{color:var(--brand);font-weight:600}
+table.sum td.ucell .chev{display:inline-block;width:14px;color:#5b7f95;transition:transform .15s;font-weight:700}
+table.sum tr.urow.open td.ucell .chev{transform:rotate(90deg)}
+table.sum tr.udetail>td{background:#eef2f5;text-align:left;padding:16px 18px 18px;border-bottom:2px solid var(--line)}
+.ud-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.ud-head h3{font-size:15px}
+.ud-head span{font-size:12px;color:var(--ink-soft)}
+.secgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.seccard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.seccard.wide{grid-column:1/-1}
+.seccard .st{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.seccard .st h4{font-size:13.5px;line-height:1.25}
+.seccard .st h4 small{display:block;font-family:'Inter';font-weight:450;font-size:11px;color:var(--ink-soft);margin-top:2px}
+.seccard .sv{font-family:'Space Grotesk';font-weight:700;font-size:20px;line-height:1}
+.seccard .delta{font-size:11.5px;color:var(--ink-soft);margin-top:6px}
+.mbar{position:relative;height:8px;background:var(--line-soft);border-radius:5px;margin-top:9px}
+.mbar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.mbar b{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px}
+.seccard .acts{display:flex;gap:6px;margin-top:10px}
+.seccard .acts button{border:1px solid var(--line);background:#fff;border-radius:7px;font-size:11.5px;padding:4px 9px;color:var(--ink-soft)}
+.seccard .acts button:hover,.seccard .acts button[aria-pressed=true]{border-color:var(--brand);color:var(--brand)}
+.seccard .acts button[aria-pressed=true]{background:#e6e9f5}
+.qrows{margin-top:12px;border-top:1px solid var(--line-soft);padding-top:8px}
+.qrows h5{font-family:'Space Grotesk';font-size:11.5px;font-weight:600;color:var(--brand);margin:4px 0 6px}
+.qrow{display:grid;grid-template-columns:minmax(0,1fr) 180px 36px;gap:12px;align-items:center;font-size:12.5px;padding:4px 0}
+.qrow .ql{color:var(--ink-soft)}.qrow .ql code{font-family:'IBM Plex Mono';font-size:11px;color:#5b7f95;margin-right:6px}
+.qrow .qv{font-family:'IBM Plex Mono';font-weight:600;font-size:12px;text-align:right}
+.qrow .mbar{margin-top:0}
+.qrow.me .ql{color:var(--ink);font-weight:600}
+.legend .avgmark{display:inline-block;width:2px;height:14px;background:var(--ink)}
+@media(max-width:700px){.qrow{grid-template-columns:minmax(0,1fr) 90px 34px}}
 table.sum tr.corp-row td.rowlab{color:#5b7f95;font-weight:600}
 table.sum tr.pdd-row td{background:#eef2f5}
 table.sum tr.pdd-row td.rowlab{color:#5b7f95;font-weight:600}
@@ -320,7 +353,6 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
     <button class="tab" role="tab" data-view="comments" aria-selected="false">Comments</button>
     <button class="tab" role="tab" data-view="sois" aria-selected="false">SOIs</button>
     <button class="tab" role="tab" data-view="facilitators" aria-selected="false">Facilitators 🔒</button>
-    <button class="tab" role="tab" data-view="rubric" aria-selected="false">Rubric</button>
     <button class="tab" role="tab" data-view="catalogue" aria-selected="false">Catalogue 🔒</button>
     <button class="tab" role="tab" data-view="setup" aria-selected="false">Setup 🔒</button>
   </nav>
@@ -338,8 +370,9 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   </div>
   <div class="panel">
     <h2>Rating scale by sub-directorate and unit</h2>
-    <div class="psub">Ratings grouped into Content, Delivery, Support Services and Library Services, rolled up by hosting unit. Individual rubric codes (C1, D2.1, etc.) are on the Rubric tab. Content and logistics also get programme-wide summaries under <b>PDD</b> and <b>Corporate Services</b> respectively, on top of each unit's own scores.</div>
+    <div class="psub">Ratings grouped into Content, Delivery, Support Services and Library Services, rolled up by hosting unit. <b>Click any unit</b> to see its eight rubric sections, then open a section to see each question or compare it across units. Content and logistics also get programme-wide summaries under <b>PDD</b> and <b>Corporate Services</b> respectively, on top of each unit's own scores.</div>
     <div class="sum-scroll"><table class="sum" id="sumTable"></table></div>
+    <div class="legend"><span class="sw"><i style="background:var(--poor)"></i>1.0 to 2.0</span><span class="sw"><i style="background:var(--mid)"></i>2.1 to 3.0</span><span class="sw"><i style="background:var(--good)"></i>3.1 to 4.0</span><span class="sw"><b class="avgmark"></b>Programme average</span></div>
     <div class="note" id="sumMethodNote"></div>
   </div>
 </section>
@@ -428,16 +461,6 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   </div>
 </section>
 
-<section id="v-rubric" class="view hidden">
-  <div class="panel"><h2>Rubric heatmap</h2>
-    <div class="psub">Average score per rubric section across hosting units. Deeper red is weaker, deeper green stronger.</div>
-    <div class="heat-scroll"><table class="heat" id="heat"></table></div>
-    <div class="legend"><span class="sw"><i style="background:var(--poor)"></i>1.0–2.0</span>
-      <span class="sw"><i style="background:var(--mid)"></i>2.1–3.0</span>
-      <span class="sw"><i style="background:var(--good)"></i>3.1–4.0</span>
-      <span style="margin-left:auto" class="mono" id="heatMeta"></span></div>
-  </div>
-</section>
 
 <section id="v-catalogue" class="view hidden">
   <div class="panel">
@@ -3728,6 +3751,32 @@ function groupAvgForUnit(u,g){
   const vals=RUBRIC.filter(s=>s.group===g).map(sec=>sectionAvgForUnit(u,sec)).filter(v=>v!=null);
   return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
 }
+/* ---- unit drill-down (replaces the old Rubric heatmap) ---- */
+const sumSel={unit:null,q:{},cmp:{}};
+function sessionsForUnit(u){return (u===CORPORATE_UNIT||u===PDD_UNIT)?SESSIONS:SESSIONS.filter(s=>(CMAP[s.cid]||{}).unit===u);}
+function sectionsForUnit(u){return u===PDD_UNIT?RUBRIC.filter(s=>s.group==='design'):u===CORPORATE_UNIT?RUBRIC.filter(s=>s.group==='corporate'):RUBRIC;}
+function itemAvgFor(sessList,code){const fac=/^D1/.test(code);let sum=0,n=0;
+  for(const s of sessList){const a=AGG[s.sid];if(!a)continue;
+    if(fac){for(const fid of Object.keys(a.facItems)){const it=a.facItems[fid][code];if(it){sum+=it.sum;n+=it.n;}}}
+    else{const it=a.items[code];if(it){sum+=it.sum;n+=it.n;}}}
+  return n?sum/n:null;}
+function meterBar(v,avg){return `<div class="mbar"><i style="width:${v!=null?v/4*100:0}%;background:${scoreColor(v)}"></i>${avg!=null?`<b style="left:${avg/4*100}%" title="Programme average ${avg.toFixed(2)}"></b>`:''}</div>`;}
+function unitDetailHtml(u){
+  const ss=sessionsForUnit(u);const label=u===PDD_UNIT?'PDD · content design across all instances':u===CORPORATE_UNIT?'Corporate Services · shared services across all instances':`${u}${UNIT_FULLNAME[u]?' · '+UNIT_FULLNAME[u]:''}`;
+  const regular=unitList().filter(x=>!SHARED_UNITS.includes(x));
+  const cards=sectionsForUnit(u).map(sec=>{const v=sectionAvgForUnit(u,sec);const avg=sectionAvgForSessions(SESSIONS,sec);
+    const qOpen=!!sumSel.q[sec.code],cOpen=!!sumSel.cmp[sec.code];
+    let delta='No ratings yet';
+    if(v!=null&&avg!=null){const d=v-avg;delta=Math.abs(d)<0.05?'In line with the programme average':`${Math.abs(d).toFixed(2)} ${d>0?'above':'below'} the programme average (${avg.toFixed(2)})`;}
+    let extra='';
+    if(qOpen)extra+=`<div class="qrows"><h5>Questions</h5>${sec.items.map(([code,lab])=>{const qv=itemAvgFor(ss,code),qa=itemAvgFor(SESSIONS,code);
+      return `<div class="qrow"><div class="ql"><code>${esc(code)}</code>${esc(lab)}</div>${meterBar(qv,qa)}<div class="qv" style="color:${qv!=null?scoreInk(qv):'#aabbc8'}">${qv!=null?qv.toFixed(2):'n/a'}</div></div>`;}).join('')}</div>`;
+    if(cOpen)extra+=`<div class="qrows"><h5>${esc(sec.name)} across units</h5>${regular.map(x=>{const xv=unitSectionAvg(x,sec);
+      return `<div class="qrow${x===u?' me':''}"><div class="ql">${esc(x)}${UNIT_FULLNAME[x]?' · '+esc(UNIT_FULLNAME[x]):''}</div>${meterBar(xv,avg)}<div class="qv" style="color:${xv!=null?scoreInk(xv):'#aabbc8'}">${xv!=null?xv.toFixed(2):'n/a'}</div></div>`;}).join('')}</div>`;
+    return `<div class="seccard${(qOpen||cOpen)?' wide':''}"><div class="st"><h4>${esc(sec.name)}<small>${esc(GROUP_LABEL[sec.group]||'')} · ${sec.items.length} question${sec.items.length!==1?'s':''}</small></h4>
+      <div class="sv" style="color:${v!=null?scoreInk(v):'#aabbc8'}">${v!=null?v.toFixed(2):'n/a'}</div></div>${meterBar(v,avg)}<div class="delta">${delta}</div>
+      <div class="acts"><button data-secq="${sec.code}" aria-pressed="${qOpen}">Questions</button><button data-seccmp="${sec.code}" aria-pressed="${cOpen}">Compare units</button></div>${extra}</div>`;}).join('');
+  return `<div class="ud-head"><h3>${esc(label)}</h3><span>Section scores out of 4 · the dark line on each bar is the programme average</span></div><div class="secgrid">${cards}</div>`;}
 function renderSummary(){
   const banner=document.getElementById('ctliBanner');
   if(banner&&!banner.style.backgroundImage)banner.style.backgroundImage=`url(${BANNER_IMG})`;
@@ -3763,21 +3812,24 @@ function renderSummary(){
   let body='<tbody>';
   for(const sub of subs){
     bySub[sub].forEach((u,i)=>{
-      body+='<tr>';
-      if(i===0)body+=`<td class="rowlab" rowspan="${bySub[sub].length}" style="border-left:4px solid ${subColor[sub]}"${subTitle(sub)}><span class="unit-chip" style="background:${subColor[sub]}"></span>${esc(sub)}<span class="sub">${SUB_FULLNAME[sub]?esc(SUB_FULLNAME[sub])+' · ':''}${bySub[sub].length} unit${bySub[sub].length!==1?'s':''}</span></td>`;
-      body+=`<td class="rowlab"${unitTitle(u)}>${esc(u)}${UNIT_FULLNAME[u]?`<span class="sub">${esc(UNIT_FULLNAME[u])}</span>`:''}</td>`;
+      body+=`<tr class="urow${sumSel.unit===u?' open':''}" data-unit="${esc(u)}" tabindex="0" aria-expanded="${sumSel.unit===u}">`;
+      if(i===0)body+=`<td class="rowlab" rowspan="${bySub[sub].length+(bySub[sub].includes(sumSel.unit)?1:0)}" style="${bySub[sub].includes(sumSel.unit)?'vertical-align:top;padding-top:14px;':''}border-left:4px solid ${subColor[sub]}"${subTitle(sub)}><span class="unit-chip" style="background:${subColor[sub]}"></span>${esc(sub)}<span class="sub">${SUB_FULLNAME[sub]?esc(SUB_FULLNAME[sub])+' · ':''}${bySub[sub].length} unit${bySub[sub].length!==1?'s':''}</span></td>`;
+      body+=`<td class="rowlab ucell"${unitTitle(u)}><span class="chev">›</span>${esc(u)}${UNIT_FULLNAME[u]?`<span class="sub">${esc(UNIT_FULLNAME[u])}</span>`:''}</td>`;
       body+=rowCells(u);
       body+='</tr>';
+      if(sumSel.unit===u)body+=`<tr class="udetail"><td colspan="${groups.length+2}">${unitDetailHtml(u)}</td></tr>`;
     });
   }
   // PDD row - owns Programme Design & Development (Content), pooled across every session
-  body+=`<tr class="pdd-row"><td class="rowlab" style="border-left:4px solid #aabbc8"><span class="unit-chip" style="background:#aabbc8"></span>PDD</td><td class="rowlab">Content design<span class="sub">all instances</span></td>`;
+  body+=`<tr class="pdd-row urow${sumSel.unit===PDD_UNIT?' open':''}" data-unit="${PDD_UNIT}" tabindex="0" aria-expanded="${sumSel.unit===PDD_UNIT}"><td class="rowlab" style="border-left:4px solid #aabbc8"><span class="unit-chip" style="background:#aabbc8"></span>PDD</td><td class="rowlab ucell"><span class="chev">›</span>Content design<span class="sub">all instances</span></td>`;
   body+=rowCells(PDD_UNIT);
   body+='</tr>';
+  if(sumSel.unit===PDD_UNIT)body+=`<tr class="udetail"><td colspan="${groups.length+3}">${unitDetailHtml(PDD_UNIT)}</td></tr>`;
   // Corporate Services row - owns Venue, Catering, Accommodation, pooled across every session
-  body+=`<tr class="corp-row"><td class="rowlab" style="border-left:4px solid #5b7f95"><span class="unit-chip" style="background:#5b7f95"></span>Corporate Services</td><td class="rowlab">Shared services<span class="sub">all instances</span></td>`;
+  body+=`<tr class="corp-row urow${sumSel.unit===CORPORATE_UNIT?' open':''}" data-unit="${CORPORATE_UNIT}" tabindex="0" aria-expanded="${sumSel.unit===CORPORATE_UNIT}"><td class="rowlab" style="border-left:4px solid #5b7f95"><span class="unit-chip" style="background:#5b7f95"></span>Corporate Services</td><td class="rowlab ucell"><span class="chev">›</span>Shared services<span class="sub">all instances</span></td>`;
   body+=rowCells(CORPORATE_UNIT);
   body+='</tr>';
+  if(sumSel.unit===CORPORATE_UNIT)body+=`<tr class="udetail"><td colspan="${groups.length+3}">${unitDetailHtml(CORPORATE_UNIT)}</td></tr>`;
   body+='</tbody>';
   const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.length}" style="text-align:right">Weighted mean across every rubric code, every instance</td><td class="score" style="background:${overall?scoreColor(overall):'#aabbc8'};color:${scoreFg(overall?scoreColor(overall):'#aabbc8')};font-size:14px">${overall?overall.toFixed(2):'n/a'}</td></tr></tfoot>`;
   document.getElementById('sumTable').innerHTML=head+body+foot;
@@ -3844,21 +3896,6 @@ function renderSoiDetail(){
 }
 
 /* RUBRIC HEATMAP */
-function renderHeat(){
-  const units=[...new Set(COURSES.map(c=>c.unit).filter(isValidUnit))].sort();
-  const cols=[...units,PDD_UNIT,CORPORATE_UNIT];
-  let head=`<thead><tr><th class="row">Section ↓ / Unit →</th>${cols.map(u=>`<th${u===CORPORATE_UNIT?' style="color:#5b7f95"':u===PDD_UNIT?' style="color:#5b7f95"':''}${unitTitle(u)}>${u}</th>`).join('')}<th>All</th></tr></thead>`;
-  let body='<tbody>';
-  for(const sec of RUBRIC){body+=`<tr><th class="row" title="${sec.name}">${sec.name}</th>`;
-    for(const u of cols){
-      const v=sectionAvgForUnit(u,sec);
-      body+=v!=null?`<td class="cell" style="background:${scoreColor(v)};color:${scoreFg(scoreColor(v))}">${v.toFixed(1)}</td>`:'<td style="color:#aabbc8">n/a</td>';}
-    const gv=sectionAvgForSessions(SESSIONS,sec);body+=gv!=null?`<td class="cell" style="background:${scoreColor(gv)};color:${scoreFg(scoreColor(gv))}">${gv.toFixed(1)}</td>`:'<td>n/a</td>';body+='</tr>';}
-  document.getElementById('heat').innerHTML=head+body+'</tbody>';
-  document.getElementById('heatMeta').textContent=`${units.length} units + PDD + Corporate Services × ${RUBRIC.length} sections · PDD and Corporate Services are programme-wide summaries on top of each unit's own scores`;
-}
-
-/* CATALOGUE */
 const MODES=['Face-to-Face','Online','Blended'],SUBS=['LA','PD','TPI'];
 function opts(arr,s){return arr.map(o=>`<option${o===s?' selected':''}>${o}</option>`).join('');}
 function renderCat(){
@@ -4036,7 +4073,7 @@ function ingestFailure(which,head,keyCol,codeCols,keyed,scored){
   const n=Object.keys(codeCols).length;
   if(keyCol<0)return `${which}: no [key] found. No column contains a key like [2701]. Check that the session question's options still end in the key, e.g. "20 Feb · Science of Reading [3001]".`;
   if(!keyed)return `${which}: found the key column ("${String(head[keyCol]||'').slice(0,60)}") but none of the ${rowsWord(scored)} rows carry a [key] in it.`;
-  if(!n)return `${which}: read ${keyed} keys but matched 0 rubric questions. The Likert question wording no longer matches the rubric. Check the Rubric tab for the expected wording.`;
+  if(!n)return `${which}: read ${keyed} keys but matched 0 rubric questions. The Likert question wording no longer matches the rubric. Check the question wording against the CTLI rubric.`;
   return `${which}: read ${keyed} keys and matched ${n} rubric questions, but no row had a usable rating. Check that answers are on the 4-point scale.`;}
 function rowsWord(n){return n;}
 function findFacilitatorCol(head){
@@ -4333,12 +4370,18 @@ function renderActive(){
   else if(state.view==='facilitators'){renderFacCards();renderFacDetail();}
   else if(state.view==='sois'){renderSoiCards();renderSoiDetail();}
   else if(state.view==='comments'){renderComments();}
-  else if(state.view==='rubric'){renderHeat();}
   else if(state.view==='catalogue'){renderCat();}}
 function setView(v){state.view=v;document.querySelectorAll('#tabs .tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===v));
   document.querySelectorAll('.view').forEach(s=>s.classList.add('hidden'));document.getElementById('v-'+v).classList.remove('hidden');renderActive();}
 
 /* wire */
+(function(){const tb=document.getElementById('sumTable');
+  tb.addEventListener('click',e=>{const q=e.target.closest('[data-secq]'),c=e.target.closest('[data-seccmp]');
+    if(q){const k=q.dataset.secq;sumSel.q[k]=!sumSel.q[k];renderSummary();return;}
+    if(c){const k=c.dataset.seccmp;sumSel.cmp[k]=!sumSel.cmp[k];renderSummary();return;}
+    const r=e.target.closest('tr.urow');if(!r)return;const u=r.dataset.unit;
+    sumSel.unit=sumSel.unit===u?null:u;sumSel.q={};sumSel.cmp={};renderSummary();});
+  tb.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr.urow')){e.preventDefault();e.target.click();}});})();
 document.getElementById('cPlo').addEventListener('change',e=>{cstate.cid=e.target.value;cstate.iid='';renderComments();});
 document.getElementById('cInst').addEventListener('change',e=>{cstate.iid=e.target.value;renderComments();});
 document.getElementById('cCopyAI').onclick=copyAIPrompt;
