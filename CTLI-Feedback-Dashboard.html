@@ -161,6 +161,15 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .pin-box input:focus{outline:2px solid var(--brand);outline-offset:1px}
 .pin-actions{display:flex;gap:8px;justify-content:center}
 .pin-error{color:var(--poor);font-size:12px;margin-top:9px;min-height:15px}
+.com-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px}
+.com-count{font-size:12.5px;color:var(--ink-soft);margin:10px 0 14px}
+.com-group{margin-bottom:18px}
+.com-group h3{font-size:14.5px;margin-bottom:2px}
+.com-group .gsub{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
+.com-item{border:1px solid var(--line-soft);border-left:3px solid var(--brand);border-radius:8px;padding:10px 12px;margin-bottom:7px;background:#fff}
+.com-item.facf{border-left-color:#5b7f95}
+.com-item p{margin:0 0 5px;font-size:13.5px;white-space:pre-wrap}
+.com-item .cm{font-size:11px;color:var(--ink-soft);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .fac-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
 .fac-toolbar-note{font-size:12.5px;color:var(--ink-soft);background:#fef6cf;border:1px solid #f9e27a;border-radius:9px;padding:8px 12px;flex:1;min-width:280px}
 #reportPrint{padding:30px;-webkit-print-color-adjust:exact;print-color-adjust:exact;
@@ -261,6 +270,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
     <button class="tab" role="tab" data-view="summary" aria-selected="true">Summary</button>
     <button class="tab" role="tab" data-view="courses" aria-selected="false">PLOs</button>
     <button class="tab" role="tab" data-view="sessions" aria-selected="false">Instances</button>
+    <button class="tab" role="tab" data-view="comments" aria-selected="false">Comments</button>
     <button class="tab" role="tab" data-view="sois" aria-selected="false">SOIs</button>
     <button class="tab" role="tab" data-view="facilitators" aria-selected="false">Facilitators 🔒</button>
     <button class="tab" role="tab" data-view="rubric" aria-selected="false">Rubric</button>
@@ -339,6 +349,21 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   </div>
 </section>
 
+
+<section id="v-comments" class="view hidden">
+  <div class="panel">
+    <h2>Participant comments</h2>
+    <div class="psub">Open-ended comments and suggestions from both feedback forms. Pick a PLO and, if you like, one instance. Facilitators are shown by code only.</div>
+    <div class="com-tools">
+      <div class="field"><label>PLO</label><select id="cPlo"></select></div>
+      <div class="field"><label>Instance</label><select id="cInst"></select></div>
+      <button class="btn primary" id="cCopyAI">Copy AI analysis prompt</button>
+      <button class="btn" id="cDownload">Download comments (CSV)</button>
+    </div>
+    <div class="com-count" id="cCount"></div>
+    <div id="cList"></div>
+  </div>
+</section>
 
 <section id="v-sois" class="view hidden">
   <div class="explorer"><div class="cards" id="soiCards"></div>
@@ -3246,6 +3271,7 @@ let COORDS=(window.__MODEL__.coordinators||[]).map(c=>({...c}));
 let CMAP={},FMAP={},COORDMAP={};
 let RESPONSES_MAIN=[]; let RESPONSES_FAC=[]; let INSTANCES=[],SOIS=[];let IMAP={},SOIMAP={};
 let RESPONSES=[]; let LIVE=false;
+let COMMENTS_MAIN=[],COMMENTS_FAC=[],CONTACTS_MAIN=[],CONTACTS_FAC=[];const cstate={cid:'',iid:''};
 let AGG={}; // sessionKey -> {n, items{}, facItems:{fid:{code:{sum,n}}}, facN:{fid}}
 let sel={session:null,course:null,fac:null,soi:null,catSub:'sessions'};
 const state={view:'summary',term:'',sub:'',unit:'',soi:'',month:'',fac:'',q:'',sort:'rating'};
@@ -3922,7 +3948,10 @@ function parseResponseCSV(text){const rows=parseCSV(text);if(rows.length<2)throw
   const codeCols=rubricCols(head);
   const keyCol=findKeyCol(head,body,[]);
   const out=[];let keyed=0;
+  const cc=contactCols(head);
+  const cCols=commentCols(head,body,[keyCol,cc.consent,cc.email,...Object.keys(codeCols).map(Number)]);COMMENTS_MAIN=[];CONTACTS_MAIN=[];
   if(keyCol>=0)for(const r of body){const m=(r[keyCol]||'').match(KEY_PATTERN);if(!m)continue;keyed++;
+    collectComments(COMMENTS_MAIN,CONTACTS_MAIN,r,head,cCols,cc,m[1],'Main form',[]);
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
     if(Object.keys(scores).length)out.push({sk:m[1],fid:null,scores});}
   if(!out.length)throw new Error(ingestFailure('Main feedback form',head,keyCol,codeCols,keyed,body.length));
@@ -3964,8 +3993,11 @@ function parseFacilitatorCSV(text){const rows=parseCSV(text);if(rows.length<2)th
   // Exclude the facilitator column from key detection - its wording usually mentions "session" too.
   const keyCol=findKeyCol(head,body,facCol>=0?[facCol]:[]);
   const out=[];let keyed=0;
+  const cc=contactCols(head);
+  const cCols=commentCols(head,body,[keyCol,facCol,cc.consent,cc.email,...Object.keys(codeCols).map(Number)]);COMMENTS_FAC=[];CONTACTS_FAC=[];
   if(keyCol>=0)for(const r of body){
     const m=(r[keyCol]||'').match(KEY_PATTERN);if(!m)continue;const sk=m[1];keyed++;
+    collectComments(COMMENTS_FAC,CONTACTS_FAC,r,head,cCols,cc,sk,'Facilitator form',facCol>=0?extractFacIds(r[facCol]):[]);
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
     if(!Object.keys(scores).length)continue;
     let fids=facCol>=0?extractFacIds(r[facCol]):[];
@@ -3996,6 +4028,113 @@ function diagnosticText(){
   if(d.unattributed){
     out.push(`⚠ ${d.unattributed} facilitator-form response${d.unattributed!==1?'s':''} could not be attributed to anyone, so they produce no facilitation score. Either the "Select your facilitator" question was left blank, or the Facilitator ID(s) column on the register Sessions tab is empty for those instances.`);}
   return out.join(' ');}
+/* ---------- COMMENTS ----------
+   Open-ended answers from both forms. A column counts as a comment column when its heading
+   reads like one, or when its answers are clearly free text. Personal-detail columns are never read. */
+const COMMENT_SKIP=/timestamp|e-?mail|\bname\b|surname|persal|id number|identity|contact|phone|cell|school|district|emis|gender|\bage\b|race|designation|post level|position|signature|consent/;
+const COMMENT_HINT=/comment|suggest|recommend|additional|improve|anything else|feedback|remark|share|explain|describe|why|what (did|would|could)/;
+const COMMENT_JUNK=/^(n\/?a|none|nil|no|nope|nothing|no comments?|not applicable|ok|okay|-+|\.+|x)$/i;
+function commentCols(head,body,skip){const sk=new Set(skip.filter(x=>x!=null&&x>=0));const cols=[];
+  head.forEach((h,idx)=>{if(sk.has(idx))return;const H=norm(h);if(!H||(COMMENT_SKIP.test(H)&&!COMMENT_HINT.test(H)))return;
+    const vals=body.map(r=>String(r[idx]||'').trim()).filter(Boolean);if(!vals.length)return;
+    if(vals.every(v=>!isNaN(scoreFromCell(v))))return; // a rating column the rubric does not know
+    const free=vals.filter(v=>v.length>=20&&/\s/.test(v)).length/vals.length;
+    const distinct=new Set(vals.map(norm)).size/vals.length;
+    if(COMMENT_HINT.test(H)||(vals.length>=3&&free>=0.4&&distinct>=0.6))cols.push(idx);});
+  return cols;}
+/* The "would you like a coordinator to contact you" question and the email address that goes
+   with it. The email is kept only when the participant said yes, and it never shows on screen
+   or in the AI prompt: it goes into the CSV download only. */
+function contactCols(head){let consent=-1,email=-1;const H=head.map(norm);
+  H.forEach((h,i)=>{if(consent<0&&/contact/.test(h)&&!/e-?mail/.test(h))consent=i;});
+  const mails=H.map((h,i)=>/e-?mail/.test(h)?i:-1).filter(i=>i>=0);
+  email=mails.find(i=>/contact|coordinator|if yes/.test(H[i]));
+  if(email==null&&consent>=0)email=mails.find(i=>i>consent);
+  return {consent,email:email==null?-1:email};}
+function contactOf(row,cc){if(cc.consent<0)return null;const a=String(row[cc.consent]||'').trim();
+  const wants=/^(yes|y|ja|ewe)\b/i.test(a);
+  return {answer:a?(wants?'Yes':(/^(no|n|nee|hayi)\b/i.test(a)?'No':a)):'',email:wants&&cc.email>=0?String(row[cc.email]||'').trim():''};}
+function collectComments(arr,contacts,row,head,cols,cc,sk,form,fids){const contact=contactOf(row,cc);let added=0;
+  for(const idx of cols){const v=String(row[idx]||'').trim();if(v.length<3||COMMENT_JUNK.test(v))continue;
+    arr.push({sk,form,q:String(head[idx]||'').trim(),text:v,fids:fids||[],contact});added++;}
+  if(!added&&contact&&contact.answer==='Yes')contacts.push({sk,form,q:'',text:'',fids:fids||[],contact});}
+function allComments(){return [...COMMENTS_MAIN,...COMMENTS_FAC];}
+/* Facilitator names in comments become their code (full name first, then a first name or
+   surname on its own when no other facilitator shares it). */
+function escRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+function maskNames(text){let out=String(text);const parts={};
+  FACS.forEach(f=>{if(!f.name)return;String(f.name).trim().split(/\s+/).forEach(w=>{if(w.length>=3){const k=w.toLowerCase();(parts[k]=parts[k]||new Set()).add(f.fid);}});});
+  FACS.slice().sort((a,b)=>String(b.name||'').length-String(a.name||'').length).forEach(f=>{
+    if(!f.name||String(f.name).trim().length<3)return;out=out.replace(new RegExp('\\b'+escRe(String(f.name).trim())+'\\b','gi'),f.fid);});
+  Object.entries(parts).forEach(([w,set])=>{if(set.size!==1)return;const fid=[...set][0];
+    out=out.replace(new RegExp('\\b'+escRe(w)+'\\b','gi'),fid);});
+  return out;}
+function commentPlace(c){const sn=SESSIONS.find(x=>x.sid===c.sk);if(!sn)return {cid:'',iid:'',sn:null};return {cid:sn.cid,iid:sn.iid||('_'+sn.sid),sn};}
+function filteredComments(){return allComments().map(c=>({...c,...commentPlace(c)}))
+  .filter(c=>(!cstate.cid||c.cid===cstate.cid)&&(!cstate.iid||c.iid===cstate.iid));}
+function instOptionLabel(g){return `${g.iid||('Key '+g.items[0].sid)} · ${fmtDate(g.date)}`;}
+function renderComments(){
+  const all=allComments().map(c=>({...c,...commentPlace(c)}));
+  const cids=[...new Set(all.map(c=>c.cid).filter(Boolean))].sort();
+  if(cstate.cid&&!cids.includes(cstate.cid))cstate.cid='';
+  const pl=document.getElementById('cPlo');
+  pl.innerHTML=`<option value="">All PLOs</option>`+cids.map(id=>`<option value="${esc(id)}"${id===cstate.cid?' selected':''}>${esc(id)} · ${esc(((CMAP[id]||{}).plo||'').slice(0,60))}</option>`).join('');
+  const groups=instanceGroups().filter(g=>(!cstate.cid||g.cid===cstate.cid)&&all.some(c=>c.iid===g.key));
+  if(cstate.iid&&!groups.some(g=>g.key===cstate.iid))cstate.iid='';
+  const il=document.getElementById('cInst');
+  il.innerHTML=`<option value="">All instances</option>`+groups.map(g=>`<option value="${esc(g.key)}"${g.key===cstate.iid?' selected':''}>${esc(instOptionLabel(g))}</option>`).join('');
+  const list=filteredComments();
+  document.getElementById('cCount').textContent=list.length?`${list.length} comment${list.length!==1?'s':''}`:'';
+  const el=document.getElementById('cList');
+  if(!all.length){el.innerHTML='<div class="note">No comments yet. They load from both feedback forms once the response sheets are linked on the Setup tab.</div>';return;}
+  if(!list.length){el.innerHTML='<div class="note">No comments for this selection.</div>';return;}
+  const by={},order=[];list.forEach(c=>{const k=c.iid||('?'+c.sk);if(!by[k]){by[k]=[];order.push(k);}by[k].push(c);});
+  const gmap={};instanceGroups().forEach(g=>gmap[g.key]=g);
+  el.innerHTML=order.map(k=>{const cs=by[k];const g=gmap[k];const c0=cs[0];const plo=(CMAP[c0.cid]||{}).plo||'Key not in register';
+    const sub=g?`${esc(c0.cid)} · ${esc(instOptionLabel(g))}`:`Session key [${esc(c0.sk)}]`;
+    return `<div class="com-group"><h3>${esc(plo)}</h3><div class="gsub">${sub} · ${cs.length} comment${cs.length!==1?'s':''}</div>${cs.map(c=>
+      `<div class="com-item${c.form==='Facilitator form'?' facf':''}"><p>${esc(maskNames(c.text))}</p><div class="cm"><span>${esc(c.form)}</span><span>[${esc(c.sk)}]</span>${c.fids.length?`<span class="pill fac">${esc(c.fids.join(', '))}</span>`:''}${c.contact&&c.contact.answer==='Yes'?'<span class="pill" style="background:#fef6cf;color:#001489">Wants coordinator contact</span>':''}<span title="${esc(c.q)}">${esc(c.q.length>70?c.q.slice(0,70)+'…':c.q)}</span></div></div>`).join('')}</div>`;}).join('');
+}
+function commentScopeText(){const c=CMAP[cstate.cid];
+  if(!cstate.cid)return 'all CTLI professional learning opportunities (PLOs) with feedback';
+  let s=`the PLO "${c?c.plo:cstate.cid}" (${cstate.cid})`;
+  if(cstate.iid){const g=instanceGroups().find(x=>x.key===cstate.iid);if(g)s+=`, instance ${instOptionLabel(g)}`;}
+  return s;}
+function buildAIPrompt(){const list=filteredComments();
+  const lines=[];let last='';
+  list.forEach(c=>{const g=c.iid?instanceGroups().find(x=>x.key===c.iid):null;
+    const head=g?`${(CMAP[c.cid]||{}).plo||c.cid} | ${instOptionLabel(g)}`:`Session key [${c.sk}]`;
+    if(head!==last){lines.push('',`## ${head}`);last=head;}
+    lines.push(`- ${maskNames(c.text).replace(/\s+/g,' ')} (${c.form}${c.fids.length?', about '+c.fids.join(', '):''})`);});
+  return `You are helping the Cape Teaching and Leadership Institute (CTLI), part of the Western Cape Education Department in South Africa, analyse participant feedback on professional learning for teachers and school leaders.
+
+Below are ${list.length} open-ended comments from participants' feedback forms for ${commentScopeText()}. Facilitators are referred to by code (for example F03). Keep them as codes and do not guess who they are.
+
+Please give me:
+1. The main themes, with roughly how many comments relate to each.
+2. What participants valued, and what needs improvement, kept separate.
+3. Specific, practical suggestions participants made.
+4. Any comment that needs urgent follow-up (for example safety, access, conduct or wellbeing concerns).
+5. Three to five clear recommendations for the programme team.
+
+Write in plain, professional South African English. Short headings and brief points are fine. Do not use em dashes.
+
+Comments:${lines.join('\n')}`;}
+function copyText(txt){if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(txt);
+  return new Promise((res,rej)=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')?res():rej(new Error('copy failed'));}catch(e){rej(e);}ta.remove();});}
+function copyAIPrompt(){const b=document.getElementById('cCopyAI');const n=filteredComments().length;
+  if(!n){b.textContent='No comments to copy';setTimeout(()=>b.textContent='Copy AI analysis prompt',1800);return;}
+  copyText(buildAIPrompt()).then(()=>{b.textContent=`✓ Copied ${n} comments. Paste into Claude`;setTimeout(()=>b.textContent='Copy AI analysis prompt',2600);})
+    .catch(()=>{b.textContent='Could not copy. Try again';setTimeout(()=>b.textContent='Copy AI analysis prompt',2000);});}
+function csvCell(v){const s=String(v==null?'':v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+function downloadComments(){const extra=[...CONTACTS_MAIN,...CONTACTS_FAC].map(c=>({...c,...commentPlace(c)}))
+    .filter(c=>(!cstate.cid||c.cid===cstate.cid)&&(!cstate.iid||c.iid===cstate.iid));
+  const list=[...filteredComments(),...extra];if(!list.length)return;
+  const rows=[['PLO ID','PLO','Instance','Date','Session key','Form','Facilitator codes','Question','Comment','Wants coordinator contact','Email','Theme']];
+  const gmap={};instanceGroups().forEach(g=>gmap[g.key]=g);
+  list.forEach(c=>{const g=gmap[c.iid];rows.push([c.cid,(CMAP[c.cid]||{}).plo||'',g?(g.iid||''):'',g&&g.date?g.date:'',c.sk,c.form,c.fids.join(', '),c.q,maskNames(c.text),c.contact?c.contact.answer:'',c.contact?c.contact.email:'','']);});
+  download(`ctli-comments${cstate.cid?'-'+cstate.cid:''}.csv`,'\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv');}
 function mergeResponses(){RESPONSES=[...RESPONSES_MAIN,...RESPONSES_FAC];LIVE=RESPONSES.length>0;
   aggregate();diagnose();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
 /* Boot fetches the links the URL carries. If someone reaches Setup and loads a different sheet
@@ -4077,12 +4216,17 @@ function renderActive(){
   else if(state.view==='courses'){renderCourseCards();renderCourseDetail();}
   else if(state.view==='facilitators'){renderFacCards();renderFacDetail();}
   else if(state.view==='sois'){renderSoiCards();renderSoiDetail();}
+  else if(state.view==='comments'){renderComments();}
   else if(state.view==='rubric'){renderHeat();}
   else if(state.view==='catalogue'){renderCat();}}
 function setView(v){state.view=v;document.querySelectorAll('#tabs .tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===v));
   document.querySelectorAll('.view').forEach(s=>s.classList.add('hidden'));document.getElementById('v-'+v).classList.remove('hidden');renderActive();}
 
 /* wire */
+document.getElementById('cPlo').addEventListener('change',e=>{cstate.cid=e.target.value;cstate.iid='';renderComments();});
+document.getElementById('cInst').addEventListener('change',e=>{cstate.iid=e.target.value;renderComments();});
+document.getElementById('cCopyAI').onclick=copyAIPrompt;
+document.getElementById('cDownload').onclick=downloadComments;
 /* admin PIN gate: Setup, Catalogue and Facilitators. Re-locks every new browser session */
 const ADMIN_PIN='2027'; // change this to set your own 4-digit PIN
 let pendingAdminView=null;
