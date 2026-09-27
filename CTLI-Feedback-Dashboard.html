@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CTLI Evaluation 2027 · Course · Session · Facilitator</title>
+<title>CTLI Evaluation 2027 · QMF Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#0C1E3E;--ink-soft:#3a4a67;--paper:#EBEEF4;--card:#FFF;--line:#dce1ea;--line-soft:#eaeef4;
---brand:#17458F;--brand-ink:#0d2a5c;--teal:#0E9285;--gold:#D99524;--good:#2E8B57;--mid:#E0A030;--poor:#C6413A;
+:root{--ink:#0C1E3E;--ink-soft:#3a4a67;--paper:#eef2f5;--card:#FFF;--line:#d5dee5;--line-soft:#e7edf1;
+--brand:#001489;--brand-ink:#000f66;--teal:#5b7f95;--gold:#f5c608;--good:#92ad12;--mid:#f5c608;--poor:#d73828;
 --shadow:0 1px 2px rgba(12,30,62,.06),0 8px 24px rgba(12,30,62,.06);--r:14px}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45;font-size:15px}
@@ -25,12 +25,12 @@ button{font-family:inherit;cursor:pointer}a{color:var(--brand);text-decoration:n
 .brand .wm small{display:block;font-family:'Inter';font-weight:450;font-size:11px;color:#5b7f95}
 .spring{flex:1}
 .tabs{display:flex;gap:2px;background:rgba(255,255,255,.08);padding:3px;border-radius:10px;flex-wrap:wrap}
-.tab{border:0;background:transparent;color:#c3cee4;padding:7px 12px;border-radius:7px;font-size:13px;font-weight:500}
+.tab{border:0;background:transparent;color:#aabbc8;padding:7px 12px;border-radius:7px;font-size:13px;font-weight:500}
 .tab[aria-selected=true]{background:#fff;color:var(--brand-ink)}
 .tab:hover:not([aria-selected=true]){color:#fff}
 .wrap{max-width:1320px;margin:0 auto;padding:22px}
-.badge-live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:#fff5e2;color:#8a5b00;border:1px solid #f0dcae}
-.badge-live.on{background:#e5f6ef;color:#0b6b4f;border-color:#bfe6d5}
+.badge-live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:#fef6cf;color:#001489;border:1px solid #f9e27a}
+.badge-live.on{background:#f0f5dc;color:#5a6b0a;border-color:#d3e08f}
 .badge-live .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
 .hero{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px 22px;margin-bottom:18px}
 .hero-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
@@ -58,26 +58,26 @@ select:focus,input:focus{outline:2px solid var(--brand);outline-offset:1px;borde
 .scard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);cursor:pointer;transition:border-color .12s,transform .12s;display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:center}
 .scard:hover{border-color:var(--brand);transform:translateY(-1px)}
 .scard[aria-selected=true]{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand),var(--shadow)}
-.scard .key{font-family:'IBM Plex Mono';font-weight:600;font-size:12px;color:#8a5b00;background:#fdf3dd;border:1px solid #f0dcae;border-radius:6px;padding:1px 7px}
+.scard .key{font-family:'IBM Plex Mono';font-weight:600;font-size:12px;color:#001489;background:#fef6cf;border:1px solid #f9e27a;border-radius:6px;padding:1px 7px}
 .scard h3{font-size:15px;line-height:1.25;grid-column:1;font-weight:600}
 .scard .meta{grid-column:1;display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft);align-items:center}
-.pill{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:#eef2f9;color:var(--brand)}
-.pill.mode{background:#e9f6f3;color:#0b6b57}.pill.fac{background:#f3eefb;color:#5b3a99}
+.pill{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:#e6e9f5;color:var(--brand)}
+.pill.mode{background:#f0f5dc;color:#5a6b0a}.pill.fac{background:#e9eff3;color:#5b7f95}
 .scard .rate{grid-row:1/3;grid-column:2;text-align:right}
 .scard .rate .num{font-family:'Space Grotesk';font-weight:700;font-size:20px;line-height:1}
 .scard .rate .n2{font-size:10.5px;color:var(--ink-soft)}
 .detail{position:sticky;top:78px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;max-height:calc(100vh - 100px);display:flex;flex-direction:column}
 .detail.empty{align-items:center;justify-content:center;text-align:center;padding:44px 26px;color:var(--ink-soft)}
-.detail-head{padding:16px 18px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,#f7f9fc,#fff)}
-.detail-head .key{font-family:'IBM Plex Mono';font-weight:600;font-size:12.5px;color:#8a5b00}
+.detail-head{padding:16px 18px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,#f4f7f9,#fff)}
+.detail-head .key{font-family:'IBM Plex Mono';font-weight:600;font-size:12.5px;color:#001489}
 .detail-head h2{font-size:17px;margin-top:5px;line-height:1.2}
 .detail-head .sub{font-size:12px;color:var(--ink-soft);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .detail-body{padding:14px 18px;overflow-y:auto}
 .rgroup{margin-bottom:15px}
 .rgroup h4{font-family:'Space Grotesk';font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);margin-bottom:8px;display:flex;justify-content:space-between}
 .rgroup h4 span{color:var(--ink-soft);font-weight:500}
-.rgroup.fac h4{color:#5b3a99}
-.facblock{border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:#faf9fd}
+.rgroup.fac h4{color:#5b7f95}
+.facblock{border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:#f4f7f9}
 .facblock .fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
 .facblock .fh b{font-family:'Space Grotesk';font-size:13px}
 .facblock .fh .fs{font-family:'IBM Plex Mono';font-weight:600;font-size:13px}
@@ -99,18 +99,18 @@ table.heat td.cell{font-family:'IBM Plex Mono';font-weight:600;color:#fff;border
 .cat-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 .cat-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;max-height:60vh}
 table.cat{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff}
-table.cat th{background:#f4f6fa;text-align:left;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);padding:9px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;font-weight:600}
+table.cat th{background:#eef2f5;text-align:left;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);padding:9px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;font-weight:600}
 table.cat td{padding:4px 6px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
 table.cat tr:hover td{background:#fafbfd}
-table.cat .keycell{font-family:'IBM Plex Mono';font-weight:600;color:#8a5b00;background:#fdf3dd;text-align:center;border-radius:5px;white-space:nowrap;padding:4px 8px}
-table.cat .cidcell{font-family:'IBM Plex Mono';font-weight:600;color:#5b3a99;background:#f3eefb;text-align:center;border-radius:5px}
+table.cat .keycell{font-family:'IBM Plex Mono';font-weight:600;color:#001489;background:#fef6cf;text-align:center;border-radius:5px;white-space:nowrap;padding:4px 8px}
+table.cat .cidcell{font-family:'IBM Plex Mono';font-weight:600;color:#5b7f95;background:#e9eff3;text-align:center;border-radius:5px}
 table.cat input,table.cat select{width:100%;min-width:60px;border:1px solid transparent;background:transparent;padding:6px 7px;border-radius:6px;font-size:12.5px}
 table.cat input:hover,table.cat select:hover{border-color:var(--line)}
 table.cat input:focus,table.cat select:focus{background:#fff;border-color:var(--brand);outline:none}
 table.cat .plo input{min-width:210px;font-weight:500}
-.rowdel{border:0;background:transparent;color:#b9c0cd;font-size:16px;padding:4px 8px;border-radius:6px}
-.rowdel:hover{background:#fdeceb;color:var(--poor)}
-.subtabs{display:inline-flex;gap:3px;background:#eef1f6;padding:3px;border-radius:9px;margin-bottom:14px}
+.rowdel{border:0;background:transparent;color:#aabbc8;font-size:16px;padding:4px 8px;border-radius:6px}
+.rowdel:hover{background:#fbe4e1;color:var(--poor)}
+.subtabs{display:inline-flex;gap:3px;background:#eef2f5;padding:3px;border-radius:9px;margin-bottom:14px}
 .subtab{border:0;background:transparent;padding:6px 13px;border-radius:6px;font-size:13px;font-weight:500;color:var(--ink-soft)}
 .subtab[aria-selected=true]{background:#fff;color:var(--brand);box-shadow:var(--shadow)}
 .step{display:flex;gap:13px;margin-bottom:15px}
@@ -122,9 +122,9 @@ table.cat .plo input{min-width:210px;font-weight:500}
 .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .urlrow{display:flex;gap:9px;margin:10px 0}.urlrow input{flex:1}
 .hidden{display:none!important}
-.foot{max-width:1320px;margin:8px auto 30px;padding:0 22px;font-size:11.5px;color:#8a94a8}
+.foot{max-width:1320px;margin:8px auto 30px;padding:0 22px;font-size:11.5px;color:#5b7f95}
 .banner{position:relative;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-bottom:18px;min-height:220px;display:flex;align-items:flex-end;background-size:cover;background-position:center}
-.banner::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,30,62,.15) 0%,rgba(13,42,92,.78) 78%,rgba(13,42,92,.92) 100%)}
+.banner::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,30,62,.15) 0%,rgba(0,15,102,.78) 78%,rgba(0,15,102,.92) 100%)}
 .banner-in{position:relative;z-index:1;padding:26px 28px;color:#fff;width:100%}
 .banner-in .eyebrow{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#001489;background:rgba(255,255,255,.94);padding:6px 13px 6px 11px;border-radius:7px;border-left:4px solid #f5c608;box-shadow:0 2px 10px rgba(0,11,77,.28)}
 .banner-in h1{font-size:30px;color:#fff;margin-top:5px}
@@ -136,20 +136,20 @@ table.cat .plo input{min-width:210px;font-weight:500}
 .sum-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
 table.sum{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff;min-width:920px}
 table.sum th,table.sum td{padding:8px 10px;border-bottom:1px solid var(--line-soft);text-align:center}
-table.sum thead th{background:#eef2f9;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);font-weight:700;border-bottom:1px solid var(--line)}
-table.sum thead th.g-design{background:#eaf1ff}
-table.sum thead th.g-delivery{background:#eaf7f2}
-table.sum thead th.g-corp{background:#f3eefb;color:#5b3a99}
-table.sum thead th.g-edulis{background:#fdf3dd;color:#8a5b00}
+table.sum thead th{background:#e6e9f5;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);font-weight:700;border-bottom:1px solid var(--line)}
+table.sum thead th.g-design{background:#e6e9f5}
+table.sum thead th.g-delivery{background:#f0f5dc}
+table.sum thead th.g-corp{background:#e9eff3;color:#5b7f95}
+table.sum thead th.g-edulis{background:#fef6cf;color:#001489}
 table.sum td.rowlab{text-align:left;font-weight:500;white-space:nowrap}
 table.sum td.rowlab .sub{display:block;font-size:10.5px;color:var(--ink-soft);font-weight:450}
-table.sum td.na{color:#c8cfda}
+table.sum td.na{color:#aabbc8}
 table.sum td.score{font-family:'IBM Plex Mono';font-weight:600;color:#fff;border-radius:6px}
-table.sum tr.corp-row td{background:#faf7fd}
-table.sum tr.corp-row td.rowlab{color:#5b3a99;font-weight:600}
-table.sum tr.pdd-row td{background:#eefbfb}
-table.sum tr.pdd-row td.rowlab{color:#00838a;font-weight:600}
-table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#f7f9fc}
+table.sum tr.corp-row td{background:#f4f7f9}
+table.sum tr.corp-row td.rowlab{color:#5b7f95;font-weight:600}
+table.sum tr.pdd-row td{background:#eef2f5}
+table.sum tr.pdd-row td.rowlab{color:#5b7f95;font-weight:600}
+table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#f4f7f9}
 .edulis-note{font-size:12px;color:var(--ink-soft);margin-top:12px}
 .unit-chip{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px;vertical-align:middle}
 .pin-overlay{position:fixed;inset:0;background:rgba(12,30,62,.6);display:flex;align-items:center;justify-content:center;z-index:500}
@@ -162,7 +162,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .pin-actions{display:flex;gap:8px;justify-content:center}
 .pin-error{color:var(--poor);font-size:12px;margin-top:9px;min-height:15px}
 .fac-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
-.fac-toolbar-note{font-size:12.5px;color:var(--ink-soft);background:#fdf3dd;border:1px solid #f0dcae;border-radius:9px;padding:8px 12px;flex:1;min-width:280px}
+.fac-toolbar-note{font-size:12.5px;color:var(--ink-soft);background:#fef6cf;border:1px solid #f9e27a;border-radius:9px;padding:8px 12px;flex:1;min-width:280px}
 #reportPrint{padding:30px;-webkit-print-color-adjust:exact;print-color-adjust:exact;
   font-family:'Inter',system-ui,sans-serif;color:#1A2340;line-height:1.45}
 #reportPrint *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -177,14 +177,14 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 #reportPrint .header-right{flex:0 0 auto;text-align:right}
 #reportPrint .header-right img{height:54px;width:auto;display:block}
 #reportPrint .brandrule{height:4px;margin:0 0 16px;
-  background:linear-gradient(90deg,#f5c608 0 34%,#92ad12 34% 67%,#0E9285 67% 100%)}
+  background:linear-gradient(90deg,#f5c608 0 34%,#92ad12 34% 67%,#5b7f95 67% 100%)}
 
 /* metadata block: a real grid, so long values cannot shunt the layout */
 #reportPrint .report-metadata{display:grid;grid-template-columns:repeat(3,1fr);gap:9px 22px;
-  margin:16px 0 18px;padding:14px 16px;background:#f5f7fb;border:1px solid #e2e8f2;border-radius:6px}
+  margin:16px 0 18px;padding:14px 16px;background:#f4f7f9;border:1px solid #d5dee5;border-radius:6px}
 #reportPrint .meta-item{display:block;min-width:0;margin:0}
 #reportPrint .meta-label{display:block;font-size:8.5px;font-weight:700;letter-spacing:.09em;
-  text-transform:uppercase;color:#8a94a8;line-height:1.3}
+  text-transform:uppercase;color:#5b7f95;line-height:1.3}
 #reportPrint .meta-value{display:block;font-size:11.5px;color:#1A2340;font-weight:500;
   line-height:1.35;margin-top:2px;word-break:break-word}
 #reportPrint .meta-item.wide{grid-column:1 / -1}
@@ -198,10 +198,10 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 
 /* sections */
 #reportPrint h2{font-family:'Space Grotesk';font-size:13px;font-weight:600;color:#001489;
-  text-transform:uppercase;letter-spacing:.07em;margin:22px 0 9px;padding-bottom:5px;border-bottom:1px solid #dbe2ee}
+  text-transform:uppercase;letter-spacing:.07em;margin:22px 0 9px;padding-bottom:5px;border-bottom:1px solid #d5dee5}
 #reportPrint .rgroup{margin-bottom:16px}
 #reportPrint .rgroup h4{font-family:'Space Grotesk';font-size:11.5px;font-weight:600;text-transform:uppercase;
-  letter-spacing:.06em;color:#001489;margin:0 0 8px;padding-bottom:4px;border-bottom:1px solid #e6ebf4;
+  letter-spacing:.06em;color:#001489;margin:0 0 8px;padding-bottom:4px;border-bottom:1px solid #e7edf1;
   display:flex;justify-content:space-between;align-items:baseline}
 #reportPrint .rgroup h4 span{color:#5b7f95;font-weight:500;letter-spacing:0;text-transform:none;font-size:11px}
 
@@ -211,18 +211,18 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 #reportPrint .ritem{display:grid;grid-template-columns:1fr 74px 34px;align-items:center;gap:9px;
   margin-bottom:5px;font-size:11px}
 #reportPrint .ritem .rn{color:#3d4a63;line-height:1.3}
-#reportPrint .ritem .rt{height:7px;border-radius:4px;background:#e7ebf2;overflow:hidden}
+#reportPrint .ritem .rt{height:7px;border-radius:4px;background:#e7edf1;overflow:hidden}
 #reportPrint .ritem .rf{height:100%;border-radius:4px}
 #reportPrint .ritem .rv{font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;text-align:right}
 
 /* tables */
 #reportPrint table,#reportPrint .fac-overview{border-collapse:collapse;width:100%;font-size:11px;margin-bottom:16px}
 #reportPrint th,#reportPrint td,#reportPrint .fac-overview th,#reportPrint .fac-overview td{
-  border:0;border-bottom:1px solid #e6ebf4;padding:6px 9px;text-align:left;vertical-align:top}
+  border:0;border-bottom:1px solid #e7edf1;padding:6px 9px;text-align:left;vertical-align:top}
 #reportPrint th,#reportPrint .fac-overview th{background:#001489;color:#fff;font-weight:600;
   font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;border-bottom:0}
-#reportPrint tbody tr:nth-child(even) td{background:#f7f9fc}
-#reportPrint .footnote{font-size:9.5px;color:#8a94a8;margin-top:14px;padding-top:9px;border-top:1px solid #e6ebf4}
+#reportPrint tbody tr:nth-child(even) td{background:#f4f7f9}
+#reportPrint .footnote{font-size:9.5px;color:#5b7f95;margin-top:14px;padding-top:9px;border-top:1px solid #e7edf1}
 
 /* ---- print ----
    The old rule used visibility:hidden on the rest of the page. Hidden elements still occupy
@@ -255,7 +255,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
-  <div class="brand"><div class="glyph"><img id="brandCrest" alt="WCED crest"></div><div class="wm">CTLI Evaluation<small>Course · Session · Facilitator · 2027</small></div></div>
+  <div class="brand"><div class="glyph"><img id="brandCrest" alt="WCED crest"></div><div class="wm">CTLI Evaluation<small>Quality Management Framework · 2027</small></div></div>
   <div class="spring"></div>
   <nav class="tabs" role="tablist" id="tabs">
     <button class="tab" role="tab" data-view="summary" aria-selected="true">Summary</button>
@@ -384,18 +384,18 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   <div class="setup-grid">
     <div class="panel">
       <h2>Connect live responses</h2>
-      <div class="psub">Feedback comes from two Google Forms — the main CTLI Professional Learning Feedback form, and a separate Facilitator Feedback form. Publish each form's response sheet as CSV (File → Share → Publish to web → responses tab → CSV → Publish) and paste both links below. The dashboard merges them, so loading one never overwrites the other.</div>
+      <div class="psub">Feedback comes from two Google Forms: the main CTLI Professional Learning Feedback form, and a separate Facilitator Feedback form. Publish each form's response sheet as CSV (File → Share → Publish to web → responses tab → CSV → Publish) and paste both links below. The dashboard merges them, so loading one never overwrites the other.</div>
       <div class="field" style="margin-bottom:6px"><label>CTLI Professional Learning Feedback form</label></div>
       <div class="urlrow"><input type="url" id="csvUrl" placeholder="https://docs.google.com/…/pub?output=csv"><button class="btn primary" id="loadCsv">Load</button></div>
       <div id="csvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
       <div class="field" style="margin:14px 0 6px"><label>Facilitator Feedback form</label></div>
       <div class="urlrow"><input type="url" id="facCsvUrl" placeholder="https://docs.google.com/…/pub?output=csv"><button class="btn primary" id="loadFacCsv">Load</button></div>
       <div id="facCsvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
-      <div class="note"><b>Links are remembered</b> — once loaded, this browser reloads both sheets automatically next time the dashboard opens. On a shared or managed computer, browser storage can get cleared without warning — see "Bookmark this setup" below for a backup that doesn't depend on the browser remembering anything.</div>
+      <div class="note"><b>Links are remembered.</b> Once loaded, this browser reloads both sheets automatically next time the dashboard opens. On a shared or managed computer, browser storage can get cleared without warning, so see "Bookmark this setup" below for a backup that doesn't depend on the browser remembering anything.</div>
     </div>
     <div class="panel">
       <h2>Link the register (live)</h2>
-      <div class="psub">The PLO Register has five core tabs, plus an optional Coordinators tab. Publish each one as CSV (File → Share → Publish to web → pick the tab → CSV) and paste its link below — same as the response sheet. A Coordinators tab needs three columns: <b>Unit</b>, <b>Coordinator ID</b> and <b>Name</b> — one row per unit, and every course in that unit picks it up automatically.</div>
+      <div class="psub">The PLO Register has five core tabs, plus an optional Coordinators tab. Publish each one as CSV (File → Share → Publish to web → pick the tab → CSV) and paste its link below, the same way as the response sheets. A Coordinators tab needs three columns: <b>Unit</b>, <b>Coordinator ID</b> and <b>Name</b>. Add one row per unit and every PLO in that unit picks it up automatically.</div>
       <div class="field" style="margin-bottom:8px"><label>PLOs tab</label><input type="url" id="regCoursesUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <div class="field" style="margin-bottom:8px"><label>Instances tab</label><input type="url" id="regInstUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <div class="field" style="margin-bottom:8px"><label>Sessions tab</label><input type="url" id="regSessionsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
@@ -404,25 +404,25 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <div class="field" style="margin-bottom:8px"><label>Coordinators tab <span style="font-weight:400;text-transform:none;color:var(--ink-soft)">(optional)</span></label><input type="url" id="regCoordsUrl" placeholder="https://docs.google.com/…/pub?output=csv&gid=…" style="width:100%"></div>
       <button class="btn primary" id="loadRegister">Load register</button>
       <div id="regStatus" class="mono" style="font-size:12px;color:var(--ink-soft);margin-top:8px"></div>
-      <div class="note">Prefer a one-off upload instead of a live link? Use <b>Import register (.xlsx)</b> on the Catalogue tab — same result, no link required.</div>
+      <div class="note">Prefer a one-off upload instead of a live link? Use <b>Import register (.xlsx)</b> on the Catalogue tab. It gives the same result with no link needed.</div>
     </div>
     <div class="panel">
       <h2>Bookmark this setup</h2>
-      <div class="psub">This is the reliable way to keep every link, immune to browser storage being cleared. Once everything above is loaded, click below and bookmark the resulting address (or save it somewhere safe) — opening that exact link always restores every sheet, on any device, with no browser memory involved.</div>
+      <div class="psub">This is the reliable way to keep every link, immune to browser storage being cleared. Once everything above is loaded, click below and bookmark the resulting address (or save it somewhere safe). Opening that exact link always restores every sheet, on any device, with no browser memory involved.</div>
       <button class="btn primary" id="copySetupLink">Copy setup link</button>
     </div>
     <div class="panel">
       <h2>How the form maps</h2>
       <div class="psub">Three things let the dashboard read each response:</div>
       <div class="step"><div class="no">A</div><div class="st"><h4>Session key (same on both forms)</h4><p>Both forms' session question uses the same plain session key:<br><code>20 Feb · SACE Ethics Seminar [2701]</code><br>Copy the list from Catalogue → <b>Copy session options</b> and paste it into each form's session question.</p></div></div>
-      <div class="step"><div class="no">B</div><div class="st"><h4>Who facilitated (facilitator form only)</h4><p>The facilitator form has a separate <i>"Select your facilitator"</i> checkbox question — respondents tick who ran the session, e.g. <code>F03 A. Petersen</code>. Ticking more than one attributes the same ratings to each. If nobody ticks a name, the dashboard falls back to whoever the register has assigned to that session. Copy the checkbox options from Catalogue → <b>Copy facilitator roster</b>.</p></div></div>
-      <div class="step"><div class="no">C</div><div class="st"><h4>Rubric matching</h4><p>Each Likert question is matched by its actual wording, not a code prefix — e.g. a column containing <i>"pitched at the right level of depth"</i> is read as <code>C2</code>, and <i>"demonstrated good knowledge of the subject"</i> is read as <code>D1.1</code>. This means the sheet can be pasted in exactly as Google Forms exports it.</p></div></div>
+      <div class="step"><div class="no">B</div><div class="st"><h4>Who facilitated (facilitator form only)</h4><p>The facilitator form has a separate <i>"Select your facilitator"</i> checkbox question where respondents tick who ran the session, e.g. <code>F03 A. Petersen</code>. Ticking more than one attributes the same ratings to each. If nobody ticks a name, the dashboard falls back to whoever the register has assigned to that session. Copy the checkbox options from Catalogue → <b>Copy facilitator roster</b>.</p></div></div>
+      <div class="step"><div class="no">C</div><div class="st"><h4>Rubric matching</h4><p>Each Likert question is matched by its actual wording, not a code prefix. For example, a column containing <i>"pitched at the right level of depth"</i> is read as <code>C2</code>, and <i>"demonstrated good knowledge of the subject"</i> is read as <code>D1.1</code>. This means the sheet can be pasted in exactly as Google Forms exports it.</p></div></div>
       <div class="note"><b>Numbers or text?</b> Both are read. Numbered answers ("4" or "4 - Agree") use the leading digit. Plain-text agreement answers ("Strongly agree", "Agree", "Disagree", "Strongly disagree") are also read directly. Other plain-text scales need their exact wording confirmed before they're added.</div>
     </div>
   </div>
 </section>
 </main>
-<div class="foot">CTLI Evaluation 2027 · course → session → facilitator model · showing a 20-course sample — connect the full register and response sheets on the Setup tab</div>
+<div class="foot">CTLI Evaluation 2027 · Quality Management Framework dashboard for professional learning at the Cape Teaching and Leadership Institute</div>
 
 <div class="pin-overlay hidden" id="pinOverlay">
   <div class="pin-box">
@@ -3252,11 +3252,16 @@ const state={view:'summary',term:'',sub:'',unit:'',soi:'',month:'',fac:'',q:'',s
 const pstate={sub:'',unit:'',term:'',soi:'',q:'',sort:'rating'};
 
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function fmtDate(iso){if(!iso)return '—';const d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.getDate()+' '+MONTHS[d.getMonth()];}
+function fmtDate(iso){if(!iso)return 'n/a';const d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.getDate()+' '+MONTHS[d.getMonth()];}
 function weekday(iso){if(!iso)return '';const d=new Date(iso+'T00:00:00');return isNaN(d)?'':['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function mix(a,b,t){return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(',')})`;}
-function scoreColor(v){if(v==null||isNaN(v))return '#c8cfda';if(v<2.5){return mix([198,65,58],[224,160,48],Math.max(0,(v-1)/1.5));}return mix([224,160,48],[46,139,87],Math.max(0,Math.min(1,(v-2.5)/1.5)));}
+function scoreColor(v){if(v==null||isNaN(v))return '#aabbc8';if(v<2.5){return mix([215,56,40],[245,198,8],Math.max(0,(v-1)/1.5));}return mix([245,198,8],[146,173,18],Math.max(0,Math.min(1,(v-2.5)/1.5)));}
+// WCED gold and green are too light to read as text on white, so text uses a deeper shade of the same colour.
+function rgbOf(c){c=String(c);let m=c.match(/rgb\((\d+),(\d+),(\d+)\)/);if(m)return [+m[1],+m[2],+m[3]];m=c.match(/^#([0-9a-f]{6})$/i);if(m){const n=parseInt(m[1],16);return [n>>16,(n>>8)&255,n&255];}return null;}
+function scoreInk(v){if(v==null||isNaN(v))return '#aabbc8';const c=rgbOf(scoreColor(v));const L=(0.2126*c[0]+0.7152*c[1]+0.0722*c[2])/255;return L>0.45?mix(c,[20,28,40],0.4):scoreColor(v);}
+// Text on a score-coloured cell: dark on gold and green, white on red and blue.
+function scoreFg(bg){const c=rgbOf(bg);if(!c)return '#fff';const L=(0.2126*c[0]+0.7152*c[1]+0.0722*c[2])/255;return L>0.5?'#0c1e3e':'#fff';}
 
 function reindex(){CMAP={};COURSES.forEach(c=>CMAP[c.cid]=c);FMAP={};FACS.forEach(f=>FMAP[f.fid]=f);COORDMAP={};COORDS.forEach(co=>{if(co.unit)(COORDMAP[co.unit]=COORDMAP[co.unit]||[]).push(co);});
   IMAP={};INSTANCES.forEach(i=>IMAP[i.iid]=i);SOIMAP={};SOIS.forEach(x=>SOIMAP[x.soi]=x);
@@ -3331,9 +3336,9 @@ function soiSectionAvg(ss,sec){let sum=0,n=0;
   for(const sn of ss){const v=sessionSectionAvg(sn.sid,sec),rn=(AGG[sn.sid]||{}).resp||0;
     if(v!=null&&rn){sum+=v*rn;n+=rn;}}
   return n?sum/n:null;}
-function coordForUnit(unit){const list=COORDMAP[unit];if(!list||!list.length)return null;return list.map(co=>co.name?`${co.name} (${co.coid})`:co.coid).join(', ');} // shown openly — coordinators aren't individually rated, unlike facilitators
-function facName(fid){return fid;} // public dashboard — ID only, never a real name (POPIA: avoid exposing facilitator identity on an openly-shared link)
-function facFullName(fid){return (FMAP[fid]&&FMAP[fid].name)||fid;} // protected use only — inside the PIN-gated Facilitators tab
+function coordForUnit(unit){const list=COORDMAP[unit];if(!list||!list.length)return null;return list.map(co=>co.name?`${co.name} (${co.coid})`:co.coid).join(', ');} // shown openly - coordinators aren't individually rated, unlike facilitators
+function facName(fid){return fid;} // public dashboard - ID only, never a real name (POPIA: avoid exposing facilitator identity on an openly-shared link)
+function facFullName(fid){return (FMAP[fid]&&FMAP[fid].name)||fid;} // protected use only - inside the PIN-gated Facilitators tab
 function courseOf(sk){const s=SESSIONS.find(x=>x.sid===sk);return s?CMAP[s.cid]:null;}
 function sessionLabelPlain(s){const c=CMAP[s.cid]||{};const wd=weekday(s.date);const dt=fmtDate(s.date);
   return `${wd?wd+', ':''}${dt} · ${c.plo||s.cid} [${s.sid}]`;}
@@ -3350,7 +3355,7 @@ function aggregate(){
       else{(a.items[code]=a.items[code]||{sum:0,n:0});a.items[code].sum+=+val;a.items[code].n++;}
     }}
 }
-// courses/sessions/facilitators that actually have feedback — used for headline counts so the catalogue's unrated entries don't inflate them
+// courses/sessions/facilitators that actually have feedback - used for headline counts so the catalogue's unrated entries don't inflate them
 function feedbackSessions(){return SESSIONS.filter(s=>AGG[s.sid]&&AGG[s.sid].resp>0);}
 function feedbackCourseIds(){return new Set(feedbackSessions().map(s=>s.cid));}
 function feedbackInstances(){return instanceGroups().filter(g=>g.resp>0);}
@@ -3364,7 +3369,7 @@ function sessionOverall(sk){let sum=0,n=0;for(const sec of RUBRIC){const v=sessi
 const CORPORATE_UNIT='Corporate Services';
 const PDD_UNIT='PDD';
 const SHARED_UNITS=[CORPORATE_UNIT,PDD_UNIT];
-// Fixed master list of official CTLI units, by sub-directorate — Summary always shows every one of these,
+// Fixed master list of official CTLI units, by sub-directorate - Summary always shows every one of these,
 // even with zero courses currently loaded for it, rather than only whatever happens to be in the register.
 const UNIT_MASTER={LA:['SLMC','SLMP'],PD:['PD'],TPI:['FP','IP','SP','ISP','FET','IE','NTI']};
 const UNIT_FULLNAME={SLMC:'School Leadership and Management Courses',SLMP:'School Leadership and Management Programme',PD:'Professional Development',FP:'Foundation Phase',IP:'Intermediate Phase',SP:'Senior Phase',ISP:'Intermediate and Senior Phase',FET:'Further Education and Training',IE:'Inclusive Education',NTI:'New Teacher Induction'};
@@ -3377,7 +3382,7 @@ const SUB_CODES=['LA','PD','TPI'];
 function isValidUnit(u){if(!u)return false;if(SUB_CODES.includes(u)&&!UNIT_MASTER_FLAT.includes(u))return false;return true;} // rejects a Unit field mistakenly set to a sub-directorate code (e.g. "LA"), while still allowing "PD" since that's genuinely also a real unit
 function unitList(){const u=[...new Set([...UNIT_MASTER_FLAT,...COURSES.map(c=>c.unit).filter(isValidUnit)])].sort();
   SHARED_UNITS.forEach(su=>{if(!u.includes(su))u.push(su);});return u;}
-function subOfUnit(u){if(u===CORPORATE_UNIT)return 'Corporate Services';if(u===PDD_UNIT)return 'PDD';if(UNIT_MASTER_SUB[u])return UNIT_MASTER_SUB[u];const c=COURSES.find(c=>c.unit===u);return c?c.sub:'—';}
+function subOfUnit(u){if(u===CORPORATE_UNIT)return 'Corporate Services';if(u===PDD_UNIT)return 'PDD';if(UNIT_MASTER_SUB[u])return UNIT_MASTER_SUB[u];const c=COURSES.find(c=>c.unit===u);return c?c.sub:'n/a';}
 function sectionAvgForSessions(sessList,sec){let sum=0,n=0;
   for(const s of sessList){const v=sessionSectionAvg(s.sid,sec);const rn=AGG[s.sid].resp;if(v!=null){sum+=v*rn;n+=rn;}}
   return n?sum/n:null;}
@@ -3386,10 +3391,10 @@ function unitSectionAvg(unit,sec){
   return sectionAvgForSessions(ss,sec);}
 function corporateSectionAvg(sec){
   if(sec.group!=='corporate')return null;
-  return sectionAvgForSessions(SESSIONS,sec);} // shared services — rolled up across every session, every unit
+  return sectionAvgForSessions(SESSIONS,sec);} // shared services - rolled up across every session, every unit
 function pddSectionAvg(sec){
   if(sec.group!=='design')return null;
-  return sectionAvgForSessions(SESSIONS,sec);} // content design — rolled up across every session, every unit
+  return sectionAvgForSessions(SESSIONS,sec);} // content design - rolled up across every session, every unit
 function sectionAvgForUnit(unit,sec){
   if(unit===CORPORATE_UNIT)return corporateSectionAvg(sec);
   if(unit===PDD_UNIT)return pddSectionAvg(sec);
@@ -3458,12 +3463,12 @@ function renderHero(){
     const o=sessionOverall(s.sid);if(o!=null){sum+=o*a.resp;n+=a.resp;}}
   const overall=n?sum/n:null,pct=(overall||0)/4,R=64,C=2*Math.PI*R,off=C*(1-pct*0.75),col=scoreColor(overall);
   document.getElementById('gauge').innerHTML=`<svg width="180" height="140" viewBox="0 0 180 140">
-    <circle cx="90" cy="90" r="${R}" fill="none" stroke="#e7ebf2" stroke-width="15" stroke-dasharray="${C*0.75} ${C}" transform="rotate(135 90 90)" stroke-linecap="round"/>
+    <circle cx="90" cy="90" r="${R}" fill="none" stroke="#e7edf1" stroke-width="15" stroke-dasharray="${C*0.75} ${C}" transform="rotate(135 90 90)" stroke-linecap="round"/>
     <circle cx="90" cy="90" r="${R}" fill="none" stroke="${col}" stroke-width="15" stroke-dasharray="${C*0.75} ${C}" stroke-dashoffset="${off}" transform="rotate(135 90 90)" stroke-linecap="round"/>
-    <text x="90" y="86" text-anchor="middle" style="font-family:Space Grotesk;font-weight:700;font-size:34px;fill:var(--ink)">${overall!=null?overall.toFixed(2):'—'}</text>
+    <text x="90" y="86" text-anchor="middle" style="font-family:Space Grotesk;font-weight:700;font-size:34px;fill:var(--ink)">${overall!=null?overall.toFixed(2):'n/a'}</text>
     <text x="90" y="106" text-anchor="middle" style="font-family:Inter;font-size:12px;fill:#3a4a67">out of 4.0</text></svg><div class="lab">Overall satisfaction</div>`;
   document.getElementById('sectbars').innerHTML=RUBRIC.map(sec=>{const v=secN[sec.code]?secSum[sec.code]/secN[sec.code]:null;
-    return `<div class="sbar"><div class="nm">${sec.name}</div><div class="track"><div class="fill" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="sc" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(2):'—'}</div></div>`;}).join('');
+    return `<div class="sbar"><div class="nm">${sec.name}</div><div class="track"><div class="fill" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="sc" style="color:${v?scoreInk(v):'#aabbc8'}">${v?v.toFixed(2):'n/a'}</div></div>`;}).join('');
   const low=instanceGroups().filter(g=>g.overall!=null&&g.overall<3.5).length;
   const fbCourses=feedbackCourseIds().size,fbSessions=feedbackInstances().length,fbFacs=feedbackFacIds().size;
   document.getElementById('stats').innerHTML=`
@@ -3471,7 +3476,7 @@ function renderHero(){
    <div class="stat"><div class="n">${fbSessions}<span style="font-size:14px;color:var(--ink-soft);font-weight:500"> / ${instanceGroups().length}</span></div><div class="l">Instances with feedback</div></div>
    <div class="stat"><div class="n">${fbFacs}<span style="font-size:14px;color:var(--ink-soft);font-weight:500"> / ${FACS.length}</span></div><div class="l">Facilitators rated</div></div>
    <div class="stat"><div class="n">${resp.toLocaleString()}</div><div class="l">Responses</div></div>
-   <div class="stat"><div class="n" style="color:${scoreColor(overall)}">${overall!=null?overall.toFixed(2):'—'}</div><div class="l">Mean score</div></div>
+   <div class="stat"><div class="n" style="color:${scoreInk(overall)}">${overall!=null?overall.toFixed(2):'n/a'}</div><div class="l">Mean score</div></div>
    <div class="stat"><div class="n" style="color:${low?'var(--poor)':'var(--good)'}">${low}</div><div class="l">Instances below 3.5</div></div>`;
 }
 
@@ -3486,11 +3491,11 @@ function renderSessionCards(){
     const when=fmtDate(g.date)+(g.end&&g.end!==g.date?' to '+fmtDate(g.end):'');
     const nb=g.items.length;
     return `<div class="scard" data-sk="${esc(g.key)}" aria-selected="${g.key===sel.session}" tabindex="0" role="button">
-      <div class="meta">${g.code?`<span class="key">${esc(g.code)}</span>`:''}<span class="pill">${esc(g.iid||c.cid||'')}</span>${g.soi?`<span class="pill fac">${esc(g.soi)}</span>`:''}<span class="pill mode">${esc(g.mode||'—')}</span><span>${when} · Term ${g.term||'—'}</span></div>
+      <div class="meta">${g.code?`<span class="key">${esc(g.code)}</span>`:''}<span class="pill">${esc(g.iid||c.cid||'')}</span>${g.soi?`<span class="pill fac">${esc(g.soi)}</span>`:''}<span class="pill mode">${esc(g.mode||'n/a')}</span><span>${when} · Term ${g.term||'n/a'}</span></div>
       <h3>${esc(c.plo||g.cid)}</h3>
-      ${g.codeName?`<div class="meta"><span class="mono" style="color:#8a5b00;font-size:11px;word-break:break-word">${esc(g.codeName)}</span></div>`:''}
+      ${g.codeName?`<div class="meta"><span class="mono" style="color:#001489;font-size:11px;word-break:break-word">${esc(g.codeName)}</span></div>`:''}
       <div class="meta"><span class="pill fac">${g.facs.length>1?g.facs.length+' facilitators':g.facs.length===1?'1 facilitator':'Unassigned'}</span><span>${esc(fnames)}</span>${nb>1?`<span class="pill">${nb} breakaways</span>`:''}</div>
-      <div class="rate"><div class="num" style="color:${g.overall?scoreColor(g.overall):'#aab'}">${g.overall?g.overall.toFixed(2):'—'}</div><div class="n2">${g.resp} responses</div></div>
+      <div class="rate"><div class="num" style="color:${g.overall?scoreInk(g.overall):'#aabbc8'}">${g.overall?g.overall.toFixed(2):'n/a'}</div><div class="n2">${g.resp} responses</div></div>
     </div>`;}).join('');
   el.querySelectorAll('.scard[data-sk]').forEach(c=>{const k=c.getAttribute('data-sk');
     c.onclick=()=>{sel.session=k;renderSessionCards();renderSessionDetail();};
@@ -3503,26 +3508,26 @@ function renderSessionDetail(){
   const c=CMAP[g.cid]||{};el.className='detail';
   const sessGroups=SESSION_SECS.map(sec=>{
     const rows=sec.items.map(([code,label])=>{const v=instItemAvg(g.items,code);if(v==null)return '';
-      return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+      return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreInk(v)}">${v.toFixed(1)}</div></div>`;}).join('');
     if(!rows.trim())return '';const sv=instSectionAvg(g.items,sec);
-    return `<div class="rgroup"><h4>${sec.name}<span>${sv?sv.toFixed(2):'—'}</span></h4>${rows}</div>`;}).join('');
+    return `<div class="rgroup"><h4>${sec.name}<span>${sv?sv.toFixed(2):'n/a'}</span></h4>${rows}</div>`;}).join('');
   const facBlocks=g.facs.map(fid=>{
     const fs=instFacOverall(g.items,fid);
     const rows=D1.items.map(([code,label])=>{const v=instFacItemAvg(g.items,fid,code);if(v==null)return '';
-      return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
-    return `<div class="facblock"><div class="fh"><b>${esc(facName(fid))} <span class="mono" style="color:#8a94a8;font-weight:500">${fid}</span></b><span class="fs" style="color:${fs?scoreColor(fs):'#aab'}">${fs?fs.toFixed(2):'—'}</span></div>${rows||'<span style="font-size:12px;color:#8a94a8">No facilitation responses yet.</span>'}</div>`;}).join('');
+      return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreInk(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+    return `<div class="facblock"><div class="fh"><b>${esc(facName(fid))} <span class="mono" style="color:#5b7f95;font-weight:500">${fid}</span></b><span class="fs" style="color:${fs?scoreInk(fs):'#aabbc8'}">${fs?fs.toFixed(2):'n/a'}</span></div>${rows||'<span style="font-size:12px;color:#5b7f95">No facilitation responses yet.</span>'}</div>`;}).join('');
   const breakaways=g.items.length>1?`<div class="rgroup"><h4>Breakaways<span>${g.items.length}</span></h4>`+g.items.map(sn=>{
       const v=sessionOverall(sn.sid);
-      return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sn.sid}]</span> ${esc(sn.name||fmtDate(sn.date))}${sn.facs.length?' · '+sn.facs.map(facName).join(', '):''}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(1):'—'}</div></div>`;}).join('')+'</div>':'';
+      return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sn.sid}]</span> ${esc(sn.name||fmtDate(sn.date))}${sn.facs.length?' · '+sn.facs.map(facName).join(', '):''}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreInk(v):'#aabbc8'}">${v?v.toFixed(1):'n/a'}</div></div>`;}).join('')+'</div>':'';
   const when=fmtDate(g.date)+(g.end&&g.end!==g.date?' to '+fmtDate(g.end):'');
   el.innerHTML=`<div class="detail-head"><div class="key">${esc(g.iid||g.cid)} · instance${g.code?' · '+esc(g.code):''}</div>
     <h2>${esc(c.plo||g.cid)}</h2>
-    ${g.codeName?`<div class="sub" style="display:block"><span style="color:#8a5b00;font-size:11px;letter-spacing:.06em;text-transform:uppercase">AG report identifier</span><br><span class="mono" style="font-size:12px;color:#8a5b00;word-break:break-word">${esc(g.codeName)}</span></div>`:''}
+    ${g.codeName?`<div class="sub" style="display:block"><span style="color:#001489;font-size:11px;letter-spacing:.06em;text-transform:uppercase">AG report identifier</span><br><span class="mono" style="font-size:12px;color:#001489;word-break:break-word">${esc(g.codeName)}</span></div>`:''}
     ${g.agName&&g.agName!==c.plo?`<div class="sub"><span style="font-size:12px;color:var(--ink-soft)">Reported as: ${esc(g.agName)}</span></div>`:''}
-    <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span><span class="pill mode">${esc(g.mode||'—')}</span><span>Term ${g.term||'—'}</span><span>${when}</span>${g.soi?`<span class="key">${esc(g.soi)}</span>`:''}</div>
-    <div class="sub"><b style="color:${g.overall?scoreColor(g.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${g.overall?g.overall.toFixed(2):'—'}/4</b><span>${g.resp} responses${g.items.length>1?' · '+g.items.length+' breakaways':''}</span><button class="btn" style="margin-left:auto" onclick="generateInstanceReport('${esc(g.key)}')">Generate report</button></div></div>
+    <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'n/a'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'n/a'}</span><span class="pill mode">${esc(g.mode||'n/a')}</span><span>Term ${g.term||'n/a'}</span><span>${when}</span>${g.soi?`<span class="key">${esc(g.soi)}</span>`:''}</div>
+    <div class="sub"><b style="color:${g.overall?scoreInk(g.overall):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${g.overall?g.overall.toFixed(2)+'/4':'n/a'}</b><span>${g.resp} responses${g.items.length>1?' · '+g.items.length+' breakaways':''}</span><button class="btn" style="margin-left:auto" onclick="generateInstanceReport('${esc(g.key)}')">Generate report</button></div></div>
     <div class="detail-body">
-      <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${g.facs.length} rated separately</span></h4>${facBlocks||`<span style="font-size:12px;color:#8a94a8">No facilitation score yet. Facilitation comes from the facilitator form only, not the main feedback form, and each response has to name a facilitator or find one in the Facilitator ID(s) column of the register.</span>`}</div>
+      <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${g.facs.length} rated separately</span></h4>${facBlocks||`<span style="font-size:12px;color:#5b7f95">No facilitation score yet. Facilitation comes from the facilitator form only, not the main feedback form, and each response has to name a facilitator or find one in the Facilitator ID(s) column of the register.</span>`}</div>
       ${breakaways}${sessGroups}</div>`;
 }
 
@@ -3556,9 +3561,9 @@ function renderCourseCards(){
     const ni=new Set(ag.sessions.map(x=>x.iid).filter(Boolean)).size;
     const modes=[...new Set(ag.sessions.map(x=>x.mode).filter(Boolean))];
     return `<div class="scard" data-cid="${c.cid}" aria-selected="${c.cid===sel.course}" tabindex="0" role="button">
-    <div class="meta"><span class="cidcell mono" style="padding:1px 7px">${c.cid}</span><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}·${c.unit||'—'}</span>${c.soi?`<span class="key">${esc(c.soi)}</span>`:''}<span class="pill mode">${ni||ag.sessions.length} instance${(ni||ag.sessions.length)!==1?'s':''}</span><span>${modes.join(' / ')||'—'}</span></div>
+    <div class="meta"><span class="cidcell mono" style="padding:1px 7px">${c.cid}</span><span class="pill"${subTitle(c.sub)}>${c.sub||'n/a'}·${c.unit||'n/a'}</span>${c.soi?`<span class="key">${esc(c.soi)}</span>`:''}<span class="pill mode">${ni||ag.sessions.length} instance${(ni||ag.sessions.length)!==1?'s':''}</span><span>${modes.join(' / ')||'n/a'}</span></div>
     <h3>${esc(c.plo)}</h3>
-    <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aab'}">${ag.overall?ag.overall.toFixed(2):'—'}</div><div class="n2">${ag.resp} responses</div></div>
+    <div class="rate"><div class="num" style="color:${ag.overall?scoreInk(ag.overall):'#aabbc8'}">${ag.overall?ag.overall.toFixed(2):'n/a'}</div><div class="n2">${ag.resp} responses</div></div>
    </div>`;}).join('');
   el.querySelectorAll('.scard[data-cid]').forEach(c=>{const k=c.getAttribute('data-cid');
     c.onclick=()=>{sel.course=k;renderCourseCards();renderCourseDetail();};c.onkeydown=e=>{if(e.key==='Enter'){c.onclick();}};});
@@ -3584,19 +3589,19 @@ function renderCourseDetail(){
   for(const sn of ss){const k=sn.iid||'';if(!(k in seen)){seen[k]=groups.length;groups.push({iid:k,items:[]});}groups[seen[k]].items.push(sn);}
   const instScore=items=>{let sum=0,n=0;for(const sn of items){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;if(o!=null&&rn){sum+=o*rn;n+=rn;}}return n?sum/n:null;};
   const spark=groups.map(g=>{const o=instScore(g.items);
-    return `<i style="height:${o?o/4*100:4}%;background:${scoreColor(o)}" title="${esc(g.iid||'ungrouped')}: ${o?o.toFixed(2):'—'}"></i>`;}).join('');
+    return `<i style="height:${o?o/4*100:4}%;background:${scoreColor(o)}" title="${esc(g.iid||'ungrouped')}: ${o?o.toFixed(2):'n/a'}"></i>`;}).join('');
   const body=groups.map(g=>{const inst=IMAP[g.iid]||{};const o=instScore(g.items);
-    const head=g.iid?`<div class="fh"><b>${esc(g.iid)} <span class="mono" style="color:#8a94a8;font-weight:500">${esc(instLabel(g.iid))}</span></b><span class="fs" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(2):'—'}</span></div>`
-      :`<div class="fh"><b>Deliveries</b><span class="fs" style="color:${o?scoreColor(o):'#aab'}">${o?o.toFixed(2):'—'}</span></div>`;
+    const head=g.iid?`<div class="fh"><b>${esc(g.iid)} <span class="mono" style="color:#5b7f95;font-weight:500">${esc(instLabel(g.iid))}</span></b><span class="fs" style="color:${o?scoreInk(o):'#aabbc8'}">${o?o.toFixed(2):'n/a'}</span></div>`
+      :`<div class="fh"><b>Deliveries</b><span class="fs" style="color:${o?scoreInk(o):'#aabbc8'}">${o?o.toFixed(2):'n/a'}</span></div>`;
     const rows=g.items.map(sn=>{const v=sessionOverall(sn.sid);
-      return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sn.sid}]</span> ${esc(sn.name||fmtDate(sn.date))}${sn.facs.length?' · '+sn.facs.map(facName).join(', '):''}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(1):'—'}</div></div>`;}).join('');
-    const meta=inst.mode||inst.days||inst.hours?`<div style="font-size:11px;color:#8a94a8;margin-bottom:6px">${[inst.mode,inst.days,inst.hours].filter(Boolean).map(esc).join(' · ')}</div>`:'';
-    return `<div class="facblock" style="background:#f7f9fc">${head}${meta}${rows}</div>`;}).join('');
+      return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">[${sn.sid}]</span> ${esc(sn.name||fmtDate(sn.date))}${sn.facs.length?' · '+sn.facs.map(facName).join(', '):''}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreInk(v):'#aabbc8'}">${v?v.toFixed(1):'n/a'}</div></div>`;}).join('');
+    const meta=inst.mode||inst.days||inst.hours?`<div style="font-size:11px;color:#5b7f95;margin-bottom:6px">${[inst.mode,inst.days,inst.hours].filter(Boolean).map(esc).join(' · ')}</div>`:'';
+    return `<div class="facblock" style="background:#f4f7f9">${head}${meta}${rows}</div>`;}).join('');
   el.innerHTML=`<div class="detail-head"><div class="key">${c.cid} · professional learning opportunity</div><h2>${esc(c.plo)}</h2>
-    <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'—'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'—'}</span>${c.soi?`<span class="key">${esc(c.soi)}${SOIMAP[c.soi]&&SOIMAP[c.soi].name?' · '+esc(SOIMAP[c.soi].name):''}</span>`:'<span class="pill">not audited</span>'}${coordForUnit(c.unit)?`<span class="pill" style="background:#e9f6f3;color:#0b6b57">${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'} ${esc(coordForUnit(c.unit))}</span>`:''}</div>
-    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${groups.filter(g=>g.iid).length||groups.length} instance${(groups.filter(g=>g.iid).length||groups.length)!==1?'s':''} · ${ss.length} sessions · ${ag.resp} responses</span><button class="btn" style="margin-left:auto" onclick="generateCourseReport('${c.cid}')">Generate report</button></div></div>
+    <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'n/a'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'n/a'}</span>${c.soi?`<span class="key">${esc(c.soi)}${SOIMAP[c.soi]&&SOIMAP[c.soi].name?' · '+esc(SOIMAP[c.soi].name):''}</span>`:'<span class="pill">not audited</span>'}${coordForUnit(c.unit)?`<span class="pill" style="background:#f0f5dc;color:#5a6b0a">${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'} ${esc(coordForUnit(c.unit))}</span>`:''}</div>
+    <div class="sub"><b style="color:${ag.overall?scoreInk(ag.overall):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2)+'/4':'n/a'}</b><span>${groups.filter(g=>g.iid).length||groups.length} instance${(groups.filter(g=>g.iid).length||groups.length)!==1?'s':''} · ${ss.length} sessions · ${ag.resp} responses</span><button class="btn" style="margin-left:auto" onclick="generateCourseReport('${c.cid}')">Generate report</button></div></div>
     <div class="detail-body"><div class="rgroup"><h4>Score across instances<span>oldest → newest</span></h4><div class="spark">${spark}</div></div>
-    <div class="rgroup"><h4>By instance</h4>${body||'<span style="font-size:12px;color:#8a94a8">No deliveries recorded yet.</span>'}</div></div>`;
+    <div class="rgroup"><h4>By instance</h4>${body||'<span style="font-size:12px;color:#5b7f95">No deliveries recorded yet.</span>'}</div></div>`;
 }
 
 /* FACILITATORS */
@@ -3605,9 +3610,9 @@ function renderFacCards(){
   const list=FACS.map(f=>({f,ag:facAgg(f.fid)}))
     .sort((a,b)=>(a.ag.overall==null?99:a.ag.overall)-(b.ag.overall==null?99:b.ag.overall));
   el.innerHTML=list.map(({f,ag})=>`<div class="scard" data-fid="${f.fid}" aria-selected="${f.fid===sel.fac}" tabindex="0" role="button">
-    <div class="meta"><span class="pill fac mono">${f.fid}</span><span class="pill">${ag.instances.length} instance${ag.instances.length!==1?'s':''}</span>${ag.resp?`<span>${ag.resp} response${ag.resp!==1?'s':''}</span>`:'<span style="color:#b48a2a">no facilitation feedback yet</span>'}</div>
+    <div class="meta"><span class="pill fac mono">${f.fid}</span><span class="pill">${ag.instances.length} instance${ag.instances.length!==1?'s':''}</span>${ag.resp?`<span>${ag.resp} response${ag.resp!==1?'s':''}</span>`:'<span style="color:#a82a1d">no facilitation feedback yet</span>'}</div>
     <h3>${esc(f.name)}</h3><div class="meta"><span>Facilitation score</span></div>
-    <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aab'}">${ag.overall?ag.overall.toFixed(2):'—'}</div><div class="n2">D1 mean</div></div>
+    <div class="rate"><div class="num" style="color:${ag.overall?scoreInk(ag.overall):'#aabbc8'}">${ag.overall?ag.overall.toFixed(2):'n/a'}</div><div class="n2">D1 mean</div></div>
    </div>`).join('');
   el.querySelectorAll('.scard[data-fid]').forEach(c=>{const k=c.getAttribute('data-fid');
     c.onclick=()=>{sel.fac=k;renderFacCards();renderFacDetail();};c.onkeydown=e=>{if(e.key==='Enter'){c.onclick();}};});
@@ -3618,19 +3623,19 @@ function renderFacDetail(){
   el.className='detail';const ag=facAgg(f.fid);const norm=ag.overall;
   const itemRows=D1.items.map(([code,label])=>{const it=ag.items[code];const v=it&&it.n?it.sum/it.n:null;
     if(v==null)return '';
-    return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(1)}</div></div>`;}).join('');
+    return `<div class="ritem"><div class="rn">${label}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreInk(v)}">${v.toFixed(1)}</div></div>`;}).join('');
   const instRows=ag.instances.map(g=>{const c=CMAP[g.cid]||{};
     const fs=instFacOverall(g.items,f.fid);
-    const flag=(fs!=null&&norm!=null&&fs<norm-0.4)?` <span class="pill" style="background:#fdeceb;color:#a3352f">below norm</span>`:'';
-    const none=fs==null?` <span class="pill" style="background:#fdf3dd;color:#8a5b00">awaiting feedback</span>`:'';
-    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn">${g.code?`<span class="key mono">${esc(g.code)}</span> `:''}${esc(c.plo||'')} <span style="color:#8a94a8">· ${esc(g.iid||'')} · ${fmtDate(g.date)}</span>${flag}${none}</div><div class="rt"><div class="rf" style="width:${fs?fs/4*100:0}%;background:${scoreColor(fs)}"></div></div><div class="rv" style="color:${fs?scoreColor(fs):'#aab'}">${fs?fs.toFixed(1):'—'}</div></div>`;}).join('');
+    const flag=(fs!=null&&norm!=null&&fs<norm-0.4)?` <span class="pill" style="background:#fbe4e1;color:#a82a1d">below norm</span>`:'';
+    const none=fs==null?` <span class="pill" style="background:#fef6cf;color:#001489">awaiting feedback</span>`:'';
+    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn">${g.code?`<span class="key mono">${esc(g.code)}</span> `:''}${esc(c.plo||'')} <span style="color:#5b7f95">· ${esc(g.iid||'')} · ${fmtDate(g.date)}</span>${flag}${none}</div><div class="rt"><div class="rf" style="width:${fs?fs/4*100:0}%;background:${scoreColor(fs)}"></div></div><div class="rv" style="color:${fs?scoreInk(fs):'#aabbc8'}">${fs?fs.toFixed(1):'n/a'}</div></div>`;}).join('');
   const plos=new Set(ag.instances.map(g=>g.cid));
   el.innerHTML=`<div class="detail-head"><div class="key">${f.fid} · facilitator</div><h2>${esc(f.name)}</h2>
-    <div class="sub"><b style="color:${norm?scoreColor(norm):'#aab'};font-size:15px;font-family:Space Grotesk">${norm?norm.toFixed(2):'—'}/4</b><span>facilitation · ${ag.instances.length} instance${ag.instances.length!==1?'s':''} across ${plos.size} PLO${plos.size!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</span><button class="btn" style="margin-left:auto" onclick="generateFacilitatorReport('${f.fid}')">Generate report</button></div>
-    ${ag.unassigned?`<div class="sub"><span style="color:#8a5b00;font-size:12px">${ag.unassigned} instance${ag.unassigned!==1?'s':''} picked up from the facilitator form but not recorded against this person on the register.</span></div>`:''}</div>
+    <div class="sub"><b style="color:${norm?scoreInk(norm):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${norm?norm.toFixed(2)+'/4':'n/a'}</b><span>facilitation · ${ag.instances.length} instance${ag.instances.length!==1?'s':''} across ${plos.size} PLO${plos.size!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</span><button class="btn" style="margin-left:auto" onclick="generateFacilitatorReport('${f.fid}')">Generate report</button></div>
+    ${ag.unassigned?`<div class="sub"><span style="color:#001489;font-size:12px">${ag.unassigned} instance${ag.unassigned!==1?'s':''} picked up from the facilitator form but not recorded against this person on the register.</span></div>`:''}</div>
     <div class="detail-body">
-      <div class="rgroup fac"><h4>Facilitation items<span>all instances</span></h4>${itemRows||'<span style="font-size:12px;color:#8a94a8">No facilitation feedback has come in for this person yet. Instances they ran are listed below.</span>'}</div>
-      <div class="rgroup"><h4>Per instance<span>flagged if more than 0.4 below their norm</span></h4>${instRows||'<span style="font-size:12px;color:#8a94a8">No instances recorded against this facilitator. Add their ID to the Facilitator ID(s) column on the register Sessions tab.</span>'}</div></div>`;
+      <div class="rgroup fac"><h4>Facilitation items<span>all instances</span></h4>${itemRows||'<span style="font-size:12px;color:#5b7f95">No facilitation feedback has come in for this person yet. Instances they ran are listed below.</span>'}</div>
+      <div class="rgroup"><h4>Per instance<span>flagged if more than 0.4 below their norm</span></h4>${instRows||'<span style="font-size:12px;color:#5b7f95">No instances recorded against this facilitator. Add their ID to the Facilitator ID(s) column on the register Sessions tab.</span>'}</div></div>`;
 }
 
 /* SUMMARY (front page) */
@@ -3646,16 +3651,16 @@ function renderSummary(){
   const overall=programmeFinalRating();
   const fbCourses=feedbackCourseIds().size,fbSessions=feedbackInstances().length,fbFacs=feedbackFacIds().size;
   document.getElementById('sumChips').innerHTML=`
-    <div class="qr-chip"><div class="n" style="color:${overall?scoreColor(overall):'#fff'}">${overall?overall.toFixed(2):'—'}/4</div><div class="l">Final quality rating</div></div>
+    <div class="qr-chip"><div class="n" style="color:${overall?scoreColor(overall):'#fff'}">${overall?overall.toFixed(2)+'/4':'n/a'}</div><div class="l">Final quality rating</div></div>
     <div class="qr-chip"><div class="n">${fbCourses}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${COURSES.length}</span></div><div class="l">PLOs with feedback</div></div>
     <div class="qr-chip"><div class="n">${fbSessions}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${instanceGroups().length}</span></div><div class="l">Instances with feedback</div></div>
     <div class="qr-chip"><div class="n">${fbFacs}<span style="font-size:13px;color:#c9d3e6;font-weight:500"> / ${FACS.length}</span></div><div class="l">Facilitators rated</div></div>`;
 
   const units=unitList().filter(u=>!SHARED_UNITS.includes(u));
-  const bySub={};units.forEach(u=>{const sub=subOfUnit(u)||'—';(bySub[sub]=bySub[sub]||[]).push(u);});
+  const bySub={};units.forEach(u=>{const sub=subOfUnit(u)||'n/a';(bySub[sub]=bySub[sub]||[]).push(u);});
   const subs=Object.keys(bySub).sort();
-  const SUB_PALETTE={LA:'#17458F',PD:'#D99524',TPI:'#0E9285'};
-  const SUB_FALLBACK=['#5B7F95','#8D6E97','#92AD12','#00A1A3','#C6413A'];
+  const SUB_PALETTE={LA:'#001489',PD:'#f5c608',TPI:'#92ad12'};
+  const SUB_FALLBACK=['#5b7f95','#aabbc8','#d73828'];
   let fbIdx=0;const subColor={};subs.forEach(s=>{subColor[s]=SUB_PALETTE[s]||SUB_FALLBACK[fbIdx++%SUB_FALLBACK.length];});
 
   const groups=['design','delivery','corporate','edulis'];
@@ -3666,9 +3671,9 @@ function renderSummary(){
   function rowCells(u){
     let cells='';
     groups.forEach(g=>{const v=groupAvgForUnit(u,g);
-      cells+=v!=null?`<td class="score" style="background:${scoreColor(v)}">${v.toFixed(1)}</td>`:`<td class="na">—</td>`;});
+      cells+=v!=null?`<td class="score" style="background:${scoreColor(v)};color:${scoreFg(scoreColor(v))}">${v.toFixed(1)}</td>`:`<td class="na">n/a</td>`;});
     const fr=rowFinalRating(u);
-    cells+=fr!=null?`<td class="score" style="background:${scoreColor(fr)};font-size:13px">${fr.toFixed(2)}</td>`:`<td class="na">—</td>`;
+    cells+=fr!=null?`<td class="score" style="background:${scoreColor(fr)};color:${scoreFg(scoreColor(fr))};font-size:13px">${fr.toFixed(2)}</td>`:`<td class="na">n/a</td>`;
     return cells;
   }
 
@@ -3682,23 +3687,23 @@ function renderSummary(){
       body+='</tr>';
     });
   }
-  // PDD row — owns Programme Design & Development (Content), pooled across every session
-  body+=`<tr class="pdd-row"><td class="rowlab" style="border-left:4px solid #00A1A3"><span class="unit-chip" style="background:#00A1A3"></span>PDD</td><td class="rowlab">Content design<span class="sub">all instances</span></td>`;
+  // PDD row - owns Programme Design & Development (Content), pooled across every session
+  body+=`<tr class="pdd-row"><td class="rowlab" style="border-left:4px solid #aabbc8"><span class="unit-chip" style="background:#aabbc8"></span>PDD</td><td class="rowlab">Content design<span class="sub">all instances</span></td>`;
   body+=rowCells(PDD_UNIT);
   body+='</tr>';
-  // Corporate Services row — owns Venue, Catering, Accommodation, pooled across every session
-  body+=`<tr class="corp-row"><td class="rowlab" style="border-left:4px solid #5b3a99"><span class="unit-chip" style="background:#5b3a99"></span>Corporate Services</td><td class="rowlab">Shared services<span class="sub">all instances</span></td>`;
+  // Corporate Services row - owns Venue, Catering, Accommodation, pooled across every session
+  body+=`<tr class="corp-row"><td class="rowlab" style="border-left:4px solid #5b7f95"><span class="unit-chip" style="background:#5b7f95"></span>Corporate Services</td><td class="rowlab">Shared services<span class="sub">all instances</span></td>`;
   body+=rowCells(CORPORATE_UNIT);
   body+='</tr>';
   body+='</tbody>';
-  const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.length}" style="text-align:right">Weighted mean across every rubric code, every instance</td><td class="score" style="background:${overall?scoreColor(overall):'#c8cfda'};font-size:14px">${overall?overall.toFixed(2):'—'}</td></tr></tfoot>`;
+  const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.length}" style="text-align:right">Weighted mean across every rubric code, every instance</td><td class="score" style="background:${overall?scoreColor(overall):'#aabbc8'};color:${scoreFg(overall?scoreColor(overall):'#aabbc8')};font-size:14px">${overall?overall.toFixed(2):'n/a'}</td></tr></tfoot>`;
   document.getElementById('sumTable').innerHTML=head+body+foot;
   document.getElementById('sumMethodNote').innerHTML=`<b>How ratings are calculated</b>
     <ul style="margin:8px 0 0;padding-left:18px">
-      <li><b>Within a section</b> (e.g. PLO &amp; Content), every response to every question in it is pooled together and divided by the total number of responses — this is fully <b>response-weighted</b>: a question answered by 100 people counts proportionally more than one answered by 10, with no distortion from uneven response counts between questions.</li>
-      <li><b>Between sections</b> — combining sections into the four columns below, into a unit's Final Quality Rating, and into the Programme overall figure — each section counts as <b>one equal vote</b>, regardless of how many responses or questions sit behind it. This is a deliberate choice so a heavily-answered section can't dominate a score purely by volume.</li>
-      <li>The four columns are <b>Content</b> (PLO &amp; Content), <b>Delivery</b> (Facilitation, Logistics, Digital experience), <b>Support Services</b> (Venue, Catering, Accommodation), and <b>Library Services</b> (EDULIS) — each is the equal-weighted average of its underlying sections, per the rule above.</li>
-      <li><b>Delivery's</b> Facilitation figure is cumulative — the response-weighted average across every facilitation question and every facilitator on instances hosted by that unit.</li>
+      <li><b>Within a section</b> (e.g. PLO &amp; Content), every response to every question in it is pooled together and divided by the total number of responses. This makes it fully <b>response-weighted</b>: a question answered by 100 people counts proportionally more than one answered by 10, with no distortion from uneven response counts between questions.</li>
+      <li><b>Between sections</b> (combining sections into the four columns below, into a unit's Final Quality Rating, and into the Programme overall figure), each section counts as <b>one equal vote</b>, regardless of how many responses or questions sit behind it. This is a deliberate choice so a heavily-answered section can't dominate a score purely by volume.</li>
+      <li>The four columns are <b>Content</b> (PLO &amp; Content), <b>Delivery</b> (Facilitation, Logistics, Digital experience), <b>Support Services</b> (Venue, Catering, Accommodation), and <b>Library Services</b> (EDULIS). Each is the equal-weighted average of its underlying sections, per the rule above.</li>
+      <li><b>Delivery's</b> Facilitation figure is cumulative: the response-weighted average across every facilitation question and every facilitator on instances hosted by that unit.</li>
       <li><b>Content</b> is reported per unit like every other column, plus pooled once more under <b>PDD</b> as a programme-wide summary.</li>
       <li><b>Support Services</b> is reported per unit like every other column, plus pooled once more under <b>Corporate Services</b> as a programme-wide summary.</li>
       <li><b>Final Quality Rating</b> is the equal-weighted average of every underlying rubric section's score for that row (not the four displayed columns), so it stays accurate regardless of how columns are grouped for display.</li>
@@ -3706,7 +3711,7 @@ function renderSummary(){
     </ul>`;
 }
 
-/* SOIs — Specific Outcomes Indicators */
+/* SOIs - Specific Outcomes Indicators */
 function renderSoiCards(){
   const el=document.getElementById('soiCards');if(!el)return;
   const ids=[...new Set(COURSES.map(c=>c.soi).filter(Boolean).concat(SOIS.map(x=>x.soi)))].sort();
@@ -3719,7 +3724,7 @@ function renderSoiCards(){
       <div class="meta"><span class="key">${esc(id)}</span>${x.year?`<span class="pill">${esc(x.year)}</span>`:''}<span class="pill">${ag.plos.length} PLO${ag.plos.length!==1?'s':''}</span><span class="pill mode">${ag.instances.length} instance${ag.instances.length!==1?'s':''}</span></div>
       <h3>${esc(x.name||id)}</h3>
       <div class="meta"><span>${units.length?esc(units.join(', ')):'no unit set'}</span></div>
-      <div class="rate"><div class="num" style="color:${ag.overall?scoreColor(ag.overall):'#aab'}">${ag.overall?ag.overall.toFixed(2):'—'}</div><div class="n2">${ag.resp} responses</div></div>
+      <div class="rate"><div class="num" style="color:${ag.overall?scoreInk(ag.overall):'#aabbc8'}">${ag.overall?ag.overall.toFixed(2):'n/a'}</div><div class="n2">${ag.resp} responses</div></div>
     </div>`;}).join('');
   el.querySelectorAll('.scard[data-soi]').forEach(c=>{const k=c.getAttribute('data-soi');
     c.onclick=()=>{sel.soi=k;renderSoiCards();renderSoiDetail();};
@@ -3731,15 +3736,15 @@ function renderSoiDetail(){
   if(!id||(!x&&!COURSES.some(c=>c.soi===id))){el.className='detail empty';el.innerHTML='<div>Select a Specific Outcomes Indicator.</div>';return;}
   el.className='detail';const ag=soiAgg(id);const meta=x||{};
   const secRows=RUBRIC.map(sec=>{const v=soiSectionAvg(ag.sessions,sec);if(v==null)return '';
-    return `<div class="ritem"><div class="rn">${esc(sec.name)}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(2)}</div></div>`;}).join('');
+    return `<div class="ritem"><div class="rn">${esc(sec.name)}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreInk(v)}">${v.toFixed(2)}</div></div>`;}).join('');
   const ploRows=ag.plos.map(p=>{const ps=ag.sessions.filter(sn=>sn.cid===p.cid);
     let sum=0,n=0;for(const sn of ps){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;if(o!=null&&rn){sum+=o*rn;n+=rn;}}
     const v=n?sum/n:null;const ni=new Set(ps.map(sn=>sn.iid).filter(Boolean)).size;
-    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">${esc(p.cid)}</span> ${esc(p.plo)} <span style="color:#8a94a8">· ${ni||ps.length} instance${(ni||ps.length)!==1?'s':''}</span></div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(1):'—'}</div></div>`;}).join('');
+    return `<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn"><span class="key mono">${esc(p.cid)}</span> ${esc(p.plo)} <span style="color:#5b7f95">· ${ni||ps.length} instance${(ni||ps.length)!==1?'s':''}</span></div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreInk(v):'#aabbc8'}">${v?v.toFixed(1):'n/a'}</div></div>`;}).join('');
   const instRows=ag.instances.map(iid=>{const is=ag.sessions.filter(sn=>sn.iid===iid);
     let sum=0,n=0;for(const sn of is){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;if(o!=null&&rn){sum+=o*rn;n+=rn;}}
     const v=n?sum/n:null;const inst=IMAP[iid]||{};const c=CMAP[inst.cid]||{};
-    return {iid,v,n,html:`<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn">${inst.code?`<span class="key mono">${esc(inst.code)}</span> `:''}${esc(c.plo||'')} <span style="color:#8a94a8">· ${esc(iid)} · ${esc(instLabel(iid))}</span>${inst.codeName?`<br><span class="mono" style="font-size:10px;color:#8a5b00">${esc(inst.codeName)}</span>`:''}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreColor(v):'#aab'}">${v?v.toFixed(1):'—'}</div></div>`};})
+    return {iid,v,n,html:`<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn">${inst.code?`<span class="key mono">${esc(inst.code)}</span> `:''}${esc(c.plo||'')} <span style="color:#5b7f95">· ${esc(iid)} · ${esc(instLabel(iid))}</span>${inst.codeName?`<br><span class="mono" style="font-size:10px;color:#001489">${esc(inst.codeName)}</span>`:''}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreInk(v):'#aabbc8'}">${v?v.toFixed(1):'n/a'}</div></div>`};})
     .sort((a,b)=>(a.v==null?99:a.v)-(b.v==null?99:b.v)).map(o=>o.html).join('');
   const units=[...new Set(ag.plos.map(p=>p.unit).filter(Boolean))];
   const subs=[...new Set(ag.plos.map(p=>p.sub).filter(Boolean))];
@@ -3747,11 +3752,11 @@ function renderSoiDetail(){
     <h2>${esc(meta.name||id)}</h2>
     ${meta.focus?`<div class="sub"><span>${esc(meta.focus)}</span></div>`:''}
     <div class="sub">${subs.map(v=>`<span class="pill">${esc(v)}</span>`).join('')}${units.map(v=>`<span class="pill">${esc(v)}</span>`).join('')}${meta.year?`<span>Audit year ${esc(meta.year)}</span>`:''}</div>
-    <div class="sub"><b style="color:${ag.overall?scoreColor(ag.overall):'#aab'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2):'—'}/4</b><span>${ag.plos.length} PLOs · ${ag.instances.length} instances · ${ag.resp} responses</span></div></div>
+    <div class="sub"><b style="color:${ag.overall?scoreInk(ag.overall):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2)+'/4':'n/a'}</b><span>${ag.plos.length} PLOs · ${ag.instances.length} instances · ${ag.resp} responses</span></div></div>
     <div class="detail-body">
       ${secRows?`<div class="rgroup"><h4>Rating by rubric section<span>whole indicator, pooled</span></h4>${secRows}</div>`:'<div class="rgroup"><h4>No responses yet</h4></div>'}
-      <div class="rgroup"><h4>By PLO<span>${ag.plos.length}</span></h4>${ploRows||'<span style="font-size:12px;color:#8a94a8">No PLOs linked to this indicator yet.</span>'}</div>
-      <div class="rgroup"><h4>By instance<span>weakest first</span></h4>${instRows||'<span style="font-size:12px;color:#8a94a8">No instances recorded yet.</span>'}</div>
+      <div class="rgroup"><h4>By PLO<span>${ag.plos.length}</span></h4>${ploRows||'<span style="font-size:12px;color:#5b7f95">No PLOs linked to this indicator yet.</span>'}</div>
+      <div class="rgroup"><h4>By instance<span>weakest first</span></h4>${instRows||'<span style="font-size:12px;color:#5b7f95">No instances recorded yet.</span>'}</div>
     </div>`;
 }
 
@@ -3759,13 +3764,13 @@ function renderSoiDetail(){
 function renderHeat(){
   const units=[...new Set(COURSES.map(c=>c.unit).filter(isValidUnit))].sort();
   const cols=[...units,PDD_UNIT,CORPORATE_UNIT];
-  let head=`<thead><tr><th class="row">Section ↓ / Unit →</th>${cols.map(u=>`<th${u===CORPORATE_UNIT?' style="color:#5b3a99"':u===PDD_UNIT?' style="color:#00838a"':''}${unitTitle(u)}>${u}</th>`).join('')}<th>All</th></tr></thead>`;
+  let head=`<thead><tr><th class="row">Section ↓ / Unit →</th>${cols.map(u=>`<th${u===CORPORATE_UNIT?' style="color:#5b7f95"':u===PDD_UNIT?' style="color:#5b7f95"':''}${unitTitle(u)}>${u}</th>`).join('')}<th>All</th></tr></thead>`;
   let body='<tbody>';
   for(const sec of RUBRIC){body+=`<tr><th class="row" title="${sec.name}">${sec.name}</th>`;
     for(const u of cols){
       const v=sectionAvgForUnit(u,sec);
-      body+=v!=null?`<td class="cell" style="background:${scoreColor(v)}">${v.toFixed(1)}</td>`:'<td style="color:#c8cfda">—</td>';}
-    const gv=sectionAvgForSessions(SESSIONS,sec);body+=gv!=null?`<td class="cell" style="background:${scoreColor(gv)}">${gv.toFixed(1)}</td>`:'<td>—</td>';body+='</tr>';}
+      body+=v!=null?`<td class="cell" style="background:${scoreColor(v)};color:${scoreFg(scoreColor(v))}">${v.toFixed(1)}</td>`:'<td style="color:#aabbc8">n/a</td>';}
+    const gv=sectionAvgForSessions(SESSIONS,sec);body+=gv!=null?`<td class="cell" style="background:${scoreColor(gv)};color:${scoreFg(scoreColor(gv))}">${gv.toFixed(1)}</td>`:'<td>n/a</td>';body+='</tr>';}
   document.getElementById('heat').innerHTML=head+body+'</tbody>';
   document.getElementById('heatMeta').textContent=`${units.length} units + PDD + Corporate Services × ${RUBRIC.length} sections · PDD and Corporate Services are programme-wide summaries on top of each unit's own scores`;
 }
@@ -3783,18 +3788,18 @@ function renderCat(){
       <td><input value="${esc(c.days||'')}" data-f="days" style="min-width:56px"></td><td><input value="${esc(c.hours||'')}" data-f="hours" style="min-width:56px"></td>
       <td><select data-f="term"><option value=""></option>${opts(['1','2','3'],c.term)}</select></td><td><select data-f="mode">${opts(MODES,c.mode)}</select></td>
       <td><button class="rowdel" data-del="${i}">×</button></td></tr>`).join('')}</tbody></table></div>`;
-    note.innerHTML='<b>Courses</b> are the stable layer — one row per PLO, IDs frozen. Each course fans out into sessions on the Sessions tab. Its <b>Coordinator</b> comes automatically from whoever coordinates its Unit — set that once on the Coordinators tab.';
+    note.innerHTML='<b>PLOs</b> are the stable layer: one row per PLO, with IDs that never change. Each PLO fans out into instances and sessions. Its <b>Coordinator</b> comes from whoever coordinates its unit, which you set once on the Coordinators tab.';
     bindCat('courses');
   } else if(sel.catSub==='facs'){
     body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>ID</th><th>Facilitator name</th><th>Instances</th><th></th></tr></thead><tbody>${FACS.map((f,i)=>{const nsess=SESSIONS.filter(s=>s.facs.includes(f.fid)).length;
-      return `<tr data-i="${i}"><td class="cidcell" style="color:#5b3a99;background:#f3eefb">${f.fid}</td><td class="plo"><input value="${esc(f.name||'')}" data-f="name"></td><td class="mono" style="color:#8a94a8">${nsess}</td><td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
+      return `<tr data-i="${i}"><td class="cidcell" style="color:#5b7f95;background:#e9eff3">${f.fid}</td><td class="plo"><input value="${esc(f.name||'')}" data-f="name"></td><td class="mono" style="color:#5b7f95">${nsess}</td><td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
     note.innerHTML='<b>Facilitators</b> are the roster. Assign them to sessions on the Sessions tab (comma-separated IDs). Facilitation feedback rolls up per person from here.';
     bindCat('facs');
   } else if(sel.catSub==='coords'){
     const allUnits=[...new Set([...COURSES.map(c=>c.unit).filter(isValidUnit),...COORDS.map(co=>co.unit).filter(Boolean)])].sort();
     body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>Unit</th><th>Coordinator ID</th><th>Coordinator name</th><th>Courses covered</th><th></th></tr></thead><tbody>${COORDS.map((co,i)=>{const ncourses=COURSES.filter(c=>c.unit===co.unit).length;
-      return `<tr data-i="${i}"><td><select data-f="unit"><option value=""></option>${allUnits.map(u=>`<option value="${u}"${u===co.unit?' selected':''}>${u}</option>`).join('')}</select></td><td class="cidcell" style="color:#0b6b57;background:#e9f6f3"><input value="${esc(co.coid||'')}" data-f="coid" style="background:transparent;color:inherit;text-align:center"></td><td class="plo"><input value="${esc(co.name||'')}" data-f="name"></td><td class="mono" style="color:#8a94a8">${ncourses}</td><td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
-    note.innerHTML='<b>Coordinators</b> are assigned per <b>Unit</b> — one row here covers every course hosted by that unit, so there is no need to set a coordinator on each course individually. Unlike facilitators, coordinators are not individually rated, so their name shows openly on the course detail.';
+      return `<tr data-i="${i}"><td><select data-f="unit"><option value=""></option>${allUnits.map(u=>`<option value="${u}"${u===co.unit?' selected':''}>${u}</option>`).join('')}</select></td><td class="cidcell" style="color:#5a6b0a;background:#f0f5dc"><input value="${esc(co.coid||'')}" data-f="coid" style="background:transparent;color:inherit;text-align:center"></td><td class="plo"><input value="${esc(co.name||'')}" data-f="name"></td><td class="mono" style="color:#5b7f95">${ncourses}</td><td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
+    note.innerHTML='<b>Coordinators</b> are assigned per <b>Unit</b>. One row here covers every PLO hosted by that unit, so there is no need to set a coordinator on each PLO individually. Unlike facilitators, coordinators are not individually rated, so their name shows openly on the PLO detail.';
     bindCat('coords');
   } else {
     body.innerHTML=`<div class="cat-scroll"><table class="cat"><thead><tr><th>Key</th><th>Course</th><th>Date</th><th>Facilitator IDs</th><th>Mode</th><th>Fallback if unticked</th><th></th></tr></thead><tbody>${SESSIONS.map((s,i)=>{const c=CMAP[s.cid]||{};
@@ -3802,10 +3807,10 @@ function renderCat(){
       <td><select data-f="cid">${COURSES.map(cc=>`<option value="${cc.cid}"${cc.cid===s.cid?' selected':''}>${cc.cid} · ${esc((cc.plo||'').slice(0,32))}</option>`).join('')}</select></td>
       <td><input value="${esc(s.date||'')}" data-f="date" placeholder="YYYY-MM-DD" style="min-width:110px"></td>
       <td><input value="${esc(s.facs.join(', '))}" data-f="facs" style="min-width:110px" title="e.g. F01, F07"></td>
-      <td class="mono" style="font-size:11px;color:#8a94a8">${c.mode||'—'}</td>
-      <td class="mono" style="font-size:10.5px;color:#8a94a8">${s.facs.length?s.facs.join(', '):'none set'}</td>
+      <td class="mono" style="font-size:11px;color:#5b7f95">${c.mode||'n/a'}</td>
+      <td class="mono" style="font-size:10.5px;color:#5b7f95">${s.facs.length?s.facs.join(', '):'none set'}</td>
       <td><button class="rowdel" data-del="${i}">×</button></td></tr>`;}).join('')}</tbody></table></div>`;
-    note.innerHTML='<b>Instances</b> are individual deliveries, one row per delivery, each carrying the feedback key the forms read. Both forms use the same plain session key, e.g. <span class="mono">[2701]</span> — copy that list with <b>Copy session options</b>. The facilitator form additionally needs a roster of facilitator names for its "Select your facilitator" checkbox question — copy that separately with <b>Copy facilitator roster</b>. If a facilitator-form response leaves that checkbox blank, ratings fall back to the facilitators assigned here.';
+    note.innerHTML='<b>Instances</b> are individual deliveries, one row per delivery, each carrying the feedback key the forms read. Both forms use the same plain session key, e.g. <span class="mono">[2701]</span>. Copy that list with <b>Copy session options</b>. The facilitator form additionally needs a roster of facilitator names for its "Select your facilitator" checkbox question, which you copy separately with <b>Copy facilitator roster</b>. If a facilitator-form response leaves that checkbox blank, ratings fall back to the facilitators assigned here.';
     bindCat('sessions');
   }
 }
@@ -3822,7 +3827,7 @@ function bindCat(kind){
 /* CSV ingest (compound key) */
 function saveLink(key,url){try{localStorage.setItem('ctli_'+key,url);}catch(e){}}
 function loadLink(key){try{return localStorage.getItem('ctli_'+key)||'';}catch(e){return '';}}
-/* URL-hash based setup persistence — survives browsers/managed devices that clear localStorage,
+/* URL-hash based setup persistence - survives browsers/managed devices that clear localStorage,
    because the links live in the bookmarked address itself, not in browser storage. */
 function currentLinkFields(){
   return {
@@ -3836,7 +3841,7 @@ function currentLinkFields(){
     so:document.getElementById('regSoisUrl').value.trim()
   };
 }
-// Google's "publish to web" CSV links are almost entirely a repeated template around one long ID —
+// Google's "publish to web" CSV links are almost entirely a repeated template around one long ID -
 // several links (e.g. the register's three tabs) often share that same ID, differing only in gid.
 // Storing {id, gid} instead of the full URL, and each unique id only once, keeps the bookmark short.
 /* Google hands out publish URLs with the parameters in whatever order it likes, and omits gid
@@ -3851,7 +3856,7 @@ function parseGSheetPub(url){
   if(gid&&!/^\d+$/.test(gid))return null;
   return [null,m[1],gid||'0'];
 }
-// 'i' and 'so' are appended, never inserted — older bookmarked #s= links stay valid.
+// 'i' and 'so' are appended, never inserted - older bookmarked #s= links stay valid.
 const LINK_ORDER=['r','f','c','s','fa','co','i','so'];
 function compactEncodeLinks(fields){
   const ids=[];
@@ -3895,9 +3900,9 @@ function copySetupLink(){
   syncSetupHash();
   const btn=document.getElementById('copySetupLink');
   navigator.clipboard.writeText(location.href).then(()=>{
-    btn.textContent='✓ Copied — bookmark or save this link';
+    btn.textContent='✓ Copied. Bookmark or save this link';
     setTimeout(()=>btn.textContent='Copy setup link',2000);
-  }).catch(()=>{btn.textContent='Could not copy — copy the address bar manually';setTimeout(()=>btn.textContent='Copy setup link',2000);});
+  }).catch(()=>{btn.textContent='Could not copy. Copy the address bar manually';setTimeout(()=>btn.textContent='Copy setup link',2000);});
 }
 function parseCSV(text){const rows=[];let row=[],cur='',q=false;for(let i=0;i<text.length;i++){const ch=text[i];
   if(q){if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
@@ -3945,7 +3950,7 @@ function ingestFailure(which,head,keyCol,codeCols,keyed,scored){
   const n=Object.keys(codeCols).length;
   if(keyCol<0)return `${which}: no [key] found. No column contains a key like [2701]. Check that the session question's options still end in the key, e.g. "20 Feb · Science of Reading [3001]".`;
   if(!keyed)return `${which}: found the key column ("${String(head[keyCol]||'').slice(0,60)}") but none of the ${rowsWord(scored)} rows carry a [key] in it.`;
-  if(!n)return `${which}: read ${keyed} keys but matched 0 rubric questions. The Likert question wording no longer matches the rubric — check the Rubric tab for the expected wording.`;
+  if(!n)return `${which}: read ${keyed} keys but matched 0 rubric questions. The Likert question wording no longer matches the rubric. Check the Rubric tab for the expected wording.`;
   return `${which}: read ${keyed} keys and matched ${n} rubric questions, but no row had a usable rating. Check that answers are on the 4-point scale.`;}
 function rowsWord(n){return n;}
 function findFacilitatorCol(head){
@@ -3956,7 +3961,7 @@ function parseFacilitatorCSV(text){const rows=parseCSV(text);if(rows.length<2)th
   const body=rows.slice(1);
   const facCol=findFacilitatorCol(head);
   const codeCols=rubricCols(head);
-  // Exclude the facilitator column from key detection — its wording usually mentions "session" too.
+  // Exclude the facilitator column from key detection - its wording usually mentions "session" too.
   const keyCol=findKeyCol(head,body,facCol>=0?[facCol]:[]);
   const out=[];let keyed=0;
   if(keyCol>=0)for(const r of body){
@@ -3964,7 +3969,7 @@ function parseFacilitatorCSV(text){const rows=parseCSV(text);if(rows.length<2)th
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
     if(!Object.keys(scores).length)continue;
     let fids=facCol>=0?extractFacIds(r[facCol]):[];
-    if(!fids.length){const sn=SESSIONS.find(x=>x.sid===sk);fids=sn?sn.facs:[];} // nobody ticked — fall back to the register
+    if(!fids.length){const sn=SESSIONS.find(x=>x.sid===sk);fids=sn?sn.facs:[];} // nobody ticked - fall back to the register
     if(!fids.length){out.push({sk,fid:null,scores});continue;}
     for(const fid of fids)out.push({sk,fid,scores});
   }
@@ -3995,7 +4000,7 @@ function mergeResponses(){RESPONSES=[...RESPONSES_MAIN,...RESPONSES_FAC];LIVE=RE
   aggregate();diagnose();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
 /* Boot fetches the links the URL carries. If someone reaches Setup and loads a different sheet
    before that fetch resolves, the slower boot response used to land last and quietly overwrite the
-   newer data — the counts looked right for a moment, then old responses reappeared. Each load takes
+   newer data - the counts looked right for a moment, then old responses reappeared. Each load takes
    a token; a fetch that is no longer the newest for its slot is discarded on arrival. */
 let RESP_GEN={r:0,f:0};
 function claimResponseLoad(slot){return ++RESP_GEN[slot];}
@@ -4078,7 +4083,7 @@ function setView(v){state.view=v;document.querySelectorAll('#tabs .tab').forEach
   document.querySelectorAll('.view').forEach(s=>s.classList.add('hidden'));document.getElementById('v-'+v).classList.remove('hidden');renderActive();}
 
 /* wire */
-/* admin PIN gate — Setup and Catalogue only, re-locks every new browser session */
+/* admin PIN gate: Setup, Catalogue and Facilitators. Re-locks every new browser session */
 const ADMIN_PIN='2027'; // change this to set your own 4-digit PIN
 let pendingAdminView=null;
 function isAdminUnlocked(){try{return sessionStorage.getItem('ctli_admin_ok')==='1';}catch(e){return false;}}
@@ -4133,12 +4138,14 @@ document.getElementById('impXlsx').addEventListener('change',e=>{if(e.target.fil
 function pickField(row,keys){for(const k of Object.keys(row)){const kl=k.toLowerCase().trim();if(keys.some(x=>kl.includes(x)))return row[k];}return null;}
 function pickUnitField(row){
   const v=pickField(row,['hosting']);if(v!=null)return v; // prefer an explicit "hosting" column
-  for(const k of Object.keys(row)){if(/\bunit\b/.test(k.toLowerCase().trim()))return row[k];} // whole-word "unit" only — plain includes() would also match "Opportunity"
+  for(const k of Object.keys(row)){if(/\bunit\b/.test(k.toLowerCase().trim()))return row[k];} // whole-word "unit" only - plain includes() would also match "Opportunity"
   return null;}
 function fmtRegDate(v){if(v==null||v==='')return null;if(v instanceof Date){const p=n=>String(n).padStart(2,'0');return v.getFullYear()+'-'+p(v.getMonth()+1)+'-'+p(v.getDate());}
   let s=String(v).trim();const m=s.match(/^(\d{4}-\d{2}-\d{2})/);if(m)return m[1];return s||null;}
 function csvRowsToObjects(text){const rows=parseCSV(text);if(rows.length<2)return[];const head=rows[0].map(h=>h.trim());
   return rows.slice(1).map(r=>{const o={};head.forEach((h,i)=>o[h]=r[i]!==undefined?r[i]:null);return o;});}
+// Two register rows sharing one session key would merge their feedback, so flag them on load.
+function duplicateKeys(){const seen={},d=new Set();SESSIONS.forEach(s=>{if(seen[s.sid])d.add(s.sid);seen[s.sid]=1;});return [...d];}
 function applyRegisterRows(R){
   const {c:cRows,s:sRows,f:fRows,co:coRows,i:iRows,so:soRows}=R||{};
   if(soRows&&soRows.length)SOIS=soRows.filter(r=>pickField(r,['soi id'])).map(r=>({
@@ -4169,7 +4176,7 @@ function applyRegisterRows(R){
     hours:pickField(r,['hour'])!=null&&pickField(r,['hour'])!==''?String(pickField(r,['hour'])):null}));
   // "Session key" is the frozen form key and must win over the structural "Session ID (auto)".
   // If a row has no frozen key yet, fall back to the suggested one so the register is usable while
-  // keys are still being assigned — provisionalKeys reports how many, since an unfrozen key can move.
+  // keys are still being assigned - provisionalKeys reports how many, since an unfrozen key can move.
   let provisionalKeys=0;
   const sessKey=r=>{const k=pickField(r,['session key']);
     if(k!=null&&String(k).trim()!=='')return String(k);
@@ -4192,21 +4199,21 @@ function applyRegisterRows(R){
   rebuild();refreshFilters();renderCat();renderActive();
   const unitsFound=new Set(COURSES.map(c=>c.unit).filter(Boolean)).size;
   return {sois:SOIS.length,courses:COURSES.length,instances:INSTANCES.length,sessions:SESSIONS.length,
-    facs:FACS.length,coords:COORDS.length,assigned:SESSIONS.filter(x=>x.facs.length).length,unitsFound,provisionalKeys};
+    facs:FACS.length,coords:COORDS.length,assigned:SESSIONS.filter(x=>x.facs.length).length,unitsFound,provisionalKeys,dupKeys:duplicateKeys()};
 }
 function importWorkbook(file){
-  if(typeof XLSX==='undefined'){alert('Spreadsheet reader is still loading — try again in a moment.');return;}
+  if(typeof XLSX==='undefined'){alert('Spreadsheet reader is still loading. Try again in a moment.');return;}
   const fr=new FileReader();
   fr.onload=()=>{try{
     const wb=XLSX.read(new Uint8Array(fr.result),{type:'array',cellDates:true});
     const grab=names=>{for(const n of wb.SheetNames){if(names.some(x=>n.toLowerCase().includes(x)))return XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:null});}return null;};
     const r=applyRegisterRows({so:grab(['soi']),c:grab(['plo','course']),i:grab(['instance']),
                                s:grab(['session']),f:grab(['facilit']),co:grab(['coordinat'])});
-    alert(`Loaded from register: ${r.sois} SOIs, ${r.courses} PLOs, ${r.instances} instances, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`+(r.provisionalKeys?`\n⚠ ${r.provisionalKeys} sessions are using a suggested key rather than a frozen one. Freeze them on the register before the form goes out.`:'')+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet — add them on the Sessions tab to populate facilitation reporting.`:'')+(r.courses&&!r.unitsFound?`\n⚠ No hosting units detected — check the Hosting Unit column header on the Courses tab. Every unit row will be blank until this is fixed.`:''));
+    alert(`Loaded from register: ${r.sois} SOIs, ${r.courses} PLOs, ${r.instances} instances, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`+(r.provisionalKeys?`\n⚠ ${r.provisionalKeys} sessions are using a suggested key rather than a frozen one. Freeze them on the register before the form goes out.`:'')+(r.dupKeys&&r.dupKeys.length?`\n⚠ Session key${r.dupKeys.length!==1?'s':''} ${r.dupKeys.join(', ')} ${r.dupKeys.length!==1?'are':'is'} used on more than one Sessions row. Their feedback will merge until each row has its own key.`:'')+(r.assigned<r.sessions?`\n${r.sessions-r.assigned} sessions have no facilitator assigned yet. Add them on the Sessions tab to populate facilitation reporting.`:'')+(r.courses&&!r.unitsFound?`\n⚠ No hosting units detected. Check the Hosting unit column header on the PLOs tab. Every unit row will be blank until this is fixed.`:''));
   }catch(err){alert('Could not read workbook: '+err.message);}};
   fr.readAsArrayBuffer(file);
 }
-function reportBar(label,v){return v==null?'':`<div class="ritem"><div class="rn">${esc(label)}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreColor(v)}">${v.toFixed(2)}</div></div>`;}
+function reportBar(label,v){return v==null?'':`<div class="ritem"><div class="rn">${esc(label)}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreInk(v)}">${v.toFixed(2)}</div></div>`;}
 function reportGrid(barsHtml){return barsHtml?`<div class="rgrid">${barsHtml}</div>`:'';}
 function reportLetterhead(reportType,metaItems){
   // Long values (an AG identifier, a list of keys) get the full width so they cannot stretch a
@@ -4228,7 +4235,7 @@ function reportLetterhead(reportType,metaItems){
   ${meta?`<div class="report-metadata">${meta}</div>`:''}`;
 }
 function printReport(){
-  // wait for the letterhead logo to finish decoding before printing — otherwise some browsers
+  // wait for the letterhead logo to finish decoding before printing - otherwise some browsers
   // capture the print preview before a freshly-inserted image has painted, and it comes out blank.
   // A hard fallback timeout guarantees print() still fires even if the load/error events never do.
   const img=document.querySelector('#reportPrint img');
@@ -4245,9 +4252,9 @@ function generateSessionReport(sid){
     const bars=sec.items.map(([code,label])=>reportBar(label,sessItemAvg(sid,code))).join('');
     if(!bars.trim())return '';
     const sv=sessionSectionAvg(sid,sec);
-    return `<div class="rgroup"><h4>${esc(sec.name)}<span>${sv!=null?sv.toFixed(2)+' / 4':'—'}</span></h4>${reportGrid(bars)}</div>`;
+    return `<div class="rgroup"><h4>${esc(sec.name)}<span>${sv!=null?sv.toFixed(2)+' / 4':'n/a'}</span></h4>${reportGrid(bars)}</div>`;
   }).join('');
-  const facOverview=s.facs.length?`<h2>Facilitator overview</h2><table class="fac-overview"><thead><tr><th>Facilitator</th><th>ID</th><th>Score</th></tr></thead><tbody>${s.facs.map(fid=>{const fs=facInSession(sid,fid);return `<tr><td>${esc(facFullName(fid))}</td><td>${esc(fid)}</td><td>${fs!=null?fs.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('')}</tbody></table>`:'';
+  const facOverview=s.facs.length?`<h2>Facilitator overview</h2><table class="fac-overview"><thead><tr><th>Facilitator</th><th>ID</th><th>Score</th></tr></thead><tbody>${s.facs.map(fid=>{const fs=facInSession(sid,fid);return `<tr><td>${esc(facFullName(fid))}</td><td>${esc(fid)}</td><td>${fs!=null?fs.toFixed(2)+' / 4':'n/a'}</td></tr>`;}).join('')}</tbody></table>`:'';
   const facBlocks=s.facs.map(fid=>{
     const bars=D1.items.map(([code,label])=>reportBar(label,facItemAvg(sid,fid,code))).join('');
     return `<div class="rgroup"><h4 style="text-transform:none">${esc(facFullName(fid))} <span style="color:#888;font-weight:400">(${esc(fid)})</span></h4>${reportGrid(bars)}</div>`;}).join('');
@@ -4257,12 +4264,12 @@ function generateSessionReport(sid){
       ['Course',(c.cid?c.cid+' · ':'')+(c.plo||'')],
       ['Facilitator',s.facs.length?s.facs.map(fid=>`${facFullName(fid)} (${fid})`).join(', '):null],
       ['Date',fmtDate(s.date)],
-      ['Unit',(c.sub||'—')+' / '+(c.unit||'—')],
+      ['Unit',(c.sub||'n/a')+' / '+(c.unit||'n/a')],
       ['Coordinator',coordForUnit(c.unit)],
       ['Mode',c.mode],
       ['Generated',today]
     ])}
-    <div class="headline"><b class="${o?'':'empty'}">${o!=null?o.toFixed(2)+' / 4':'—'}</b> overall · ${a.resp} response${a.resp!==1?'s':''}</div>
+    <div class="headline"><b class="${o?'':'empty'}">${o!=null?o.toFixed(2)+' / 4':'n/a'}</b> overall · ${a.resp} response${a.resp!==1?'s':''}</div>
     ${secBlocks}
     ${facOverview}
     ${s.facs.length?`<h2>Facilitator detail</h2>${facBlocks}`:''}`;
@@ -4280,7 +4287,7 @@ function generateFacilitatorReport(fid){
   const plos=[...new Set(ag.instances.map(g=>g.cid))];
   const rows=ag.instances.map(g=>{const c=CMAP[g.cid]||{};const fs=instFacOverall(g.items,fid);
     const below=(fs!=null&&norm!=null&&fs<norm-0.4)?' (below norm)':'';
-    return `<tr><td>${esc(g.code||g.iid||'—')}</td><td>${esc(c.plo||'')}</td><td>${fmtDate(g.date)}</td><td>${g.term||'—'}</td><td>${g.resp}</td><td>${fs!=null?fs.toFixed(2)+' / 4'+below:'awaiting feedback'}</td></tr>`;}).join('');
+    return `<tr><td>${esc(g.code||g.iid||'n/a')}</td><td>${esc(c.plo||'')}</td><td>${fmtDate(g.date)}</td><td>${g.term||'n/a'}</td><td>${g.resp}</td><td>${fs!=null?fs.toFixed(2)+' / 4'+below:'awaiting feedback'}</td></tr>`;}).join('');
   document.getElementById('reportPrint').innerHTML=`
     ${reportLetterhead('Facilitator Feedback Report',[
       ['Facilitator',facFullName(fid)+' ('+fid+')'],
@@ -4290,7 +4297,7 @@ function generateFacilitatorReport(fid){
       ['Basis','Section D1 of the CTLI rubric, pooled across every instance'],
       ['Generated',today]
     ])}
-    <div class="headline"><b class="${norm?'':'empty'}">${norm!=null?norm.toFixed(2)+' / 4':'—'}</b> facilitation · ${ag.resp} response${ag.resp!==1?'s':''} across ${ag.instances.length} instance${ag.instances.length!==1?'s':''}</div>
+    <div class="headline"><b class="${norm?'':'empty'}">${norm!=null?norm.toFixed(2)+' / 4':'n/a'}</b> facilitation · ${ag.resp} response${ag.resp!==1?'s':''} across ${ag.instances.length} instance${ag.instances.length!==1?'s':''}</div>
     ${bars.trim()?`<div class="rgroup"><h4>Facilitation items</h4>${reportGrid(bars)}</div>`:'<p class="footnote">No facilitation feedback has been received for this person yet.</p>'}
     ${rows?`<h2>By instance</h2><table class="fac-overview"><thead><tr><th>Instance</th><th>Learning opportunity</th><th>Date</th><th>Term</th><th>Responses</th><th>Facilitation score</th></tr></thead><tbody>${rows}</tbody></table>`:''}
     <p class="footnote">An instance is flagged as below norm when it falls more than 0.4 beneath this facilitator's own average, so the comparison is against their own record rather than against colleagues.</p>`;
@@ -4305,14 +4312,14 @@ function generateInstanceReport(key){
       sec.kind==='facilitator'?null:instItemAvg(g.items,code))).join('');
     if(sec.kind==='facilitator'||!bars.trim())return '';
     const sv=instSectionAvg(g.items,sec);
-    return `<div class="rgroup"><h4>${esc(sec.name)}<span>${sv!=null?sv.toFixed(2)+' / 4':'—'}</span></h4>${reportGrid(bars)}</div>`;
+    return `<div class="rgroup"><h4>${esc(sec.name)}<span>${sv!=null?sv.toFixed(2)+' / 4':'n/a'}</span></h4>${reportGrid(bars)}</div>`;
   }).join('');
-  const facOverview=g.facs.length?`<h2>Facilitator overview</h2><table class="fac-overview"><thead><tr><th>Facilitator</th><th>ID</th><th>Score</th></tr></thead><tbody>${g.facs.map(fid=>{const fs=instFacOverall(g.items,fid);return `<tr><td>${esc(facFullName(fid))}</td><td>${esc(fid)}</td><td>${fs!=null?fs.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('')}</tbody></table>`:'';
+  const facOverview=g.facs.length?`<h2>Facilitator overview</h2><table class="fac-overview"><thead><tr><th>Facilitator</th><th>ID</th><th>Score</th></tr></thead><tbody>${g.facs.map(fid=>{const fs=instFacOverall(g.items,fid);return `<tr><td>${esc(facFullName(fid))}</td><td>${esc(fid)}</td><td>${fs!=null?fs.toFixed(2)+' / 4':'n/a'}</td></tr>`;}).join('')}</tbody></table>`:'';
   const facBlocks=g.facs.map(fid=>{
     const bars=D1.items.map(([code,label])=>reportBar(label,instFacItemAvg(g.items,fid,code))).join('');
     return `<div class="rgroup"><h4 style="text-transform:none">${esc(facFullName(fid))} <span style="color:#888;font-weight:400">(${esc(fid)})</span></h4>${reportGrid(bars)}</div>`;}).join('');
   const breakaway=g.items.length>1?`<h2>Breakaways in this instance</h2><table class="fac-overview"><thead><tr><th>Key</th><th>Breakaway</th><th>Facilitator</th><th>Responses</th><th>Score</th></tr></thead><tbody>${g.items.map(sn=>{const o=sessionOverall(sn.sid);const rn=(AGG[sn.sid]||{}).resp||0;
-    return `<tr><td>${esc(sn.sid)}</td><td>${esc(sn.name||fmtDate(sn.date))}</td><td>${sn.facs.map(facFullName).join(', ')||'—'}</td><td>${rn}</td><td>${o!=null?o.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('')}</tbody></table>`:'';
+    return `<tr><td>${esc(sn.sid)}</td><td>${esc(sn.name||fmtDate(sn.date))}</td><td>${sn.facs.map(facFullName).join(', ')||'n/a'}</td><td>${rn}</td><td>${o!=null?o.toFixed(2)+' / 4':'n/a'}</td></tr>`;}).join('')}</tbody></table>`:'';
   const when=fmtDate(g.date)+(g.end&&g.end!==g.date?' to '+fmtDate(g.end):'');
   document.getElementById('reportPrint').innerHTML=`
     ${reportLetterhead('Instance Feedback Report',[
@@ -4323,12 +4330,12 @@ function generateInstanceReport(key){
       ['Specific Outcomes Indicator',g.soi?g.soi+(SOIMAP[g.soi]&&SOIMAP[g.soi].name?' · '+SOIMAP[g.soi].name:''):'Not audited'],
       ['Facilitator',g.facs.length?g.facs.map(fid=>`${facFullName(fid)} (${fid})`).join(', '):null],
       ['Dates',when],['Term',g.term?'Term '+g.term:null],
-      ['Unit',(c.sub||'—')+' / '+(c.unit||'—')],
+      ['Unit',(c.sub||'n/a')+' / '+(c.unit||'n/a')],
       ['Coordinator',coordForUnit(c.unit)],
       ['Mode',g.mode],['Feedback keys',g.items.map(x=>x.sid).join(', ')],
       ['Generated',today]
     ])}
-    <div class="headline"><b class="${g.overall?'':'empty'}">${g.overall!=null?g.overall.toFixed(2)+' / 4':'—'}</b> overall · ${g.resp} response${g.resp!==1?'s':''}${g.items.length>1?' pooled across '+g.items.length+' breakaways':''}</div>
+    <div class="headline"><b class="${g.overall?'':'empty'}">${g.overall!=null?g.overall.toFixed(2)+' / 4':'n/a'}</b> overall · ${g.resp} response${g.resp!==1?'s':''}${g.items.length>1?' pooled across '+g.items.length+' breakaways':''}</div>
     ${secBlocks}
     ${breakaway}
     ${facOverview}
@@ -4353,19 +4360,19 @@ function generateCourseReport(cid){
   // Roll the raw sessions up into instances, so the PLO report reads as deliveries not breakaways.
   const instRows=instanceGroups().filter(g=>g.cid===cid)
     .sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
-  const spark=instRows.map(g=>`<i style="display:inline-block;width:${Math.max(1,Math.floor(300/Math.max(instRows.length,1))-3)}px;height:${g.overall?g.overall/4*100:4}%;background:${scoreColor(g.overall)};margin-right:3px;vertical-align:bottom;border-radius:2px 2px 0 0" title="${fmtDate(g.date)}: ${g.overall?g.overall.toFixed(2):'—'}"></i>`).join('');
+  const spark=instRows.map(g=>`<i style="display:inline-block;width:${Math.max(1,Math.floor(300/Math.max(instRows.length,1))-3)}px;height:${g.overall?g.overall/4*100:4}%;background:${scoreColor(g.overall)};margin-right:3px;vertical-align:bottom;border-radius:2px 2px 0 0" title="${fmtDate(g.date)}: ${g.overall?g.overall.toFixed(2):'n/a'}"></i>`).join('');
   const instTable=instRows.length?`<h2>By instance</h2><table class="fac-overview"><thead><tr><th>Instance</th><th>SOI code</th><th>AG report identifier</th><th>Dates</th><th>Term</th><th>Responses</th><th>Score</th></tr></thead><tbody>${instRows.map(g=>
-    `<tr><td>${esc(g.iid||'—')}</td><td>${esc(g.code||'—')}</td><td style="font-size:10.5px">${esc(g.codeName||'—')}</td><td>${fmtDate(g.date)}${g.end&&g.end!==g.date?' to '+fmtDate(g.end):''}</td><td>${g.term||'—'}</td><td>${g.resp}</td><td>${g.overall!=null?g.overall.toFixed(2)+' / 4':'—'}</td></tr>`).join('')}</tbody></table>`:'';
+    `<tr><td>${esc(g.iid||'n/a')}</td><td>${esc(g.code||'n/a')}</td><td style="font-size:10.5px">${esc(g.codeName||'n/a')}</td><td>${fmtDate(g.date)}${g.end&&g.end!==g.date?' to '+fmtDate(g.end):''}</td><td>${g.term||'n/a'}</td><td>${g.resp}</td><td>${g.overall!=null?g.overall.toFixed(2)+' / 4':'n/a'}</td></tr>`).join('')}</tbody></table>`:'';
   const sessRows=ss.map(s=>{const o=sessionOverall(s.sid);const resp=AGG[s.sid]?AGG[s.sid].resp:0;
-    const facs=s.facs.map(fid=>facFullName(fid)).join(', ')||'—';
-    return `<tr><td>[${esc(s.sid)}]</td><td>${fmtDate(s.date)}</td><td>${esc(facs)}</td><td>${resp}</td><td style="color:${o?scoreColor(o):'#888'};font-weight:600">${o!=null?o.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('');
+    const facs=s.facs.map(fid=>facFullName(fid)).join(', ')||'n/a';
+    return `<tr><td>[${esc(s.sid)}]</td><td>${fmtDate(s.date)}</td><td>${esc(facs)}</td><td>${resp}</td><td style="color:${o?scoreInk(o):'#888'};font-weight:600">${o!=null?o.toFixed(2)+' / 4':'n/a'}</td></tr>`;}).join('');
   const secBars=RUBRIC.map(sec=>reportBar(sec.name,sectionAvgForSessions(ss,sec))).join('');
   const allFacs=[...new Set(ss.flatMap(s=>s.facs))];
   const facOverview=allFacs.length?`<h2>Facilitator overview</h2><table class="fac-overview"><thead><tr><th>Facilitator</th><th>ID</th><th>Instances</th><th>Score</th></tr></thead><tbody>${allFacs.map(fid=>{
     const withFac=ss.filter(s=>s.facs.includes(fid));
     let sum=0,n=0;withFac.forEach(s=>{const fi=AGG[s.sid]&&AGG[s.sid].facItems[fid];if(fi)Object.values(fi).forEach(it=>{sum+=it.sum;n+=it.n;});});
     const ov=n?sum/n:null;
-    return `<tr><td>${esc(facFullName(fid))}</td><td>${esc(fid)}</td><td>${withFac.length}</td><td>${ov!=null?ov.toFixed(2)+' / 4':'—'}</td></tr>`;}).join('')}</tbody></table>`:'';
+    return `<tr><td>${esc(facFullName(fid))}</td><td>${esc(fid)}</td><td>${withFac.length}</td><td>${ov!=null?ov.toFixed(2)+' / 4':'n/a'}</td></tr>`;}).join('')}</tbody></table>`:'';
   const facBlocks=allFacs.map(fid=>facilitatorCourseBlock(fid,ss)).join('');
   document.getElementById('reportPrint').innerHTML=`
     ${reportLetterhead('PLO Feedback Report',[
@@ -4373,14 +4380,14 @@ function generateCourseReport(cid){
       ['Professional Learning Opportunity',c.plo],
       ['Specific Outcomes Indicator',c.soi?c.soi+(SOIMAP[c.soi]&&SOIMAP[c.soi].name?' · '+SOIMAP[c.soi].name:''):'Not audited'],
       ['Report identifier',c.soi?c.soi+'_'+(c.unit||'')+'_'+(c.plo||''):null],
-      ['Unit',(c.sub||'—')+' / '+(c.unit||'—')],
+      ['Unit',(c.sub||'n/a')+' / '+(c.unit||'n/a')],
       [(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator',coord],
       ['Instances',String(instRows.length)],
       ['SOI instance codes',instRows.map(g=>g.code).filter(Boolean).join(', ')||null],
       ['AG report identifiers',instRows.map(g=>g.codeName).filter(Boolean).join('  |  ')||null],
       ['Generated',today]
     ])}
-    <div class="headline"><b class="${ag.overall?'':'empty'}">${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'—'}</b> overall · ${instRows.length} instance${instRows.length!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</div>
+    <div class="headline"><b class="${ag.overall?'':'empty'}">${ag.overall!=null?ag.overall.toFixed(2)+' / 4':'n/a'}</b> overall · ${instRows.length} instance${instRows.length!==1?'s':''} · ${ag.resp} response${ag.resp!==1?'s':''}</div>
     ${instRows.length>1?`<div class="rgroup"><h4>Score across instances<span>oldest → newest</span></h4><div style="height:40px">${spark}</div></div>`:''}
     ${instTable}
     ${secBars?`<div class="rgroup"><h4>By rubric section</h4>${reportGrid(secBars)}</div>`:''}
@@ -4414,9 +4421,10 @@ function loadRegisterFromLinks(silent){
       const R={};keys.forEach((k,idx)=>{R[k]=texts[idx]?csvRowsToObjects(texts[idx]):null;});
       const r=applyRegisterRows(R);
       st.textContent=`✓ Loaded ${r.sois} SOIs, ${r.courses} PLOs, ${r.instances} instances, ${r.sessions} sessions, ${r.facs} facilitators, ${r.coords} coordinators.`
-        +(r.courses&&!r.unitsFound?' ⚠ No hosting units detected — check the Hosting unit column header on the PLOs tab.':'')
-        +(r.sessions&&!r.instances?' ⚠ No instances loaded — link the Instances tab, or term and mode will stay blank.':'')
-        +(r.provisionalKeys?` ⚠ ${r.provisionalKeys} session${r.provisionalKeys!==1?'s are':' is'} using a suggested key, not a frozen one — freeze them on the register before the form goes out.`:'');
+        +(r.courses&&!r.unitsFound?' ⚠ No hosting units detected. Check the Hosting unit column header on the PLOs tab.':'')
+        +(r.sessions&&!r.instances?' ⚠ No instances loaded. Link the Instances tab, or term and mode will stay blank.':'')
+        +(r.provisionalKeys?` ⚠ ${r.provisionalKeys} session${r.provisionalKeys!==1?'s are':' is'} using a suggested key, not a frozen one. Freeze them on the register before the form goes out.`:'')
+        +(r.dupKeys&&r.dupKeys.length?` ⚠ Session key${r.dupKeys.length!==1?'s':''} ${r.dupKeys.join(', ')} ${r.dupKeys.length!==1?'are':'is'} used on more than one Sessions row. Their feedback will merge until each row has its own key.`:'');
       const SAVE={c:'link_reg_courses',i:'link_reg_instances',s:'link_reg_sessions',f:'link_reg_facs',so:'link_reg_sois',co:'link_reg_coords'};
       keys.forEach(k=>{if(urls[k])saveLink(SAVE[k],urls[k]);});
       syncSetupHash();
@@ -4430,7 +4438,7 @@ document.getElementById('copySetupLink').onclick=copySetupLink;
 rebuild();refreshFilters();setView('summary');
 if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessionCards();renderSessionDetail();}
 
-/* restore remembered links, register first (session/facilitator metadata), then both response sheets — avoids the load-order race condition.
+/* restore remembered links, register first (session/facilitator metadata), then both response sheets - avoids the load-order race condition.
    The URL hash (bookmarkable, storage-independent) takes priority over localStorage, since managed devices can clear browser storage at any time. */
 (function(){
   const hashLinks=decodeSetupHash()||{};
@@ -4472,7 +4480,7 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
   const savedResp=hashLinks.r||loadLink('link_responses'),savedFacResp=hashLinks.f||loadLink('link_responses_fac');
   // Put the response links back into their fields BEFORE syncSetupHash runs. syncSetupHash rebuilds
   // the hash from the fields, so leaving these blank silently strips both response sheets out of a
-  // shared link — which only shows up on a machine that has no localStorage copy to fall back on.
+  // shared link - which only shows up on a machine that has no localStorage copy to fall back on.
   if(savedResp)document.getElementById('csvUrl').value=savedResp;
   if(savedFacResp)document.getElementById('facCsvUrl').value=savedFacResp;
   const REG=[['c','regCoursesUrl','link_reg_courses'],['i','regInstUrl','link_reg_instances'],
