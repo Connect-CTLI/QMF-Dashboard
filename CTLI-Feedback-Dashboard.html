@@ -3599,7 +3599,6 @@ function renderSessionCards(){
     return `<div class="scard" data-sk="${esc(g.key)}" aria-selected="${g.key===sel.session}" tabindex="0" role="button">
       <div class="meta">${g.code?`<span class="key">${esc(g.code)}</span>`:''}<span class="pill">${esc(g.iid||c.cid||'')}</span>${g.soi?`<span class="pill fac">${esc(g.soi)}</span>`:''}<span class="pill mode">${esc(g.mode||'n/a')}</span><span>${when} · Term ${g.term||'n/a'}</span></div>
       <h3>${esc(c.plo||g.cid)}</h3>
-      ${g.codeName?`<div class="meta"><span class="mono" style="color:#001489;font-size:11px;word-break:break-word">${esc(g.codeName)}</span></div>`:''}
       <div class="meta"><span class="pill fac">${g.facs.length>1?g.facs.length+' facilitators':g.facs.length===1?'1 facilitator':'Unassigned'}</span><span>${esc(fnames)}</span>${nb>1?`<span class="pill">${nb} breakaways</span>`:''}</div>
       <div class="rate"><div class="num" style="color:${g.overall?scoreInk(g.overall):'#aabbc8'}">${g.overall?g.overall.toFixed(2):'n/a'}</div><div class="n2">${g.resp} responses</div></div>
     </div>`;}).join('');
@@ -3628,7 +3627,6 @@ function renderSessionDetail(){
   const when=fmtDate(g.date)+(g.end&&g.end!==g.date?' to '+fmtDate(g.end):'');
   el.innerHTML=`<div class="detail-head"><div class="key">${esc(g.iid||g.cid)} · instance${g.code?' · '+esc(g.code):''}</div>
     <h2>${esc(c.plo||g.cid)}</h2>
-    ${g.codeName?`<div class="sub" style="display:block"><span style="color:#001489;font-size:11px;letter-spacing:.06em;text-transform:uppercase">AG report identifier</span><br><span class="mono" style="font-size:12px;color:#001489;word-break:break-word">${esc(g.codeName)}</span></div>`:''}
     ${g.agName&&g.agName!==c.plo?`<div class="sub"><span style="font-size:12px;color:var(--ink-soft)">Reported as: ${esc(g.agName)}</span></div>`:''}
     <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'n/a'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'n/a'}</span><span class="pill mode">${esc(g.mode||'n/a')}</span><span>Term ${g.term||'n/a'}</span><span>${when}</span>${g.soi?`<span class="key">${esc(g.soi)}</span>`:''}</div>
     <div class="sub"><b style="color:${g.overall?scoreInk(g.overall):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${g.overall?g.overall.toFixed(2)+'/4':'n/a'}</b><span>${g.resp} responses${g.items.length>1?' · '+g.items.length+' breakaways':''}</span><button class="btn" style="margin-left:auto" onclick="generateInstanceReport('${esc(g.key)}')">Generate report</button></div></div>
@@ -3879,7 +3877,7 @@ function renderSoiDetail(){
   const instRows=ag.instances.map(iid=>{const is=ag.sessions.filter(sn=>sn.iid===iid);
     let sum=0,n=0;for(const sn of is){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;if(o!=null&&rn){sum+=o*rn;n+=rn;}}
     const v=n?sum/n:null;const inst=IMAP[iid]||{};const c=CMAP[inst.cid]||{};
-    return {iid,v,n,html:`<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn">${inst.code?`<span class="key mono">${esc(inst.code)}</span> `:''}${esc(c.plo||'')} <span style="color:#5b7f95">· ${esc(iid)} · ${esc(instLabel(iid))}</span>${inst.codeName?`<br><span class="mono" style="font-size:10px;color:#001489">${esc(inst.codeName)}</span>`:''}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreInk(v):'#aabbc8'}">${v?v.toFixed(1):'n/a'}</div></div>`};})
+    return {iid,v,n,html:`<div class="ritem" style="grid-template-columns:1fr 70px 34px"><div class="rn">${inst.code?`<span class="key mono">${esc(inst.code)}</span> `:''}${esc(c.plo||'')} <span style="color:#5b7f95">· ${esc(iid)} · ${esc(instLabel(iid))}</span></div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreInk(v):'#aabbc8'}">${v?v.toFixed(1):'n/a'}</div></div>`};})
     .sort((a,b)=>(a.v==null?99:a.v)-(b.v==null?99:b.v)).map(o=>o.html).join('');
   const units=[...new Set(ag.plos.map(p=>p.unit).filter(Boolean))];
   const subs=[...new Set(ag.plos.map(p=>p.sub).filter(Boolean))];
