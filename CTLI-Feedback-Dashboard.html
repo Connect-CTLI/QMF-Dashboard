@@ -77,6 +77,17 @@ select:focus,input:focus{outline:2px solid var(--brand);outline-offset:1px;borde
 .rgroup h4{font-family:'Space Grotesk';font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);margin-bottom:8px;display:flex;justify-content:space-between}
 .rgroup h4 span{color:var(--ink-soft);font-weight:500}
 .rgroup.fac h4{color:#5b7f95}
+/* Follow-up (use in practice) blocks: deliberately styled apart, because they sit outside the rating. */
+.rgroup.fu{background:#f6f9ec;border:1px dashed #92ad12;border-radius:10px;padding:12px 14px}
+.rgroup.fu h4{color:#5a6b0a}
+.fu-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--ink-soft);margin-bottom:8px}
+.fu-st{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#e9eff3;color:#5b7f95;white-space:nowrap}
+.fu-st.open{background:#fef6cf;color:#001489}
+.fu-st.closed{background:#f0f5dc;color:#5a6b0a}
+.fu-cmp{font-size:12px;color:var(--ink);margin-top:10px;line-height:1.5}
+.fu-note{font-size:11px;color:#5b7f95;margin-top:8px}
+.fu-inst{margin-top:10px;border-top:1px solid #dfe8c2;padding-top:8px}
+.fu-inst .ritem{grid-template-columns:1fr auto 70px 34px}
 .facblock{border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:#f4f7f9}
 .facblock .fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
 .facblock .fh b{font-family:'Space Grotesk';font-size:13px}
@@ -141,6 +152,10 @@ table.sum thead th.g-design{background:#e6e9f5}
 table.sum thead th.g-delivery{background:#f0f5dc}
 table.sum thead th.g-corp{background:#e9eff3;color:#5b7f95}
 table.sum thead th.g-edulis{background:#fef6cf;color:#001489}
+table.sum thead th.g-fu{background:#f6f9ec;color:#5a6b0a;border-left:2px dashed #92ad12}
+table.sum thead th.g-fu small{display:block;font-size:9px;letter-spacing:0;text-transform:none;font-weight:500;color:#5b7f95}
+table.sum td.fu-cell{border-left:2px dashed #cfdc9a}
+table.sum td.fu-cell.score{border-radius:0;opacity:.85}
 table.sum td.rowlab{text-align:left;font-weight:500;white-space:nowrap}
 table.sum td.rowlab .sub{display:block;font-size:10.5px;color:var(--ink-soft);font-weight:450}
 table.sum td.na{color:#aabbc8}
@@ -216,6 +231,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .qhead{display:flex;align-items:flex-start;gap:10px;margin-bottom:4px}
 .qhead .dot{flex:none;width:8px;height:8px;border-radius:50%;margin-top:6px;background:var(--brand)}
 .qhead .dot.fac{background:var(--gold)}
+.qhead .dot.fu{background:var(--good)}
 .qhead h4{font-family:'Space Grotesk';font-size:14.5px;font-weight:600;color:var(--brand);line-height:1.35}
 .qhead .qf{display:block;font-family:'Inter';font-weight:450;font-size:11px;color:var(--ink-soft);margin-top:2px}
 .qhead .qf .fu{font-weight:600;color:var(--ink)}
@@ -244,6 +260,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 .com-side .row .lg{display:inline-flex;align-items:center;gap:8px}
 .com-side .row .lg i{width:8px;height:8px;border-radius:50%;background:var(--brand)}
 .com-side .row .lg i.fac{background:var(--gold)}
+.com-side .row .lg i.fu{background:var(--good)}
 .com-side .actions{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .com-side .actions .btn{justify-content:center;padding:10px 13px}
 .com-side .fine{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.45}
@@ -478,6 +495,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <div class="field" style="margin-left:auto"><label>Copy options for</label>
         <select id="copyMonths" multiple size="4" style="min-width:170px;padding:5px 8px"></select></div>
       <button class="btn" id="copySessions">Copy session options (both forms)</button>
+      <button class="btn" id="copyFollowup" title="Sessions of instances that are 6 to 8 weeks past their end date today">Copy follow-up options (due now)</button>
       <button class="btn" id="copyAll">Copy facilitator roster ("Select your facilitator" options)</button>
     </div>
     <div id="catBody"></div>
@@ -496,6 +514,10 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
       <div class="field" style="margin:14px 0 6px"><label>Facilitator Feedback form</label></div>
       <div class="urlrow"><input type="url" id="facCsvUrl" placeholder="https://docs.google.com/…/pub?output=csv"><button class="btn primary" id="loadFacCsv">Load</button></div>
       <div id="facCsvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
+      <div class="field" style="margin:14px 0 6px"><label>Follow-up form: use in practice <span style="font-weight:400;text-transform:none;color:var(--ink-soft)">(6 to 8 weeks later, optional)</span></label></div>
+      <div class="urlrow"><input type="url" id="fuCsvUrl" placeholder="https://docs.google.com/…/pub?output=csv"><button class="btn primary" id="loadFuCsv">Load</button></div>
+      <div id="fuCsvStatus" class="mono" style="font-size:12px;color:var(--ink-soft)"></div>
+      <div class="note" style="border-left-color:#92ad12"><b>The follow-up form</b> is emailed 6 to 8 weeks after an instance ends, only to participants who completed it. It asks how they have used what they learned. Its scores are shown next to the feedback but are <b>never counted in the Final Quality Rating</b>. It uses the same session keys, so use <b>Copy follow-up options (due now)</b> on the Catalogue tab to refresh its session question.</div>
       <div class="note"><b>Links are remembered.</b> Once loaded, this browser reloads both sheets automatically next time the dashboard opens. On a shared or managed computer, browser storage can get cleared without warning, so see "Bookmark this setup" below for a backup that doesn't depend on the browser remembering anything.</div>
     </div>
     <div class="panel">
@@ -3343,6 +3365,94 @@ const RUBRIC=[
 const ALL_ITEM_DEFS=RUBRIC.flatMap(s=>s.items.map(([code,label,kw])=>({code,kw:kw?norm(kw):null})));
 const D1=RUBRIC.find(s=>s.code==='D1');
 const SESSION_SECS=RUBRIC.filter(s=>s.kind==='session');
+/* ---------- FOLLOW-UP: USE IN PRACTICE (Guskey Level 4) ----------
+   A separate Google Form, emailed 6 to 8 weeks after an instance ends to the participants who
+   completed it. It lives outside RUBRIC on purpose, so it can never reach a section score, a
+   column on the Summary, the Final Quality Rating or the programme overall. It is not attributed
+   to facilitators either: using new practice depends on the school as much as on the session.
+   Each item is matched on a phrase from its question wording, the same way the rubric is. */
+const FU_SEC={code:'U',name:'Use in practice',items:[
+  ['U1','Used what I learned','used what i learned'],
+  ['U2','Changed how I plan or teach','changed the way i plan'],
+  ['U3','Learners have responded well','learners have responded'],
+  ['U4','Supported by school management','school management has supported me'],
+  ['U5','Had the time and resources','time and resources'],
+  ['U6','Shared it with colleagues','shared what i learned']]};
+const FU_ITEM_DEFS=FU_SEC.items.map(([code,label,kw])=>({code,kw:norm(kw)}));
+/* Which PLOs get a follow-up. 'soi' means only PLOs linked to a Specific Outcomes Indicator.
+   Change it to 'all' to switch the follow-up on for every PLO. A "Follow-up" column on the
+   register's PLOs tab (Yes or No) overrides this for a single PLO, so it can be widened one at a time. */
+const FOLLOWUP_SCOPE='soi';
+const FU_OPEN_DAYS=42,FU_CLOSE_DAYS=56; // 6 and 8 weeks after the instance's end date (or start date if no end)
+const MAIN_FORM='Main form',FAC_FORM='Facilitator form',FU_FORM='Follow-up form';
+let RESPONSES_FU=[];let FUAGG={};
+let COMMENTS_FU=[],CONTACTS_FU=[],PARENTS_FU=[],CLOSED_FU=[];
+function followupEligible(cid){const c=CMAP[cid];if(!c)return false;
+  if(c.followup==='yes')return true;if(c.followup==='no')return false;
+  return FOLLOWUP_SCOPE==='all'||!!c.soi;}
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function addDays(iso,n){const d=new Date(iso+'T00:00:00');if(isNaN(d))return null;d.setDate(d.getDate()+n);return ymd(d);}
+function fuWindow(g){const base=g.end||g.date;if(!base)return null;
+  const open=addDays(base,FU_OPEN_DAYS),close=addDays(base,FU_CLOSE_DAYS);return open&&close?{open,close}:null;}
+/* Where an eligible instance stands today: not yet due, due now, or past its window. */
+function fuStatus(g){if(!followupEligible(g.cid))return null;const w=fuWindow(g);
+  if(!w)return {code:'nodate',label:'Follow-up: no date on register',w:null};
+  const t=ymd(new Date());
+  if(t<w.open)return {code:'pending',label:'Follow-up opens '+fmtDate(w.open),w};
+  if(t<=w.close)return {code:'open',label:'Follow-up due now · until '+fmtDate(w.close),w};
+  return {code:'closed',label:'Follow-up window closed '+fmtDate(w.close),w};}
+function fuPill(g){const st=fuStatus(g);return st?`<span class="fu-st ${st.code}">${esc(st.label)}</span>`:'';}
+function aggregateFollowup(){FUAGG={};for(const s of SESSIONS)FUAGG[s.sid]={resp:0,items:{}};
+  for(const r of RESPONSES_FU){const a=FUAGG[r.sk];if(!a)continue;a.resp++;
+    for(const[code,val]of Object.entries(r.scores)){if(val==null||isNaN(val))continue;
+      (a.items[code]=a.items[code]||{sum:0,n:0});a.items[code].sum+=+val;a.items[code].n++;}}}
+/* Pooled the same way as a rubric section: every answer to every follow-up question counts once.
+   The rate compares follow-up responses with end-of-course (main form) responses for the same
+   sessions. It is a rough guide only, because the follow-up goes to completers, not everyone. */
+function fuStats(sessList){const items={};let resp=0,main=0;
+  for(const sn of sessList){main+=((AGG[sn.sid]||{}).resp||0);const a=FUAGG[sn.sid];if(!a)continue;resp+=a.resp;
+    for(const[code,it]of Object.entries(a.items)){(items[code]=items[code]||{sum:0,n:0});items[code].sum+=it.sum;items[code].n+=it.n;}}
+  let sum=0,n=0;for(const it of Object.values(items)){sum+=it.sum;n+=it.n;}
+  return {resp,main,score:n?sum/n:null,rate:main&&resp?resp/main:null,
+    item:code=>items[code]&&items[code].n?items[code].sum/items[code].n:null};}
+function fuRateText(fs){return fs.rate!=null?`${Math.round(fs.rate*100)}% of end-of-course respondents`:'';}
+function fuItemRows(fs){return FU_SEC.items.map(([code,label])=>{const v=fs.item(code);if(v==null)return '';
+  return `<div class="ritem"><div class="rn">${esc(label)}</div><div class="rt"><div class="rf" style="width:${v/4*100}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${scoreInk(v)}">${v.toFixed(1)}</div></div>`;}).join('');}
+/* End-of-course "this improved my knowledge and skills" (C6) next to "I have used it" (U1). */
+function fuCompareText(sessList,fs){let sum=0,n=0;
+  for(const sn of sessList){const it=(AGG[sn.sid]||{items:{}}).items.C6;if(it&&it.n){sum+=it.sum;n+=it.n;}}
+  const c6=n?sum/n:null,u1=fs.item('U1');if(c6==null||u1==null)return '';
+  const d=u1-c6;const gap=Math.abs(d)<0.1?'roughly the same':`${Math.abs(d).toFixed(2)} ${d<0?'lower':'higher'}`;
+  return `At the end of the course, participants rated "improved my knowledge and skills" at <b>${c6.toFixed(2)}</b>. Six to eight weeks later, "I have used what I learned" is at <b>${u1.toFixed(2)}</b>, ${gap}.`;}
+/* The on-screen block used by the instance, PLO and SOI detail panels. groups lists the instances
+   whose follow-up status should be shown; pass one group for an instance. */
+function fuDetailBlock(sessList,groups,scopeWord){
+  const eligible=groups.filter(g=>followupEligible(g.cid));const fs=fuStats(sessList);
+  if(!eligible.length&&!fs.resp)return '';
+  const one=groups.length===1?groups[0]:null;
+  const meta=`<div class="fu-meta">${one?fuPill(one):''}<span>${fs.resp} follow-up response${fs.resp!==1?'s':''}${fs.rate!=null?' · '+fuRateText(fs):''}</span></div>`;
+  const rows=fuItemRows(fs);const cmp=fuCompareText(sessList,fs);
+  const inst=!one&&eligible.length?`<div class="fu-inst">${eligible.slice().sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')).map(g=>{const f2=fuStats(g.items);const v=f2.score;const c=CMAP[g.cid]||{};
+      return `<div class="ritem"><div class="rn">${g.code?`<span class="key mono">${esc(g.code)}</span> `:''}${esc(scopeWord==='soi'?(c.plo||g.cid):(g.iid||g.cid))} <span style="color:#5b7f95">· ${fmtDate(g.end||g.date)} · ${f2.resp} resp.</span></div><div>${fuPill(g)}</div><div class="rt"><div class="rf" style="width:${v?v/4*100:0}%;background:${scoreColor(v)}"></div></div><div class="rv" style="color:${v?scoreInk(v):'#aabbc8'}">${v?v.toFixed(1):'n/a'}</div></div>`;}).join('')}</div>`:'';
+  return `<div class="rgroup fu"><h4>Use in practice · 6 to 8 weeks later<span>${fs.score!=null?fs.score.toFixed(2):'n/a'}</span></h4>${meta}
+    ${rows||`<span style="font-size:12px;color:#5b7f95">No follow-up responses yet.${one&&fuStatus(one)&&fuStatus(one).code==='pending'?' The form goes out once the instance is six weeks past its end date.':''}</span>`}
+    ${cmp?`<div class="fu-cmp">${cmp}</div>`:''}${inst}
+    <div class="fu-note">From the separate follow-up form (Guskey Level 4). Shown for interest and planning. Not part of the Final Quality Rating.</div></div>`;}
+/* The printed equivalent, for the instance, SOI and PLO reports. */
+function fuReportSection(sessList,groups){
+  const eligible=groups.filter(g=>followupEligible(g.cid));const fs=fuStats(sessList);
+  if(!eligible.length&&!fs.resp)return '';
+  const bars=FU_SEC.items.map(([code,label])=>reportBar(label,fs.item(code))).join('');
+  const cmp=fuCompareText(sessList,fs);
+  const table=eligible.length?`<table class="fac-overview"><thead><tr><th>Instance</th><th>Ended</th><th>Follow-up window</th><th>Status</th><th>Responses</th><th>Response rate</th><th>Score</th></tr></thead><tbody>${eligible.slice().sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')).map(g=>{
+      const f2=fuStats(g.items);const w=fuWindow(g);const st=fuStatus(g);
+      return `<tr><td>${esc(g.code||g.iid||'n/a')}</td><td>${fmtDate(g.end||g.date)}</td><td>${w?fmtDate(w.open)+' to '+fmtDate(w.close):'n/a'}</td><td>${st?esc(st.label.replace(/^Follow-up /,'').replace(/^./,ch=>ch.toUpperCase())):'n/a'}</td><td>${f2.resp}</td><td>${f2.rate!=null?Math.round(f2.rate*100)+'%':'n/a'}</td><td>${f2.score!=null?f2.score.toFixed(2)+' / 4':'n/a'}</td></tr>`;}).join('')}</tbody></table>`:'';
+  return `<h2>Use in practice (6 to 8 weeks later)</h2>
+    <div class="headline"><b class="${fs.score!=null?'':'empty'}">${fs.score!=null?fs.score.toFixed(2)+' / 4':'n/a'}</b> use in practice · ${fs.resp} follow-up response${fs.resp!==1?'s':''}${fs.rate!=null?' · '+fuRateText(fs):''}</div>
+    ${bars.trim()?`<div class="rgroup"><h4>Follow-up items</h4>${reportGrid(bars)}</div>`:''}
+    ${cmp?`<p class="footnote">${cmp}</p>`:''}
+    ${table}
+    <p class="footnote">These figures come from a separate follow-up form emailed 6 to 8 weeks after each instance to participants who completed it. They show how far the learning has been carried into practice (Guskey Level 4). They are reported alongside the feedback but are not included in the overall score or the Final Quality Rating.</p>`;}
 
 let COURSES=window.__MODEL__.courses.map(c=>({...c}));
 let SESSIONS=window.__MODEL__.sessions.map(s=>({...s,facs:[...s.facs]}));
@@ -3460,6 +3570,7 @@ function aggregate(){
       if(/^D1/.test(code)){if(!r.fid)continue;const fi=a.facItems[r.fid];(fi[code]=fi[code]||{sum:0,n:0});fi[code].sum+=+val;fi[code].n++;}
       else{(a.items[code]=a.items[code]||{sum:0,n:0});a.items[code].sum+=+val;a.items[code].n++;}
     }}
+  aggregateFollowup();
 }
 // courses/sessions/facilitators that actually have feedback - used for headline counts so the catalogue's unrated entries don't inflate them
 function feedbackSessions(){return SESSIONS.filter(s=>AGG[s.sid]&&AGG[s.sid].resp>0);}
@@ -3597,7 +3708,7 @@ function renderSessionCards(){
     const when=fmtDate(g.date)+(g.end&&g.end!==g.date?' to '+fmtDate(g.end):'');
     const nb=g.items.length;
     return `<div class="scard" data-sk="${esc(g.key)}" aria-selected="${g.key===sel.session}" tabindex="0" role="button">
-      <div class="meta">${g.code?`<span class="key">${esc(g.code)}</span>`:''}<span class="pill">${esc(g.iid||c.cid||'')}</span>${g.soi?`<span class="pill fac">${esc(g.soi)}</span>`:''}<span class="pill mode">${esc(g.mode||'n/a')}</span><span>${when} · Term ${g.term||'n/a'}</span></div>
+      <div class="meta">${g.code?`<span class="key">${esc(g.code)}</span>`:''}<span class="pill">${esc(g.iid||c.cid||'')}</span>${g.soi?`<span class="pill fac">${esc(g.soi)}</span>`:''}<span class="pill mode">${esc(g.mode||'n/a')}</span><span>${when} · Term ${g.term||'n/a'}</span>${fuPill(g)}</div>
       <h3>${esc(c.plo||g.cid)}</h3>
       <div class="meta"><span class="pill fac">${g.facs.length>1?g.facs.length+' facilitators':g.facs.length===1?'1 facilitator':'Unassigned'}</span><span>${esc(fnames)}</span>${nb>1?`<span class="pill">${nb} breakaways</span>`:''}</div>
       <div class="rate"><div class="num" style="color:${g.overall?scoreInk(g.overall):'#aabbc8'}">${g.overall?g.overall.toFixed(2):'n/a'}</div><div class="n2">${g.resp} responses</div></div>
@@ -3632,7 +3743,7 @@ function renderSessionDetail(){
     <div class="sub"><b style="color:${g.overall?scoreInk(g.overall):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${g.overall?g.overall.toFixed(2)+'/4':'n/a'}</b><span>${g.resp} responses${g.items.length>1?' · '+g.items.length+' breakaways':''}</span><button class="btn" style="margin-left:auto" onclick="generateInstanceReport('${esc(g.key)}')">Generate report</button></div></div>
     <div class="detail-body">
       <div class="rgroup fac"><h4>Facilitation · by facilitator<span>${g.facs.length} rated separately</span></h4>${facBlocks||`<span style="font-size:12px;color:#5b7f95">No facilitation score yet. Facilitation comes from the facilitator form only, not the main feedback form, and each response has to name a facilitator or find one in the Facilitator ID(s) column of the register.</span>`}</div>
-      ${breakaways}${sessGroups}</div>`;
+      ${breakaways}${sessGroups}${fuDetailBlock(g.items,[g],'instance')}</div>`;
 }
 
 /* COURSES */
@@ -3666,7 +3777,7 @@ function renderCourseCards(){
     const modes=[...new Set(ag.sessions.map(x=>x.mode).filter(Boolean))];
     return `<div class="scard" data-cid="${c.cid}" aria-selected="${c.cid===sel.course}" tabindex="0" role="button">
     <div class="meta"><span class="cidcell mono" style="padding:1px 7px">${c.cid}</span><span class="pill"${subTitle(c.sub)}>${c.sub||'n/a'}·${c.unit||'n/a'}</span>${c.soi?`<span class="key">${esc(c.soi)}</span>`:''}<span class="pill mode">${ni||ag.sessions.length} instance${(ni||ag.sessions.length)!==1?'s':''}</span><span>${modes.join(' / ')||'n/a'}</span></div>
-    <h3>${esc(c.plo)}</h3>
+    <h3>${esc(c.plo)}</h3>${(function(){const fs=fuStats(ag.sessions);return fs.resp?`<div class="meta"><span class="fu-st closed">Use in practice ${fs.score!=null?fs.score.toFixed(2):'n/a'} · ${fs.resp} follow-up</span></div>`:'';})()}
     <div class="rate"><div class="num" style="color:${ag.overall?scoreInk(ag.overall):'#aabbc8'}">${ag.overall?ag.overall.toFixed(2):'n/a'}</div><div class="n2">${ag.resp} responses</div></div>
    </div>`;}).join('');
   el.querySelectorAll('.scard[data-cid]').forEach(c=>{const k=c.getAttribute('data-cid');
@@ -3705,7 +3816,8 @@ function renderCourseDetail(){
     <div class="sub"><span class="pill"${subTitle(c.sub)}>${c.sub||'n/a'}</span><span class="pill"${unitTitle(c.unit)}>${c.unit||'n/a'}</span>${c.soi?`<span class="key">${esc(c.soi)}${SOIMAP[c.soi]&&SOIMAP[c.soi].name?' · '+esc(SOIMAP[c.soi].name):''}</span>`:'<span class="pill">not audited</span>'}${coordForUnit(c.unit)?`<span class="pill" style="background:#f0f5dc;color:#5a6b0a">${(COORDMAP[c.unit]||[]).length>1?'Coordinators':'Coordinator'} ${esc(coordForUnit(c.unit))}</span>`:''}</div>
     <div class="sub"><b style="color:${ag.overall?scoreInk(ag.overall):'#aabbc8'};font-size:15px;font-family:Space Grotesk">${ag.overall?ag.overall.toFixed(2)+'/4':'n/a'}</b><span>${groups.filter(g=>g.iid).length||groups.length} instance${(groups.filter(g=>g.iid).length||groups.length)!==1?'s':''} · ${ss.length} sessions · ${ag.resp} responses</span><button class="btn" style="margin-left:auto" onclick="generateCourseReport('${c.cid}')">Generate report</button></div></div>
     <div class="detail-body"><div class="rgroup"><h4>Score across instances<span>oldest → newest</span></h4><div class="spark">${spark}</div></div>
-    <div class="rgroup"><h4>By instance</h4>${body||'<span style="font-size:12px;color:#5b7f95">No deliveries recorded yet.</span>'}</div></div>`;
+    <div class="rgroup"><h4>By instance</h4>${body||'<span style="font-size:12px;color:#5b7f95">No deliveries recorded yet.</span>'}</div>
+    ${fuDetailBlock(ag.sessions,instanceGroups().filter(x=>x.cid===c.cid),'plo')}</div>`;
 }
 
 /* FACILITATORS */
@@ -3796,7 +3908,7 @@ function renderSummary(){
   const groups=['design','delivery','corporate','edulis'];
   let head=`<thead><tr><th class="rowlab">Sub-directorate</th><th>Unit</th>`;
   groups.forEach(g=>head+=`<th class="${GROUP_CLASS[g]}" title="${g==='delivery'?'Facilitation, logistics and digital experience, combined':g==='corporate'?'Venue, catering and accommodation, combined':GROUP_LABEL[g]}">${GROUP_LABEL[g]}</th>`);
-  head+=`<th>Final<br>Quality Rating</th></tr></thead>`;
+  head+=`<th>Final<br>Quality Rating</th><th class="g-fu" title="From the separate follow-up form, 6 to 8 weeks after each instance. Shown alongside, never counted in the Final Quality Rating.">Use in practice<small>6 to 8 weeks · not rated</small></th></tr></thead>`;
 
   function rowCells(u){
     let cells='';
@@ -3804,6 +3916,9 @@ function renderSummary(){
       cells+=v!=null?`<td class="score" style="background:${scoreColor(v)};color:${scoreFg(scoreColor(v))}">${v.toFixed(1)}</td>`:`<td class="na">n/a</td>`;});
     const fr=rowFinalRating(u);
     cells+=fr!=null?`<td class="score" style="background:${scoreColor(fr)};color:${scoreFg(scoreColor(fr))};font-size:13px">${fr.toFixed(2)}</td>`:`<td class="na">n/a</td>`;
+    // Follow-up sits after the rating on purpose. Shared rows (PDD, Corporate) have no follow-up of their own.
+    const fs=SHARED_UNITS.includes(u)?null:fuStats(sessionsForUnit(u));
+    cells+=fs&&fs.score!=null?`<td class="score fu-cell" style="background:${scoreColor(fs.score)};color:${scoreFg(scoreColor(fs.score))}" title="${fs.resp} follow-up response${fs.resp!==1?'s':''}">${fs.score.toFixed(1)}</td>`:`<td class="na fu-cell">n/a</td>`;
     return cells;
   }
 
@@ -3815,21 +3930,21 @@ function renderSummary(){
       body+=`<td class="rowlab ucell"${unitTitle(u)}><span class="chev">›</span>${esc(u)}${UNIT_FULLNAME[u]?`<span class="sub">${esc(UNIT_FULLNAME[u])}</span>`:''}</td>`;
       body+=rowCells(u);
       body+='</tr>';
-      if(sumSel.unit===u)body+=`<tr class="udetail"><td colspan="${groups.length+2}">${unitDetailHtml(u)}</td></tr>`;
+      if(sumSel.unit===u)body+=`<tr class="udetail"><td colspan="${groups.length+3}">${unitDetailHtml(u)}</td></tr>`;
     });
   }
   // PDD row - owns Programme Design & Development (Content), pooled across every session
   body+=`<tr class="pdd-row urow${sumSel.unit===PDD_UNIT?' open':''}" data-unit="${PDD_UNIT}" tabindex="0" aria-expanded="${sumSel.unit===PDD_UNIT}"><td class="rowlab" style="border-left:4px solid #aabbc8"><span class="unit-chip" style="background:#aabbc8"></span>PDD</td><td class="rowlab ucell"><span class="chev">›</span>Content design<span class="sub">all instances</span></td>`;
   body+=rowCells(PDD_UNIT);
   body+='</tr>';
-  if(sumSel.unit===PDD_UNIT)body+=`<tr class="udetail"><td colspan="${groups.length+3}">${unitDetailHtml(PDD_UNIT)}</td></tr>`;
+  if(sumSel.unit===PDD_UNIT)body+=`<tr class="udetail"><td colspan="${groups.length+4}">${unitDetailHtml(PDD_UNIT)}</td></tr>`;
   // Corporate Services row - owns Venue, Catering, Accommodation, pooled across every session
   body+=`<tr class="corp-row urow${sumSel.unit===CORPORATE_UNIT?' open':''}" data-unit="${CORPORATE_UNIT}" tabindex="0" aria-expanded="${sumSel.unit===CORPORATE_UNIT}"><td class="rowlab" style="border-left:4px solid #5b7f95"><span class="unit-chip" style="background:#5b7f95"></span>Corporate Services</td><td class="rowlab ucell"><span class="chev">›</span>Shared services<span class="sub">all instances</span></td>`;
   body+=rowCells(CORPORATE_UNIT);
   body+='</tr>';
-  if(sumSel.unit===CORPORATE_UNIT)body+=`<tr class="udetail"><td colspan="${groups.length+3}">${unitDetailHtml(CORPORATE_UNIT)}</td></tr>`;
+  if(sumSel.unit===CORPORATE_UNIT)body+=`<tr class="udetail"><td colspan="${groups.length+4}">${unitDetailHtml(CORPORATE_UNIT)}</td></tr>`;
   body+='</tbody>';
-  const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.length}" style="text-align:right">Weighted mean across every rubric code, every instance</td><td class="score" style="background:${overall?scoreColor(overall):'#aabbc8'};color:${scoreFg(overall?scoreColor(overall):'#aabbc8')};font-size:14px">${overall?overall.toFixed(2):'n/a'}</td></tr></tfoot>`;
+  const foot=`<tfoot><tr><td class="rowlab" colspan="2">Programme overall</td><td colspan="${groups.length}" style="text-align:right">Weighted mean across every rubric code, every instance</td><td class="score" style="background:${overall?scoreColor(overall):'#aabbc8'};color:${scoreFg(overall?scoreColor(overall):'#aabbc8')};font-size:14px">${overall?overall.toFixed(2):'n/a'}</td>${(function(){const fs=fuStats(SESSIONS);return fs.score!=null?`<td class="score fu-cell" style="background:${scoreColor(fs.score)};color:${scoreFg(scoreColor(fs.score))}" title="${fs.resp} follow-up responses">${fs.score.toFixed(2)}</td>`:'<td class="na fu-cell">n/a</td>';})()}</tr></tfoot>`;
   document.getElementById('sumTable').innerHTML=head+body+foot;
   document.getElementById('sumMethodNote').innerHTML=`<b>How ratings are calculated</b>
     <ul style="margin:8px 0 0;padding-left:18px">
@@ -3841,6 +3956,7 @@ function renderSummary(){
       <li><b>Support Services</b> is reported per unit like every other column, plus pooled once more under <b>Corporate Services</b> as a programme-wide summary.</li>
       <li><b>Final Quality Rating</b> is the equal-weighted average of every underlying rubric section's score for that row (not the four displayed columns), so it stays accurate regardless of how columns are grouped for display.</li>
       <li><b>Programme overall</b> (footer) applies the same two-level calculation across the whole programme.</li>
+      <li><b>Use in practice</b> comes from a separate follow-up form, emailed 6 to 8 weeks after an instance to participants who completed it. It asks whether they have used what they learned, and what has helped or got in the way (Guskey's Level 4). It is pooled the same way as a section, but it sits <b>outside</b> the Final Quality Rating and the Programme overall, and is never attributed to a facilitator. It currently applies to PLOs linked to a Specific Outcomes Indicator.</li>
     </ul>`;
 }
 
@@ -3856,7 +3972,7 @@ function renderSoiCards(){
     return `<div class="scard" data-soi="${esc(id)}" aria-selected="${id===sel.soi}" tabindex="0" role="button">
       <div class="meta"><span class="key">${esc(id)}</span>${x.year?`<span class="pill">${esc(x.year)}</span>`:''}<span class="pill">${ag.plos.length} PLO${ag.plos.length!==1?'s':''}</span><span class="pill mode">${ag.instances.length} instance${ag.instances.length!==1?'s':''}</span></div>
       <h3>${esc(x.name||id)}</h3>
-      <div class="meta"><span>${units.length?esc(units.join(', ')):'no unit set'}</span></div>
+      <div class="meta"><span>${units.length?esc(units.join(', ')):'no unit set'}</span>${(function(){const fs=fuStats(ag.sessions);return fs.resp?`<span class="fu-st closed">Use in practice ${fs.score!=null?fs.score.toFixed(2):'n/a'} · ${fs.resp} follow-up</span>`:'';})()}</div>
       <div class="rate"><div class="num" style="color:${ag.overall?scoreInk(ag.overall):'#aabbc8'}">${ag.overall?ag.overall.toFixed(2):'n/a'}</div><div class="n2">${ag.resp} responses</div></div>
     </div>`;}).join('');
   el.querySelectorAll('.scard[data-soi]').forEach(c=>{const k=c.getAttribute('data-soi');
@@ -3890,6 +4006,7 @@ function renderSoiDetail(){
       ${secRows?`<div class="rgroup"><h4>Rating by rubric section<span>whole indicator, pooled</span></h4>${secRows}</div>`:'<div class="rgroup"><h4>No responses yet</h4></div>'}
       <div class="rgroup"><h4>By PLO<span>${ag.plos.length}</span></h4>${ploRows||'<span style="font-size:12px;color:#5b7f95">No PLOs linked to this indicator yet.</span>'}</div>
       <div class="rgroup"><h4>By instance<span>weakest first</span></h4>${instRows||'<span style="font-size:12px;color:#5b7f95">No instances recorded yet.</span>'}</div>
+      ${(function(){const ids=new Set(ag.sessions.map(sn=>sn.sid));return fuDetailBlock(ag.sessions,instanceGroups().filter(gg=>gg.items.some(sn=>ids.has(sn.sid))),'soi');})()}
     </div>`;
 }
 
@@ -3956,7 +4073,8 @@ function currentLinkFields(){
     fa:document.getElementById('regFacsUrl').value.trim(),
     co:document.getElementById('regCoordsUrl').value.trim(),
     i:document.getElementById('regInstUrl').value.trim(),
-    so:document.getElementById('regSoisUrl').value.trim()
+    so:document.getElementById('regSoisUrl').value.trim(),
+    u:document.getElementById('fuCsvUrl').value.trim()
   };
 }
 // Google's "publish to web" CSV links are almost entirely a repeated template around one long ID -
@@ -3974,8 +4092,8 @@ function parseGSheetPub(url){
   if(gid&&!/^\d+$/.test(gid))return null;
   return [null,m[1],gid||'0'];
 }
-// 'i' and 'so' are appended, never inserted - older bookmarked #s= links stay valid.
-const LINK_ORDER=['r','f','c','s','fa','co','i','so'];
+// 'i', 'so' and 'u' (follow-up form) are appended, never inserted - older bookmarked #s= links stay valid.
+const LINK_ORDER=['r','f','c','s','fa','co','i','so','u'];
 function compactEncodeLinks(fields){
   const ids=[];
   const slots=LINK_ORDER.map(k=>{
@@ -4043,12 +4161,29 @@ function parseResponseCSV(text){const rows=parseCSV(text);if(rows.length<2)throw
   const cc=contactCols(head);
   const cCols=commentCols(head,body,[keyCol,cc.consent,cc.email,...Object.keys(codeCols).map(Number)]);COMMENTS_MAIN=[];CONTACTS_MAIN=[];PARENTS_MAIN=[];CLOSED_MAIN=[];
   if(keyCol>=0)for(const r of body){const m=(r[keyCol]||'').match(KEY_PATTERN);if(!m)continue;keyed++;
-    collectComments(COMMENTS_MAIN,CONTACTS_MAIN,r,head,cCols,cc,m[1],'Main form',[]);
+    collectComments(COMMENTS_MAIN,CONTACTS_MAIN,r,head,cCols,cc,m[1],MAIN_FORM,[]);
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
     if(Object.keys(scores).length)out.push({sk:m[1],fid:null,scores});}
   if(!out.length)throw new Error(ingestFailure('Main feedback form',head,keyCol,codeCols,keyed,body.length));
   return out;}
 const KEY_PATTERN=/\[(\d{3,4})\]/;
+/* Follow-up form: same [key] question, its own six items, its own comments. */
+function fuCols(head){const out={};
+  head.forEach((h,idx)=>{const H=norm(h);for(const it of FU_ITEM_DEFS){if(H.includes(it.kw)){out[idx]=it.code;break;}}});
+  return out;}
+function parseFollowupCSV(text){const rows=parseCSV(text);if(rows.length<2)throw new Error('empty');const head=rows[0];
+  const body=rows.slice(1);
+  const codeCols=fuCols(head);
+  const keyCol=findKeyCol(head,body,[]);
+  const out=[];let keyed=0;
+  const cc=contactCols(head);
+  const cCols=commentCols(head,body,[keyCol,cc.consent,cc.email,...Object.keys(codeCols).map(Number)]);COMMENTS_FU=[];CONTACTS_FU=[];PARENTS_FU=[];CLOSED_FU=[];
+  if(keyCol>=0)for(const r of body){const m=(r[keyCol]||'').match(KEY_PATTERN);if(!m)continue;keyed++;
+    collectComments(COMMENTS_FU,CONTACTS_FU,r,head,cCols,cc,m[1],FU_FORM,[]);
+    const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
+    if(Object.keys(scores).length)out.push({sk:m[1],scores});}
+  if(!out.length)throw new Error(ingestFailure('Follow-up form',head,keyCol,codeCols,keyed,body.length).replace('the CTLI rubric','the follow-up question wording'));
+  return out;}
 /* Find the column holding the [key]. Header wording is only a hint: the winner must actually
    contain a [key] in the data. This stops a question like "Select your facilitator for this
    session" being claimed as the key column just because it says "session". */
@@ -4089,7 +4224,7 @@ function parseFacilitatorCSV(text){const rows=parseCSV(text);if(rows.length<2)th
   const cCols=commentCols(head,body,[keyCol,facCol,cc.consent,cc.email,...Object.keys(codeCols).map(Number)]);COMMENTS_FAC=[];CONTACTS_FAC=[];PARENTS_FAC=[];CLOSED_FAC=[];
   if(keyCol>=0)for(const r of body){
     const m=(r[keyCol]||'').match(KEY_PATTERN);if(!m)continue;const sk=m[1];keyed++;
-    collectComments(COMMENTS_FAC,CONTACTS_FAC,r,head,cCols,cc,sk,'Facilitator form',facCol>=0?extractFacIds(r[facCol]):[]);
+    collectComments(COMMENTS_FAC,CONTACTS_FAC,r,head,cCols,cc,sk,FAC_FORM,facCol>=0?extractFacIds(r[facCol]):[]);
     const scores={};for(const[idx,code]of Object.entries(codeCols)){const v=scoreFromCell(r[idx]);if(!isNaN(v))scores[code]=v;}
     if(!Object.keys(scores).length)continue;
     let fids=facCol>=0?extractFacIds(r[facCol]):[];
@@ -4099,15 +4234,16 @@ function parseFacilitatorCSV(text){const rows=parseCSV(text);if(rows.length<2)th
   }
   if(!out.length)throw new Error(ingestFailure('Facilitator form',head,keyCol,codeCols,keyed,body.length));
   return out;}
-let DIAG={orphanMain:0,orphanFac:0,orphanKeys:[],unattributed:0};
+let DIAG={orphanMain:0,orphanFac:0,orphanFu:0,orphanKeys:[],unattributed:0};
 /* aggregate() drops any response whose key is not in the register, and any facilitation response
    with nobody attached. Both used to happen in silence, which made an empty facilitation panel
    impossible to explain. Count them and surface it. */
 function diagnose(){
   const known=new Set(SESSIONS.map(x=>String(x.sid)));
   const bad=new Set();
-  DIAG={orphanMain:0,orphanFac:0,orphanKeys:[],unattributed:0};
+  DIAG={orphanMain:0,orphanFac:0,orphanFu:0,orphanKeys:[],unattributed:0};
   for(const r of RESPONSES_MAIN)if(!known.has(String(r.sk))){DIAG.orphanMain++;bad.add(String(r.sk));}
+  for(const r of RESPONSES_FU)if(!known.has(String(r.sk))){DIAG.orphanFu++;bad.add(String(r.sk));}
   for(const r of RESPONSES_FAC){
     if(!known.has(String(r.sk))){DIAG.orphanFac++;bad.add(String(r.sk));}
     else if(!r.fid)DIAG.unattributed++;}
@@ -4115,8 +4251,9 @@ function diagnose(){
   return DIAG;}
 function diagnosticText(){
   const d=DIAG;const out=[];
-  if(d.orphanMain||d.orphanFac){
-    out.push(`⚠ ${d.orphanMain+d.orphanFac} response${(d.orphanMain+d.orphanFac)!==1?'s':''} carry a session key that is not in the register and are being ignored (keys ${d.orphanKeys.join(', ')}${d.orphanKeys.length>=12?' …':''}). The form options were built from a different set of keys than the register now holds.`);}
+  const orph=d.orphanMain+d.orphanFac+(d.orphanFu||0);
+  if(orph){
+    out.push(`⚠ ${orph} response${orph!==1?'s carry':' carries'} a session key that is not in the register and ${orph!==1?'are':'is'} being ignored (keys ${d.orphanKeys.join(', ')}${d.orphanKeys.length>=12?' …':''}). The form options were built from a different set of keys than the register now holds.`);}
   if(d.unattributed){
     out.push(`⚠ ${d.unattributed} facilitator-form response${d.unattributed!==1?'s':''} could not be attributed to anyone, so they produce no facilitation score. Either the "Select your facilitator" question was left blank, or the Facilitator ID(s) column on the register Sessions tab is empty for those instances.`);}
   return out.join(' ');}
@@ -4124,7 +4261,7 @@ function diagnosticText(){
    Open-ended answers from both forms. A column counts as a comment column when its heading
    reads like one, or when its answers are clearly free text. Personal-detail columns are never read. */
 const COMMENT_SKIP=/timestamp|e-?mail|\bname\b|surname|persal|id number|identity|contact|phone|cell|school|district|emis|gender|\bage\b|race|designation|post level|position|signature|consent/;
-const COMMENT_HINT=/comment|suggest|recommend|additional|improve|anything else|feedback|remark|share|explain|describe|why|what (did|would|could)/;
+const COMMENT_HINT=/comment|suggest|recommend|additional|improve|anything else|feedback|remark|share|explain|describe|why|what (did|would|could|has)|example|difficult|barrier|challenge/;
 const COMMENT_JUNK=/^(n\/?a|none|nil|no|nope|nothing|no comments?|not applicable|ok|okay|-+|\.+|x)$/i;
 /* Short fixed answers (Yes, No, Maybe...) are a closed question, not a comment. They are
    summarised as counts instead of being listed one by one. */
@@ -4160,8 +4297,8 @@ function contactOf(row,cc){if(cc.consent<0)return null;const a=String(row[cc.con
 const FOLLOW_UP=/(answer|response|rating|choice) above|clarify|elaborate|explain (your|why)|please explain|if (yes|no|not|so)\b|please specify|motivate/;
 function parentCol(head,idx){return idx>0&&FOLLOW_UP.test(norm(head[idx]))?idx-1:-1;}
 function collectComments(arr,contacts,row,head,cols,cc,sk,form,fids){const contact=contactOf(row,cc);let added=0;
-  const parents=form==='Main form'?PARENTS_MAIN:PARENTS_FAC;
-  const closedArr=form==='Main form'?CLOSED_MAIN:CLOSED_FAC;
+  const parents=form===MAIN_FORM?PARENTS_MAIN:form===FU_FORM?PARENTS_FU:PARENTS_FAC;
+  const closedArr=form===MAIN_FORM?CLOSED_MAIN:form===FU_FORM?CLOSED_FU:CLOSED_FAC;
   for(const idx of (cols.closed||[])){const a=String(row[idx]||'').trim();if(a)closedArr.push({sk,form,col:idx,q:String(head[idx]||'').trim(),answer:a,closed:true});}
   for(const idx of cols){const pc0=parentCol(head,idx);if(pc0>=0){const a=String(row[pc0]||'').trim();if(a)parents.push({sk,form,col:idx,answer:a});}}
   for(const idx of cols){const v=String(row[idx]||'').trim();if(v.length<3||COMMENT_JUNK.test(v))continue;
@@ -4175,17 +4312,20 @@ function synopsisOf(answers){const counts={};answers.forEach(a=>{counts[a]=(coun
   const parts=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([a,c])=>`${c} indicated ${a}`);
   const list=parts.length>1?parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1]:parts[0];
   return `Of ${n} response${n!==1?'s':''}, ${list}.`;}
-function filteredClosed(){return [...CLOSED_MAIN,...CLOSED_FAC].map(c=>({...c,...commentPlace(c)}))
+function filteredClosed(){return [...CLOSED_MAIN,...CLOSED_FAC,...CLOSED_FU].map(c=>({...c,...commentPlace(c)}))
   .filter(c=>(!cstate.cid||c.cid===cstate.cid)&&(!cstate.iid||c.iid===cstate.iid));}
-function blockSort(a,b){const fa=a.form==='Main form'?0:1,fb=b.form==='Main form'?0:1;return (fa-fb)||((a.col||0)-(b.col||0));}
+const FORM_ORDER={[MAIN_FORM]:0,[FAC_FORM]:1,[FU_FORM]:2};
+function formLabel(f){return f===FAC_FORM?'Facilitation feedback form':f===FU_FORM?'Follow-up form (6 to 8 weeks later)':'General feedback form';}
+function formDot(f){return f===FAC_FORM?' fac':f===FU_FORM?' fu':'';}
+function blockSort(a,b){const fa=FORM_ORDER[a.form]||0,fb=FORM_ORDER[b.form]||0;return (fa-fb)||((a.col||0)-(b.col||0));}
 function followSynopsis(form,col,groupKey){const counts={};let n=0;
-  [...PARENTS_MAIN,...PARENTS_FAC].forEach(r=>{if(r.form!==form||r.col!==col)return;const pl=commentPlace(r);
+  [...PARENTS_MAIN,...PARENTS_FAC,...PARENTS_FU].forEach(r=>{if(r.form!==form||r.col!==col)return;const pl=commentPlace(r);
     if((pl.iid||('?'+r.sk))!==groupKey)return;counts[r.answer]=(counts[r.answer]||0)+1;n++;});
   if(!n)return '';
   const parts=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([a,c])=>`${c} indicated ${a}`);
   const list=parts.length>1?parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1]:parts[0];
   return `Of ${n} response${n!==1?'s':''}, ${list}.`;}
-function allComments(){return [...COMMENTS_MAIN,...COMMENTS_FAC];}
+function allComments(){return [...COMMENTS_MAIN,...COMMENTS_FAC,...COMMENTS_FU];}
 /* Facilitator names in comments become their code (full name first, then a first name or
    surname on its own when no other facilitator shares it). */
 function escRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
@@ -4211,8 +4351,8 @@ function renderComments(){
   const il=document.getElementById('cInst');il.disabled=!groups.length;
   il.innerHTML=`<option value="">All instances</option>`+groups.map(g=>`<option value="${esc(g.key)}"${g.key===cstate.iid?' selected':''}>${esc(instOptionLabel(g))}</option>`).join('');
   const list=filteredComments();
-  const contacts=[...CONTACTS_MAIN,...CONTACTS_FAC].map(c=>({...c,...commentPlace(c)})).filter(c=>(!cstate.cid||c.cid===cstate.cid)&&(!cstate.iid||c.iid===cstate.iid));
-  const nMain=list.filter(c=>c.form!=='Facilitator form').length,nFac=list.length-nMain;
+  const contacts=[...CONTACTS_MAIN,...CONTACTS_FAC,...CONTACTS_FU].map(c=>({...c,...commentPlace(c)})).filter(c=>(!cstate.cid||c.cid===cstate.cid)&&(!cstate.iid||c.iid===cstate.iid));
+  const nMain=list.filter(c=>c.form===MAIN_FORM).length,nFac=list.filter(c=>c.form===FAC_FORM).length,nFu=list.filter(c=>c.form===FU_FORM).length;
   const nContact=list.filter(c=>c.contact&&c.contact.answer==='Yes').length+contacts.length;
   const nInst=new Set(list.map(c=>c.iid||('?'+c.sk))).size;
   // side panel
@@ -4222,12 +4362,13 @@ function renderComments(){
   document.getElementById('cStats').innerHTML=`
     <div class="row"><span class="lg"><i></i>General feedback form</span><b>${nMain}</b></div>
     <div class="row"><span class="lg"><i class="fac"></i>Facilitation feedback form</span><b>${nFac}</b></div>
+    ${(nFu||COMMENTS_FU.length)?`<div class="row"><span class="lg"><i class="fu"></i>Follow-up form (6 to 8 weeks)</span><b>${nFu}</b></div>`:''}
     <div class="row"><span>Instances with comments</span><b>${nInst}</b></div>
     <div class="row"><span>Asked for coordinator contact</span><b>${nContact}</b></div>`;
   document.getElementById('cCopyAI').disabled=!list.length;
   document.getElementById('cDownload').disabled=!(list.length||contacts.length);
   const el=document.getElementById('cList');
-  if(!all.length){el.innerHTML='<div class="com-empty"><h3>No comments yet</h3>Comments appear here once the two feedback response sheets are linked on the Setup tab.</div>';return;}
+  if(!all.length){el.innerHTML='<div class="com-empty"><h3>No comments yet</h3>Comments appear here once the feedback response sheets are linked on the Setup tab.</div>';return;}
   const closed=filteredClosed();
   if(!list.length&&!closed.length){el.innerHTML='<div class="com-empty"><h3>Nothing for this selection</h3>No participant left a comment for this PLO or instance.</div>';return;}
   const by={},order=[];[...list,...closed].forEach(c=>{const k=c.iid||('?'+c.sk);if(!by[k]){by[k]=[];order.push(k);}by[k].push(c);});
@@ -4238,9 +4379,9 @@ function renderComments(){
       <div class="ccount"><b>${cs.length}</b><span>comment${cs.length!==1?'s':''}</span></div></header>
       <div class="cbody">${(function(){const qb={},qo=[];csAll.forEach(c=>{const qk=c.form+'|'+c.col+'|'+c.q+(c.closed?'|c':'');if(!qb[qk]){qb[qk]=[];qo.push(qk);}qb[qk].push(c);});
         qo.sort((a,b)=>blockSort(qb[a][0],qb[b][0]));
-        return qo.map(qk=>{const items=qb[qk];const fac=items[0].form==='Facilitator form';
-          if(items[0].closed)return `<section class="qblock"><div class="qhead"><span class="dot${fac?' fac':''}"></span><h4>${esc(items[0].q)}<span class="qf">${fac?'Facilitation feedback form':'General feedback form'}</span></h4></div><div class="syn">${esc(synopsisOf(items.map(x=>x.answer)))}</div></section>`;
-          return `<section class="qblock"><div class="qhead"><span class="dot${fac?' fac':''}"></span><h4>${esc(items[0].parentQ||items[0].q||'Comment')}<span class="qf">${items[0].parentQ?`<b class="fu">Follow-up: ${esc(items[0].q)}</b> · `:''}${fac?'Facilitation feedback form':'General feedback form'} · ${items.length} comment${items.length!==1?'s':''}</span></h4></div>${items[0].parentQ?(function(){const s=followSynopsis(items[0].form,items[0].col,k);return s?`<div class="syn">${esc(s)}</div>`:'';})():''}
+        return qo.map(qk=>{const items=qb[qk];const fm=items[0].form;
+          if(items[0].closed)return `<section class="qblock"><div class="qhead"><span class="dot${formDot(fm)}"></span><h4>${esc(items[0].q)}<span class="qf">${formLabel(fm)}</span></h4></div><div class="syn">${esc(synopsisOf(items.map(x=>x.answer)))}</div></section>`;
+          return `<section class="qblock"><div class="qhead"><span class="dot${formDot(fm)}"></span><h4>${esc(items[0].parentQ||items[0].q||'Comment')}<span class="qf">${items[0].parentQ?`<b class="fu">Follow-up: ${esc(items[0].q)}</b> · `:''}${formLabel(fm)} · ${items.length} comment${items.length!==1?'s':''}</span></h4></div>${items[0].parentQ?(function(){const s=followSynopsis(items[0].form,items[0].col,k);return s?`<div class="syn">${esc(s)}</div>`:'';})():''}
             <ul class="clist">${items.map(c=>`<li class="cmt"><p>${esc(maskNames(c.text))}</p>${(c.fids.length||(c.contact&&c.contact.answer==='Yes'))?`<div class="cmeta">${c.fids.length?`<span class="pill fac">${esc(c.fids.join(', '))}</span>`:''}${c.contact&&c.contact.answer==='Yes'?'<span class="tag-contact">Wants coordinator contact</span>':''}</div>`:''}</li>`).join('')}</ul></section>`;}).join('');})()}</div></article>`;}).join('');
 }
 function commentScopeText(){const c=CMAP[cstate.cid];
@@ -4254,12 +4395,14 @@ function buildAIPrompt(){const textN=filteredComments().length;const raw=[...fil
   list.forEach(c=>{const g=c.iid?instanceGroups().find(x=>x.key===c.iid):null;
     const head=g?`${(CMAP[c.cid]||{}).plo||c.cid} | ${instOptionLabel(g)}`:`Session key [${c.sk}]`;
     if(head!==last){lines.push('',`## ${head}`);last=head;lastQ='';}
-    const qh=`${c.form==='Facilitator form'?'Facilitation feedback form':'General feedback form'}: ${c.parentQ?c.parentQ+' (follow-up question: '+c.q+')':(c.q||'Comment')}`;if(qh!==lastQ){lines.push(`### ${qh}`);lastQ=qh;if(c.closed){const s=synopsisOf(raw.filter(x=>x.closed&&x.form===c.form&&x.col===c.col&&gk(x)===gk(c)).map(x=>x.answer));if(s)lines.push(s);}if(c.parentQ){const s=followSynopsis(c.form,c.col,c.iid||('?'+c.sk));if(s)lines.push(s);}}
+    const qh=`${formLabel(c.form)}: ${c.parentQ?c.parentQ+' (follow-up question: '+c.q+')':(c.q||'Comment')}`;if(qh!==lastQ){lines.push(`### ${qh}`);lastQ=qh;if(c.closed){const s=synopsisOf(raw.filter(x=>x.closed&&x.form===c.form&&x.col===c.col&&gk(x)===gk(c)).map(x=>x.answer));if(s)lines.push(s);}if(c.parentQ){const s=followSynopsis(c.form,c.col,c.iid||('?'+c.sk));if(s)lines.push(s);}}
     if(c.closed)return;
     lines.push(`- ${maskNames(c.text).replace(/\s+/g,' ')}${c.fids.length?' (about '+c.fids.join(', ')+')':''}`);});
   return `You are helping the Cape Teaching and Leadership Institute (CTLI), part of the Western Cape Education Department in South Africa, analyse participant feedback on professional learning for teachers and school leaders.
 
-Below are ${textN} open-ended comments from participants' feedback forms for ${commentScopeText()}. Facilitators are referred to by code (for example F03). Keep them as codes and do not guess who they are.
+Below are ${textN} open-ended comments from participants' feedback forms for ${commentScopeText()}. Facilitators are referred to by code (for example F03). Keep them as codes and do not guess who they are.${raw.some(c=>c.form===FU_FORM)?`
+
+Comments under "Follow-up form (6 to 8 weeks later)" come from a separate questionnaire sent to participants who completed the course, asking how they have used what they learned back at school. Treat those separately: summarise how participants are applying the learning, and what is getting in the way (for example time, resources or school support).`:''}
 
 Please give me:
 1. The main themes, with roughly how many comments relate to each.
@@ -4279,29 +4422,30 @@ function copyAIPrompt(){const b=document.getElementById('cCopyAI');const n=filte
   copyText(buildAIPrompt()).then(()=>{b.textContent=`✓ Copied ${n} comments`;setTimeout(()=>b.textContent='Copy AI analysis prompt',2600);})
     .catch(()=>{b.textContent='Could not copy. Try again';setTimeout(()=>b.textContent='Copy AI analysis prompt',2000);});}
 function csvCell(v){const s=String(v==null?'':v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
-function downloadComments(){const extra=[...CONTACTS_MAIN,...CONTACTS_FAC].map(c=>({...c,...commentPlace(c)}))
+function downloadComments(){const extra=[...CONTACTS_MAIN,...CONTACTS_FAC,...CONTACTS_FU].map(c=>({...c,...commentPlace(c)}))
     .filter(c=>(!cstate.cid||c.cid===cstate.cid)&&(!cstate.iid||c.iid===cstate.iid));
   const list=[...filteredComments(),...extra];if(!list.length)return;
   const rows=[['PLO ID','PLO','Instance','Date','Session key','Form','Facilitator codes','Question','Follow-up to','Their answer to that question','Comment','Wants coordinator contact','Email','Theme']];
   const gmap={};instanceGroups().forEach(g=>gmap[g.key]=g);
-  list.forEach(c=>{const g=gmap[c.iid];rows.push([c.cid,(CMAP[c.cid]||{}).plo||'',g?(g.iid||''):'',g&&g.date?g.date:'',c.sk,c.form,c.fids.join(', '),c.q,c.parentQ||'',c.parentA||'',maskNames(c.text),c.contact?c.contact.answer:'',c.contact?c.contact.email:'','']);});
+  list.forEach(c=>{const g=gmap[c.iid];rows.push([c.cid,(CMAP[c.cid]||{}).plo||'',g?(g.iid||''):'',g&&g.date?g.date:'',c.sk,formLabel(c.form),c.fids.join(', '),c.q,c.parentQ||'',c.parentA||'',maskNames(c.text),c.contact?c.contact.answer:'',c.contact?c.contact.email:'','']);});
   download(`ctli-comments${cstate.cid?'-'+cstate.cid:''}.csv`,'\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv');}
 function mergeResponses(){RESPONSES=[...RESPONSES_MAIN,...RESPONSES_FAC];LIVE=RESPONSES.length>0;
-  aggregate();diagnose();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length);renderActive();}
+  aggregate();diagnose();setBadge(RESPONSES_MAIN.length,RESPONSES_FAC.length,RESPONSES_FU.length);renderActive();}
 /* Boot fetches the links the URL carries. If someone reaches Setup and loads a different sheet
    before that fetch resolves, the slower boot response used to land last and quietly overwrite the
    newer data - the counts looked right for a moment, then old responses reappeared. Each load takes
    a token; a fetch that is no longer the newest for its slot is discarded on arrival. */
-let RESP_GEN={r:0,f:0};
+let RESP_GEN={r:0,f:0,u:0};
 function claimResponseLoad(slot){return ++RESP_GEN[slot];}
 function loadIsCurrent(slot,token){return RESP_GEN[slot]===token;}
 function ingestCSV(text){RESPONSES_MAIN=parseResponseCSV(text);mergeResponses();return RESPONSES_MAIN.length;}
 function ingestFacCSV(text){RESPONSES_FAC=parseFacilitatorCSV(text);mergeResponses();return RESPONSES_FAC.length;}
-function setBadge(mainN,facN){const b=document.getElementById('dataBadge'),t=document.getElementById('dataBadgeTxt');const on=(mainN+facN)>0;b.classList.toggle('on',on);
+function ingestFuCSV(text){RESPONSES_FU=parseFollowupCSV(text);mergeResponses();return RESPONSES_FU.length;}
+function setBadge(mainN,facN,fuN){fuN=fuN||0;const b=document.getElementById('dataBadge'),t=document.getElementById('dataBadgeTxt');const on=(mainN+facN+fuN)>0;b.classList.toggle('on',on);
   if(!on){t.textContent='No responses connected yet';return;}
-  const parts=[];if(mainN)parts.push(`${mainN} main form`);if(facN)parts.push(`${facN} facilitator form`);
-  const d=DIAG,drop=d.orphanMain+d.orphanFac;
-  t.textContent=`Live · ${parts.join(' + ')} response${(mainN+facN)!==1?'s':''}`+(drop?` · ${drop} ignored`:'');
+  const parts=[];if(mainN)parts.push(`${mainN} main form`);if(facN)parts.push(`${facN} facilitator form`);if(fuN)parts.push(`${fuN} follow-up`);
+  const d=DIAG,drop=d.orphanMain+d.orphanFac+(d.orphanFu||0);
+  t.textContent=`Live · ${parts.join(' + ')} response${(mainN+facN+fuN)!==1?'s':''}`+(drop?` · ${drop} ignored`:'');
   b.title=diagnosticText()||'';
   const w=document.getElementById('dataWarn');
   if(w){const msg=diagnosticText();w.textContent=msg;w.style.display=msg?'block':'none';}}
@@ -4335,6 +4479,14 @@ function copySessionOptions(){const lines=sessionsForCopy().map(sessionLabelPlai
   const months=selectedCopyMonths();
   b.textContent=`✓ Copied ${lines.length}`+(months.length?` for ${months.map(monthLabel).join(', ')}`:' options');
   setTimeout(()=>b.textContent='Copy session options (both forms)',2200);}
+/* Sessions whose instance is in its 6 to 8 week window today, for the follow-up form's session question. */
+function sessionsForFollowup(){const t=ymd(new Date());const out=[];
+  for(const g of instanceGroups()){const st=fuStatus(g);if(st&&st.code==='open')out.push(...g.items);}
+  return out;}
+function copyFollowupOptions(){const b=document.getElementById('copyFollowup');const list=sessionsForFollowup();
+  if(!list.length){b.textContent='Nothing is due a follow-up today';setTimeout(()=>b.textContent='Copy follow-up options (due now)',2400);return;}
+  copyText(list.map(sessionLabelPlain).join('\n')).then(()=>{b.textContent=`✓ Copied ${list.length} option${list.length!==1?'s':''} due now`;
+    setTimeout(()=>b.textContent='Copy follow-up options (due now)',2400);}).catch(()=>{b.textContent='Could not copy. Try again';setTimeout(()=>b.textContent='Copy follow-up options (due now)',2000);});}
 function copyFacilitatorRoster(){const lines=FACS.map(f=>`${f.fid} ${f.name||''}`.trim());
   navigator.clipboard.writeText(lines.join('\n'));const b=document.getElementById('copyAll');b.textContent=`✓ Copied ${lines.length} options`;setTimeout(()=>b.textContent='Copy facilitator roster ("Select your facilitator" options)',1500);}
 
@@ -4457,7 +4609,10 @@ function applyRegisterRows(R){
   // A PLOs tab and a legacy Courses tab both land here: "PLO ID" or "Course ID", whichever is present.
   if(cRows&&cRows.length)COURSES=cRows.filter(r=>pickField(r,['plo id','course id'])).map(r=>{
     const soi=pickField(r,['soi id','soi']);
-    return {cid:String(pickField(r,['plo id','course id'])).trim(),
+    // Optional "Follow-up" column (Yes/No). Blank means use FOLLOWUP_SCOPE.
+    const fuRaw=String(pickField(r,['follow-up','follow up','followup'])||'').trim();
+    const followup=/^(y|yes|ja|true|1)\b/i.test(fuRaw)?'yes':/^(n|no|nee|false|0)\b/i.test(fuRaw)?'no':'';
+    return {cid:String(pickField(r,['plo id','course id'])).trim(),followup,
       plo:pickField(r,['professional learning','plo name','course name'])||'',
       sub:pickField(r,['sub'])||null,unit:pickUnitField(r)||null,
       soi:soi?String(soi).trim():'',
@@ -4639,7 +4794,8 @@ function generateInstanceReport(key){
     ${secBlocks}
     ${breakaway}
     ${facOverview}
-    ${g.facs.length?`<h2>Facilitator detail</h2>${facBlocks}`:''}`;
+    ${g.facs.length?`<h2>Facilitator detail</h2>${facBlocks}`:''}
+    ${fuReportSection(g.items,[g])}`;
   printReport();
 }
 function facilitatorCourseBlock(fid,courseSessions){
@@ -4689,7 +4845,8 @@ function generateSoiReport(id){
     ${secBars?`<div class="rgroup"><h4>By rubric section</h4>${reportGrid(secBars)}</div>`:''}
     ${ploTable}
     ${instTable}
-    ${facOverview}`;
+    ${facOverview}
+    ${fuReportSection(ag.sessions,groups)}`;
   printReport();
 }
 function generateCourseReport(cid){
@@ -4732,10 +4889,12 @@ function generateCourseReport(cid){
     ${secBars?`<div class="rgroup"><h4>By rubric section</h4>${reportGrid(secBars)}</div>`:''}
     ${facOverview}
     ${allFacs.length?`<h2>Facilitator detail</h2>${facBlocks}`:''}
-    <h2>Sessions</h2><table><thead><tr><th>Key</th><th>Date</th><th>Facilitator(s)</th><th>Responses</th><th>Score</th></tr></thead><tbody>${sessRows}</tbody></table>`;
+    <h2>Sessions</h2><table><thead><tr><th>Key</th><th>Date</th><th>Facilitator(s)</th><th>Responses</th><th>Score</th></tr></thead><tbody>${sessRows}</tbody></table>
+    ${fuReportSection(ss,instRows)}`;
   printReport();
 }
 document.getElementById('copySessions').onclick=copySessionOptions;
+document.getElementById('copyFollowup').onclick=copyFollowupOptions;
 document.getElementById('copyAll').onclick=copyFacilitatorRoster;
 document.getElementById('loadCsv').onclick=()=>{const url=document.getElementById('csvUrl').value.trim();const st=document.getElementById('csvStatus');
   if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
@@ -4747,6 +4906,11 @@ document.getElementById('loadFacCsv').onclick=()=>{const url=document.getElement
   const tok=claimResponseLoad('f');
   fetch(url).then(r=>r.text()).then(t=>{if(!loadIsCurrent('f',tok))return;
     st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses. `+diagnosticText();saveLink('link_responses_fac',url);syncSetupHash();}).catch(e=>{if(loadIsCurrent('f',tok))st.textContent='Could not load: '+e.message;});};
+document.getElementById('loadFuCsv').onclick=()=>{const url=document.getElementById('fuCsvUrl').value.trim();const st=document.getElementById('fuCsvStatus');
+  if(!url){st.textContent='Paste a published CSV link first.';return;}st.textContent='Loading…';
+  const tok=claimResponseLoad('u');
+  fetch(url).then(r=>r.text()).then(t=>{if(!loadIsCurrent('u',tok))return;
+    st.textContent=`✓ Loaded ${ingestFuCSV(t)} follow-up responses. `+diagnosticText();saveLink('link_responses_fu',url);syncSetupHash();}).catch(e=>{if(loadIsCurrent('u',tok))st.textContent='Could not load: '+e.message;});};
 
 function loadRegisterFromLinks(silent){
   const U={c:'regCoursesUrl',i:'regInstUrl',s:'regSessionsUrl',f:'regFacsUrl',so:'regSoisUrl',co:'regCoordsUrl'};
@@ -4784,9 +4948,9 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
   /* The hash wins so a shared link works on a machine with no stored settings. The cost is that an
      old bookmark silently reinstates old sheets over links you just set up here. Say so out loud. */
   const STORE={r:'link_responses',f:'link_responses_fac',c:'link_reg_courses',i:'link_reg_instances',
-               s:'link_reg_sessions',fa:'link_reg_facs',so:'link_reg_sois',co:'link_reg_coords'};
+               s:'link_reg_sessions',fa:'link_reg_facs',so:'link_reg_sois',co:'link_reg_coords',u:'link_responses_fu'};
   const LABEL={r:'main feedback responses',f:'facilitator responses',c:'PLOs',i:'Instances',
-               s:'Sessions',fa:'Facilitators',so:'SOIs',co:'Coordinators'};
+               s:'Sessions',fa:'Facilitators',so:'SOIs',co:'Coordinators',u:'follow-up responses'};
   const clashes=Object.keys(STORE).filter(k=>{const h=hashLinks[k],l=loadLink(STORE[k]);
     return h&&l&&h!==l;});
   if(clashes.length){
@@ -4802,7 +4966,7 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
       const b=document.getElementById('useSaved');
       if(b)b.onclick=function(){
         const F={r:'csvUrl',f:'facCsvUrl',c:'regCoursesUrl',i:'regInstUrl',s:'regSessionsUrl',
-                 fa:'regFacsUrl',so:'regSoisUrl',co:'regCoordsUrl'};
+                 fa:'regFacsUrl',so:'regSoisUrl',co:'regCoordsUrl',u:'fuCsvUrl'};
         clashes.forEach(k=>{const el=document.getElementById(F[k]);if(el)el.value=window.__LINK_CLASH__.saved[k];});
         syncSetupHash();
         w.innerHTML='Reloading with this device\'s links…';
@@ -4811,6 +4975,8 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
           const jobs=[];
           if(r)jobs.push(fetch(r).then(x=>x.text()).then(t=>ingestCSV(t)));
           if(f)jobs.push(fetch(f).then(x=>x.text()).then(t=>ingestFacCSV(t)));
+          const u=document.getElementById('fuCsvUrl').value.trim();
+          if(u)jobs.push(fetch(u).then(x=>x.text()).then(t=>ingestFuCSV(t)));
           return Promise.all(jobs);
         }).then(()=>{w.style.display='none';}).catch(e=>{w.textContent='Could not reload: '+e.message;});
       };
@@ -4822,6 +4988,8 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
   // shared link - which only shows up on a machine that has no localStorage copy to fall back on.
   if(savedResp)document.getElementById('csvUrl').value=savedResp;
   if(savedFacResp)document.getElementById('facCsvUrl').value=savedFacResp;
+  const savedFuResp=hashLinks.u||loadLink('link_responses_fu');
+  if(savedFuResp)document.getElementById('fuCsvUrl').value=savedFuResp;
   const REG=[['c','regCoursesUrl','link_reg_courses'],['i','regInstUrl','link_reg_instances'],
              ['s','regSessionsUrl','link_reg_sessions'],['fa','regFacsUrl','link_reg_facs'],
              ['so','regSoisUrl','link_reg_sois'],['co','regCoordsUrl','link_reg_coords']];
@@ -4837,6 +5005,10 @@ if(filteredSessions().length){sel.session=filteredSessions()[0].sid;renderSessio
       const tok=claimResponseLoad('f');
       fetch(savedFacResp).then(r=>r.text()).then(t=>{if(!loadIsCurrent('f',tok))return;
         st.textContent=`✓ Loaded ${ingestFacCSV(t)} responses. `+diagnosticText();}).catch(e=>{if(loadIsCurrent('f',tok))st.textContent='Could not reload saved link: '+e.message;});}
+    if(savedFuResp){const st=document.getElementById('fuCsvStatus');st.textContent='Loading…';
+      const tok=claimResponseLoad('u');
+      fetch(savedFuResp).then(r=>r.text()).then(t=>{if(!loadIsCurrent('u',tok))return;
+        st.textContent=`✓ Loaded ${ingestFuCSV(t)} follow-up responses. `+diagnosticText();}).catch(e=>{if(loadIsCurrent('u',tok))st.textContent='Could not reload saved link: '+e.message;});}
   });
   if(Object.keys(hashLinks).length)syncSetupHash(); // normalise the hash once fields are populated
 })();
