@@ -333,6 +333,48 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
 #reportPrint tbody tr:nth-child(even) td{background:#f4f7f9}
 #reportPrint .footnote{font-size:9.5px;color:#5b7f95;margin-top:14px;padding-top:9px;border-top:1px solid #e7edf1}
 
+/* comment analysis report */
+#reportPrint .cr-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 18px;padding:12px 16px;
+  background:#001489;color:#dbe3f2;border-radius:6px;font-size:11.5px}
+#reportPrint .cr-stats b{display:block;font-family:'Space Grotesk';font-size:22px;color:#f5c608;line-height:1.15;letter-spacing:-.02em}
+#reportPrint .cr-stats b.empty{color:rgba(245,198,8,.55)}
+#reportPrint .cr-lead{color:#3d4a63;font-size:12.5px;margin:0 0 8px}
+#reportPrint .cr-q{color:#5b7f95;font-size:10.5px;margin:0 0 6px}
+#reportPrint td.cr-num{text-align:center;white-space:nowrap;font-family:'IBM Plex Mono';font-weight:600}
+#reportPrint td b{color:#001489;font-weight:600}
+#reportPrint .cr-bar{height:7px;border-radius:4px;background:#e7edf1;width:64px;margin:4px auto 0;overflow:hidden}
+#reportPrint .cr-bar span{display:block;height:100%;border-radius:4px}
+#reportPrint .cr-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px}
+#reportPrint .cr-card{border:1px solid #d5dee5;border-radius:6px;padding:10px 12px}
+#reportPrint .cr-card h4{font-family:'Space Grotesk';margin:0 0 6px;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+#reportPrint .cr-card.good{border-top:4px solid #92ad12}#reportPrint .cr-card.good h4{color:#5e7008}
+#reportPrint .cr-card.fix{border-top:4px solid #d73828}#reportPrint .cr-card.fix h4{color:#d73828}
+#reportPrint .cr-card ul,#reportPrint .cr-note ul{margin:0;padding-left:16px}
+#reportPrint .cr-card li,#reportPrint .cr-note li{margin-bottom:4px}
+#reportPrint .cr-flag{border-left:4px solid #d73828;background:#fdf0ee;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:8px}
+#reportPrint .cr-flag.amber{border-left-color:#f5c608;background:#fef8dc}
+#reportPrint .cr-flag .tag{display:inline-block;font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:9px;background:#d73828;color:#fff;margin-right:6px}
+#reportPrint .cr-flag.amber .tag{background:#f5c608;color:#1A2340}
+#reportPrint .cr-flag b,#reportPrint .cr-rec b{color:#001489}
+#reportPrint .cr-note{background:#eef2f5;border:1px solid #d5dee5;border-radius:6px;padding:10px 12px;margin-top:10px}
+#reportPrint .cr-note h4{font-family:'Space Grotesk';font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#001489;margin:0 0 4px}
+#reportPrint .cr-note h4:not(:first-child){margin-top:10px}
+#reportPrint .cr-rec{display:grid;grid-template-columns:28px 1fr;gap:10px;margin-bottom:10px}
+#reportPrint .cr-rec .n{align-self:start;width:24px;height:24px;border-radius:50%;background:#001489;color:#f5c608;
+  font-family:'Space Grotesk';font-weight:700;text-align:center;line-height:24px;font-size:12px}
+#reportPrint .cr-rec .owner{font-size:10px;color:#5b7f95;margin-top:2px}
+/* the paste box on the Comments tab */
+.com-side .cr-box{margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.com-side .cr-box label{display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.com-side .cr-box textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:8px;padding:8px 9px;
+  font:12px/1.45 'Inter',system-ui,sans-serif;resize:vertical;color:var(--ink);background:#fbfcfd}
+.com-side .cr-box .btn{width:100%;justify-content:center;padding:10px 13px;margin-top:8px}
+.com-side .cr-msg{font-size:11.5px;line-height:1.45;margin-top:8px;padding:7px 9px;border-radius:8px;display:none}
+.com-side .cr-msg.show{display:block}
+.com-side .cr-msg.err{background:#fdf0ee;border:1px solid #f1b8b0;color:#8a1f13}
+.com-side .cr-msg.ok{background:#f2f6e3;border:1px solid #cfdc95;color:#4a5906}
+
 /* ---- print ----
    The old rule used visibility:hidden on the rest of the page. Hidden elements still occupy
    layout, so the whole dashboard kept generating blank pages underneath an absolutely
@@ -353,6 +395,7 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
   #reportPrint .ritem{page-break-inside:avoid;break-inside:avoid}
   #reportPrint thead{display:table-header-group}
   #reportPrint tr{page-break-inside:avoid;break-inside:avoid}
+  #reportPrint .cr-stats,#reportPrint .cr-card,#reportPrint .cr-flag,#reportPrint .cr-rec,#reportPrint .cr-note{page-break-inside:avoid;break-inside:avoid}
   #reportPrint table{page-break-inside:auto}
   /* a trailing margin on the last block is enough to spill one empty page */
   #reportPrint>*:last-child{margin-bottom:0!important;padding-bottom:0!important}
@@ -470,6 +513,13 @@ table.sum tfoot td{font-weight:700;border-top:2px solid var(--line);background:#
           <button class="btn" id="cDownload">Download comments (CSV)</button>
         </div>
         <div class="fine">The prompt is ready to paste into your approved AI tool. Facilitators appear by code only. Contact emails are in the CSV download and nowhere else on this page.</div>
+        <div class="cr-box">
+          <label for="cReply">Paste the AI reply to make a report</label>
+          <textarea id="cReply" placeholder="SUMMARY&#10;...&#10;&#10;THEMES&#10;- ..."></textarea>
+          <button class="btn primary" id="cMakeReport">Generate comment report (PDF)</button>
+          <div class="cr-msg" id="cReplyMsg"></div>
+          <div class="fine">Keep the same PLO and instance selected as when you copied the prompt. Ratings, response counts and tick-box answers are added from the dashboard data, not from the AI reply.</div>
+        </div>
       </div>
     </aside>
   </div>
@@ -4405,16 +4455,38 @@ function buildAIPrompt(){const textN=filteredComments().length;const raw=[...fil
 
 Below are ${textN} open-ended comments from participants' feedback forms for ${commentScopeText()}. Facilitators are referred to by code (for example F03). Keep them as codes and do not guess who they are.${raw.some(c=>c.form===FU_FORM)?`
 
-Comments under "Follow-up form (6 to 8 weeks later)" come from a separate questionnaire sent to participants who completed the course, asking how they have used what they learned back at school. Treat those separately: summarise how participants are applying the learning, and what is getting in the way (for example time, resources or school support).`:''}
+Comments under "Follow-up form (6 to 8 weeks later)" come from a separate questionnaire sent to participants who completed the course, asking how they have used what they learned back at school. Treat those separately: summarise how participants are applying the learning, and what is getting in the way (for example time, resources or school support). Each participant who returns the follow-up form answers up to three open questions, so several follow-up comments can come from one person. Treat any answer that is not real words (for example "ccc") as blank and say so plainly rather than analysing it.`:''}
 
-Please give me:
-1. The main themes, with roughly how many comments relate to each.
-2. What participants valued, and what needs improvement, kept separate.
-3. Specific, practical suggestions participants made.
-4. Any comment that needs urgent follow-up (for example safety, access, conduct or wellbeing concerns).
-5. Three to five clear recommendations for the programme team.
+Please reply using exactly the headings below, in capitals, each on its own line and in this order. Under each heading, put one point per line starting with "- ". Where a line has more than one part, separate the parts with " | ". Do not add an introduction, extra headings, tables or bold text. If a section has nothing in it, write "- None".
 
-Write in plain, professional South African English. Short headings and brief points are fine. Do not use em dashes.
+SUMMARY
+Three or four sentences giving the overall picture.
+
+THEMES
+- Theme name | roughly how many comments relate to it | what participants said, in one sentence
+
+VALUED
+- Something participants valued
+
+NEEDS IMPROVEMENT
+- Something that needs improvement
+
+SUGGESTIONS
+- What the comment said | the specific, practical step it points to
+
+URGENT
+- URGENT or CHECK SOON | short title | what happened and who should act (for example safety, access, conduct or wellbeing concerns)
+${raw.some(c=>c.form===FU_FORM)?`
+FOLLOW-UP APPLYING
+- How participants are applying the learning at school
+
+FOLLOW-UP BARRIERS
+- What is getting in the way, for example time, resources or school support
+`:''}
+RECOMMENDATIONS
+- Short title | what to do | who should lead (give three to five)
+
+Write in plain, professional South African English. Do not use em dashes. Keep facilitator codes as codes. Rating scores are added to the report separately from the feedback data, so do not invent or estimate any scores.
 
 Comments:${lines.join('\n')}`;}
 function copyText(txt){const fallback=()=>new Promise((res,rej)=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
@@ -4426,6 +4498,122 @@ function copyAIPrompt(){const b=document.getElementById('cCopyAI');const n=filte
   if(!n){b.textContent='No comments to copy';setTimeout(()=>b.textContent='Copy AI analysis prompt',1800);return;}
   copyText(buildAIPrompt()).then(()=>{b.textContent=`✓ Copied ${n} comments`;setTimeout(()=>b.textContent='Copy AI analysis prompt',2600);})
     .catch(()=>{b.textContent='Could not copy. Try again';setTimeout(()=>b.textContent='Copy AI analysis prompt',2000);});}
+/* ---------- COMMENT ANALYSIS REPORT ----------
+   The AI tool only interprets the words. Everything countable (ratings, responses, tick-box
+   answers, follow-up figures) is added here from the dashboard's own data, so the numbers
+   cannot drift whichever AI tool someone uses. */
+const CR_SECTIONS=[['SUMMARY',/^(SUMMARY|AT A GLANCE|OVERVIEW)$/],['THEMES',/^(MAIN )?THEMES$/],['VALUED',/^(WHAT PARTICIPANTS )?VALUED$/],
+  ['NEEDS',/^(WHAT )?NEEDS IMPROVEMENT$/],['SUGGESTIONS',/^(PRACTICAL |SPECIFIC )?SUGGESTIONS$/],['URGENT',/^URGENT( FOLLOW-UP)?$/],
+  ['FUAPPLY',/^FOLLOW-UP APPLYING$/],['FUBARR',/^FOLLOW-UP BARRIERS$/],['RECS',/^RECOMMENDATIONS$/]];
+const CR_REQUIRED={SUMMARY:'SUMMARY',THEMES:'THEMES',VALUED:'VALUED',NEEDS:'NEEDS IMPROVEMENT',RECS:'RECOMMENDATIONS'};
+// No em or en dashes in the report: number ranges become "to", anything else becomes a comma.
+function crClean(s){return String(s==null?'':s).replace(/\*\*|__|`/g,'')
+  .replace(/(\d)\s*[\u2013\u2014]\s*(\d)/g,'$1 to $2').replace(/\s*[\u2013\u2014]\s*/g,', ')
+  .replace(/\s+/g,' ').replace(/^,\s*|\s*,$/g,'').trim();}
+function crHeading(line){if(line.includes('|'))return null;
+  const h=line.replace(/^[#*_\s]+|[*_\s:]+$/g,'').replace(/^\d+[.)]\s*/,'').replace(/^[#*_\s]+/,'')
+    .toUpperCase().replace(/FOLLOW UP/g,'FOLLOW-UP').replace(/\s+/g,' ').replace(/[:.]$/,'').trim();
+  for(const[k,re]of CR_SECTIONS)if(re.test(h))return k;return null;}
+function crParse(text){const out={};let cur=null;
+  for(const raw of String(text).split(/\r?\n/)){const l=raw.trim();if(!l)continue;
+    const k=crHeading(l);if(k){cur=k;out[k]=out[k]||[];continue;}
+    if(!cur)continue;
+    const item=crClean(l.replace(/^\s*(?:[-*•‣]|\d+[.)])\s+/,''));
+    if(!item||/^none\.?$/i.test(item))continue;out[cur].push(item);}
+  return out;}
+function crParts(s){return s.split(/\s*\|\s*/).map(x=>x.trim());}
+function crList(items){return items&&items.length?`<ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`:'<p class="cr-q">Nothing reported.</p>';}
+function crMsg(cls,html){const m=document.getElementById('cReplyMsg');m.className='cr-msg'+(cls?' show '+cls:'');m.innerHTML=html||'';}
+/* The sessions behind the current Comments selection. */
+function commentScopeSessions(){
+  if(cstate.iid){const g=instanceGroups().find(x=>x.key===cstate.iid);return g?g.items:[];}
+  if(cstate.cid)return SESSIONS.filter(s=>s.cid===cstate.cid);
+  return SESSIONS.slice();}
+/* Tick-box answers for the scope, plus the "would recommend" count. */
+function crCoded(){const rows=[];const seen={};
+  filteredClosed().filter(c=>c.form!==FU_FORM).forEach(c=>{const k=c.form+'|'+c.col;if(!seen[k]){seen[k]={q:c.q,form:c.form,col:c.col,answers:[]};rows.push(seen[k]);}seen[k].answers.push(c.answer);});
+  let rec=null;
+  const withParent=filteredComments().filter(c=>c.parentQ&&c.form!==FU_FORM);const pseen={};
+  withParent.forEach(c=>{const k=c.form+'|'+c.col;if(pseen[k])return;pseen[k]=1;
+    const answers=[...PARENTS_MAIN,...PARENTS_FAC].filter(r=>r.form===c.form&&r.col===c.col).filter(r=>{const pl=commentPlace(r);
+      return (!cstate.cid||pl.cid===cstate.cid)&&(!cstate.iid||pl.iid===cstate.iid);}).map(r=>r.answer);
+    if(!answers.length)return;rows.push({q:c.parentQ,form:c.form,answers});
+    if(/recommend/i.test(c.parentQ)&&!rec)rec={yes:answers.filter(a=>/^(yes|y|ja|ewe)\b/i.test(a)).length,n:answers.length};});
+  if(!rec){const r=rows.find(x=>/recommend/i.test(x.q));if(r)rec={yes:r.answers.filter(a=>/^(yes|y|ja|ewe)\b/i.test(a)).length,n:r.answers.length};}
+  return {rows:rows.sort((a,b)=>blockSort(a,b)).map(r=>({q:r.q.replace(/^\d+\.\s*/,''),syn:synopsisOf(r.answers)})),rec};}
+
+function generateCommentReport(){
+  crMsg('','');
+  const text=document.getElementById('cReply').value;
+  if(!text.trim()){crMsg('err','Paste the reply from your AI tool first.');return;}
+  if(!filteredComments().length){crMsg('err','There are no comments for this selection. Choose the PLO and instance you copied the prompt for.');return;}
+  const R=crParse(text);
+  const missing=Object.keys(CR_REQUIRED).filter(k=>!R[k]);
+  if(missing.length){crMsg('err',`The reply is missing ${missing.length===1?'this heading':'these headings'}: <b>${missing.map(k=>CR_REQUIRED[k]).join(', ')}</b>. Ask your AI tool to reply again using the headings in the prompt, or add ${missing.length===1?'it':'them'} by hand.`);return;}
+
+  const today=new Date().toLocaleDateString('en-ZA',{year:'numeric',month:'long',day:'numeric'});
+  const sess=commentScopeSessions();const sset=new Set(sess.map(s=>s.sid));
+  const groups=instanceGroups().filter(g=>g.items.some(sn=>sset.has(sn.sid)));
+  let sum=0,n=0,resp=0;for(const sn of sess){const o=sessionOverall(sn.sid),rn=(AGG[sn.sid]||{}).resp||0;if(o!=null&&rn){sum+=o*rn;n+=rn;}resp+=rn;}
+  const overall=n?sum/n:null;
+  const comments=filteredComments();const nText=comments.length;const nFuText=comments.filter(c=>c.form===FU_FORM).length;
+  const coded=crCoded();const fs=fuStats(sess);
+  const c=CMAP[cstate.cid]||{};const g=cstate.iid?groups.find(x=>x.key===cstate.iid):null;
+
+  const themes=(R.THEMES||[]).map(s=>{const p=crParts(s);const cnt=parseInt(p[1],10);return {name:p[0]||s,count:isNaN(cnt)?null:cnt,said:p[2]||(isNaN(cnt)?(p[1]||''):'')};});
+  const maxC=Math.max(1,...themes.map(t=>t.count||0));
+  const colours=['#d73828','#f5c608','#92ad12','#5b7f95','#001489','#aabbc8'];
+  const urgent=(R.URGENT||[]).map(s=>{const p=crParts(s);const lv=/^(urgent|check soon|check)$/i.test(p[0]||'')?p.shift():'Check soon';
+    const red=/urgent/i.test(lv);return {red,label:red?'Urgent':'Check soon',title:(p[0]||'').replace(/\.$/,''),detail:p.slice(1).join(' ')};});
+  const nUrgent=urgent.filter(u=>u.red).length;
+  const sugg=(R.SUGGESTIONS||[]).map(s=>{const p=crParts(s);return p.length>1?{c:p[0],s:p.slice(1).join(' ')}:{c:'',s:p[0]};});
+  const recs=(R.RECS||[]).map(s=>{const p=crParts(s);return {title:(p[0]||s).replace(/\.$/,''),what:p[1]||'',lead:p[2]||''};});
+
+  const stat=(v,label,empty)=>`<div><b class="${empty?'empty':''}">${esc(v)}</b>${esc(label)}</div>`;
+  const showFU=nFuText||fs.resp||R.FUAPPLY||R.FUBARR;
+  const fuRatings=showFU?fuReportSection(sess,groups):'';
+  const fuIntro=fs.resp?`${fs.resp} participant${fs.resp!==1?'s':''} returned the follow-up form${nFuText?`, giving ${nFuText} written answer${nFuText!==1?'s':''} across the open questions`:''}.`
+    :`The follow-up form has ${nFuText} written answer${nFuText!==1?'s':''} for this selection, but no follow-up ratings are linked to it yet.`;
+  const fuWritten=showFU?`${fuRatings?'':'<h2>Use in practice (6 to 8 weeks later)</h2>'}<p>${fuIntro} Each participant answers up to three open questions, so one person can account for several answers.</p>
+    ${fs.resp&&!(R.FUAPPLY||[]).length&&!(R.FUBARR||[]).length?'<p class="cr-q">Ratings were recorded, but no usable written answers were given.</p>':''}
+    <div class="cr-note"><h4>How participants are applying the learning</h4>${crList(R.FUAPPLY)}<h4>What is getting in the way</h4>${crList(R.FUBARR)}</div>`:'';
+
+  document.getElementById('reportPrint').innerHTML=`
+    ${reportLetterhead('Comment Analysis Report',[
+      ['PLO',cstate.cid?(cstate.cid+' · '+(c.plo||'')):'All PLOs'],
+      ['Instance',g?instOptionLabel(g):(cstate.cid?'All instances':null)],
+      ['SOI instance code',g&&g.code?g.code:null],
+      ['Unit',cstate.cid?(c.sub||'n/a')+' / '+(c.unit||'n/a'):null],
+      ['Comments analysed',nText+' written comment'+(nText!==1?'s':'')],
+      ['Generated',today]
+    ])}
+    <div class="cr-stats">
+      ${stat(overall!=null?overall.toFixed(2)+' / 4':'n/a','overall rating · '+resp+' response'+(resp!==1?'s':''),overall==null)}
+      ${stat(nText,'written comment'+(nText!==1?'s':''))}
+      ${stat(coded.rec?coded.rec.yes+' of '+coded.rec.n:'n/a','would recommend the PLO',!coded.rec)}
+      ${stat(nUrgent,'urgent issue'+(nUrgent!==1?'s':''))}
+    </div>
+    <h2>At a glance</h2>
+    <p class="cr-lead">${esc((R.SUMMARY||[]).join(' '))}</p>
+    <h2>1. Main themes</h2>
+    <table><thead><tr><th style="width:30%">Theme</th><th style="width:13%;text-align:center">Comments</th><th>What participants said</th></tr></thead><tbody>
+    ${themes.map((t,i)=>`<tr><td><b>${esc(t.name)}</b></td><td class="cr-num">${t.count!=null?t.count+`<div class="cr-bar"><span style="width:${t.count/maxC*100}%;background:${colours[i%colours.length]}"></span></div>`:'n/a'}</td><td>${esc(t.said)}</td></tr>`).join('')}
+    </tbody></table>
+    ${coded.rows.length?`<p class="cr-q">Tick-box answers, taken directly from the feedback data:</p><table><thead><tr><th style="width:44%">Question</th><th>What participants indicated</th></tr></thead><tbody>${coded.rows.map(r=>`<tr><td>${esc(r.q)}</td><td>${esc(r.syn)}</td></tr>`).join('')}</tbody></table>`:''}
+    <h2>2. What participants valued and what needs improvement</h2>
+    <div class="cr-two"><div class="cr-card good"><h4>Valued</h4>${crList(R.VALUED)}</div><div class="cr-card fix"><h4>Needs improvement</h4>${crList(R.NEEDS)}</div></div>
+    <h2>3. Practical suggestions from participants</h2>
+    ${sugg.length?`<table><thead><tr><th style="width:42%">Comment</th><th>Practical step it points to</th></tr></thead><tbody>${sugg.map(s=>`<tr><td>${esc(s.c)}</td><td>${esc(s.s)}</td></tr>`).join('')}</tbody></table>`:'<p class="cr-q">No specific suggestions were made.</p>'}
+    <h2>4. Comments needing urgent follow-up</h2>
+    ${urgent.length?urgent.map(u=>`<div class="cr-flag${u.red?'':' amber'}"><span class="tag">${u.label}</span><b>${esc(u.title)}.</b> ${esc(u.detail)}</div>`).join(''):'<p class="cr-q">No comments needed urgent follow-up.</p>'}
+    ${fuRatings}
+    ${fuWritten}
+    <h2>5. Recommendations for the programme team</h2>
+    ${recs.map((r,i)=>`<div class="cr-rec"><div class="n">${i+1}</div><div><b>${esc(r.title)}.</b> ${esc(r.what)}${r.lead?`<div class="owner">Lead: ${esc(r.lead)}</div>`:''}</div></div>`).join('')}
+    <div class="footnote"><b>Method.</b> Ratings, response counts and tick-box answers come directly from the QMF feedback data. Themes, suggestions and recommendations were drafted by an approved AI tool from the written comments only, and should be checked by the programme team before the report is shared. Facilitators appear by code only. Comment counts are approximate, and one comment can touch on more than one theme.${nText<20?` With ${nText} comment${nText!==1?'s':''}, read these findings as indicators rather than firm trends.`:''}</div>`;
+  crMsg('ok','Report ready. Choose <b>Save as PDF</b> in the print window.');
+  printReport();
+}
 function csvCell(v){const s=String(v==null?'':v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
 function downloadComments(){const extra=[...CONTACTS_MAIN,...CONTACTS_FAC,...CONTACTS_FU].map(c=>({...c,...commentPlace(c)}))
     .filter(c=>(!cstate.cid||c.cid===cstate.cid)&&(!cstate.iid||c.iid===cstate.iid));
@@ -4541,6 +4729,7 @@ document.getElementById('cPlo').addEventListener('change',e=>{cstate.cid=e.targe
 document.getElementById('cInst').addEventListener('change',e=>{cstate.iid=e.target.value;renderComments();});
 document.getElementById('cCopyAI').onclick=copyAIPrompt;
 document.getElementById('cDownload').onclick=downloadComments;
+document.getElementById('cMakeReport').onclick=generateCommentReport;
 /* admin PIN gate: Setup, Catalogue and Facilitators. Re-locks every new browser session */
 const ADMIN_PIN='2027'; // change this to set your own 4-digit PIN
 let pendingAdminView=null;
