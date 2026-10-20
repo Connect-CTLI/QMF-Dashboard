@@ -4138,7 +4138,7 @@ function decodeSetupHash(){
 function copySetupLink(){
   syncSetupHash();
   const btn=document.getElementById('copySetupLink');
-  navigator.clipboard.writeText(location.href).then(()=>{
+  copyText(location.href).then(()=>{
     btn.textContent='✓ Copied. Bookmark or save this link';
     setTimeout(()=>btn.textContent='Copy setup link',2000);
   }).catch(()=>{btn.textContent='Could not copy. Copy the address bar manually';setTimeout(()=>btn.textContent='Copy setup link',2000);});
@@ -4417,9 +4417,11 @@ Please give me:
 Write in plain, professional South African English. Short headings and brief points are fine. Do not use em dashes.
 
 Comments:${lines.join('\n')}`;}
-function copyText(txt){if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(txt);
-  return new Promise((res,rej)=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
-    try{document.execCommand('copy')?res():rej(new Error('copy failed'));}catch(e){rej(e);}ta.remove();});}
+function copyText(txt){const fallback=()=>new Promise((res,rej)=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')?res():rej(new Error('copy failed'));}catch(e){rej(e);}ta.remove();});
+  // If the browser refuses the clipboard API, fall back to the older copy method.
+  if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(txt).catch(fallback);
+  return fallback();}
 function copyAIPrompt(){const b=document.getElementById('cCopyAI');const n=filteredComments().length;
   if(!n){b.textContent='No comments to copy';setTimeout(()=>b.textContent='Copy AI analysis prompt',1800);return;}
   copyText(buildAIPrompt()).then(()=>{b.textContent=`✓ Copied ${n} comments`;setTimeout(()=>b.textContent='Copy AI analysis prompt',2600);})
@@ -4478,7 +4480,7 @@ function refreshCopyMonths(){
     `<option value="${mm}"${keep.includes(mm)?' selected':''}>${monthLabel(mm)} (${counts[mm]})</option>`).join('')
     ||'<option value="" disabled>No dated instances</option>';}
 function copySessionOptions(){const lines=sessionsForCopy().map(sessionLabelPlain);
-  navigator.clipboard.writeText(lines.join('\n'));const b=document.getElementById('copySessions');
+  copyText(lines.join('\n'));const b=document.getElementById('copySessions');
   const months=selectedCopyMonths();
   b.textContent=`✓ Copied ${lines.length}`+(months.length?` for ${months.map(monthLabel).join(', ')}`:' options');
   setTimeout(()=>b.textContent='Copy session options (both forms)',2200);}
@@ -4491,7 +4493,7 @@ function copyFollowupOptions(){const b=document.getElementById('copyFollowup');c
   copyText(list.map(sessionLabelPlain).join('\n')).then(()=>{b.textContent=`✓ Copied ${list.length} option${list.length!==1?'s':''} due now`;
     setTimeout(()=>b.textContent='Copy follow-up options (due now)',2400);}).catch(()=>{b.textContent='Could not copy. Try again';setTimeout(()=>b.textContent='Copy follow-up options (due now)',2000);});}
 function copyFacilitatorRoster(){const lines=FACS.map(f=>`${f.fid} ${f.name||''}`.trim());
-  navigator.clipboard.writeText(lines.join('\n'));const b=document.getElementById('copyAll');b.textContent=`✓ Copied ${lines.length} options`;setTimeout(()=>b.textContent='Copy facilitator roster ("Select your facilitator" options)',1500);}
+  copyText(lines.join('\n'));const b=document.getElementById('copyAll');b.textContent=`✓ Copied ${lines.length} options`;setTimeout(()=>b.textContent='Copy facilitator roster ("Select your facilitator" options)',1500);}
 
 /* filters UI */
 function refreshFilters(){
